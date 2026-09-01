@@ -1,0 +1,10 @@
+/src/content/dexterous-hand/ @starrysky77
+/src/content/dual-arm/ @xy144001
+/src/content/humanoid/ @SyouSanGin
+
+/src/components/ @xy144001 @starrysky77 @SyouSanGin
+/src/layouts/ @xy144001 @starrysky77 @SyouSanGin
+/src/styles/ @xy144001 @starrysky77 @SyouSanGin
+/src/schemas/ @xy144001 @starrysky77 @SyouSanGin
+/.github/ @xy144001
+/package.json @xy144001
