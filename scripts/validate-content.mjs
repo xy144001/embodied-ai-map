@@ -1,7 +1,8 @@
 import { readdir, readFile } from "node:fs/promises";
 import { join } from "node:path";
+import { fileURLToPath } from "node:url";
 
-const root = new URL("../src/content/", import.meta.url);
+const root = fileURLToPath(new URL("../src/content/", import.meta.url));
 const categories = new Set(["dexterous-hand", "dual-arm", "humanoid"]);
 const ids = new Set();
 let checked = 0;
@@ -16,7 +17,7 @@ async function walk(directory) {
     if (!frontmatter) throw new Error(`${path}: missing frontmatter`);
     const category = frontmatter[1].match(/^category:\s*(.+)$/m)?.[1]?.trim();
     if (!categories.has(category)) throw new Error(`${path}: invalid category`);
-    const id = path.replace(String(root.pathname), "");
+    const id = path.replace(root, "");
     if (ids.has(id)) throw new Error(`${path}: duplicate id`);
     ids.add(id);
     checked += 1;
