@@ -1,0 +1,22 @@
+---
+import { getCollection } from "astro:content";
+import BaseLayout from "../../layouts/BaseLayout.astro";
+
+export function getStaticPaths() {
+  return ["dexterous-hand", "dual-arm", "humanoid"].map((category) => ({ params: { category } }));
+}
+const labels = { "dexterous-hand": "灵巧手", "dual-arm": "双臂", humanoid: "全身" } as const;
+const category = Astro.params.category as keyof typeof labels;
+const items = (await getCollection("dossier", ({ data }) => data.category === category && !data.draft));
+---
+<BaseLayout title={`${labels[category]}｜具身机器人技术地图`}>
+  <main>
+    <a class="back" href={import.meta.env.BASE_URL}>← 返回首页</a>
+    <header class="section-head"><p class="eyebrow">SECTION</p><h1>{labels[category]}</h1></header>
+    {items.length === 0 ? <p class="empty">该分区已就绪，等待负责人提交第一篇内容。</p> : (
+      <section class="list">
+        {items.map((item) => <article class="item"><span>{item.data.kind}</span><h2>{item.data.title}</h2><p>{item.data.summary}</p></article>)}
+      </section>
+    )}
+  </main>
+</BaseLayout>
