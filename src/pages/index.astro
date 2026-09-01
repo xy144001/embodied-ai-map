@@ -1,9 +1,9 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
 const sections = [
-  { key: "dexterous-hand", title: "灵巧手", owner: "@starrysky77", description: "手内操作、触觉感知、灵巧抓取与高自由度控制。" },
-  { key: "dual-arm", title: "双臂", owner: "@xy144001", description: "双臂协同、装配、接触丰富操作与任务级规划。" },
-  { key: "humanoid", title: "全身", owner: "@SyouSanGin", description: "移动操作、平衡、全身控制与通用人形机器人策略。" },
+  { key: "datasets", title: "数据集", owner: "@starrysky77", description: "具身数据集、采集系统、数据格式、规模与任务覆盖。", href: "datasets/" },
+  { key: "model-architecture", title: "模型架构", owner: "@xy144001", description: "五个开源模型的架构、训练目标、推理闭环、公式与模块级流程。", href: "model-architecture/" },
+  { key: "evaluation", title: "评测", owner: "@SyouSanGin", description: "评测基准、任务设计、指标体系、仿真与真实机器人测试。", href: "evaluation/" },
 ];
 ---
 <BaseLayout>
@@ -11,7 +11,7 @@ const sections = [
     <header class="hero">
       <p class="eyebrow">EMBODIED ROBOT LEARNING MAP</p>
       <h1>具身机器人技术地图</h1>
-      <p>由三位维护者共同建设的模型、理论与系统实现知识库。</p>
+      <p>由三位维护者共同建设的数据集、模型架构与评测知识库。</p>
     </header>
     <section class="grid" aria-label="知识分区">
       {sections.map((section) => (
@@ -19,7 +19,7 @@ const sections = [
           <span class="owner">{section.owner}</span>
           <h2>{section.title}</h2>
           <p>{section.description}</p>
-          <a href={`${import.meta.env.BASE_URL}/${section.key}/`}>进入分区 →</a>
+          <a href={`${import.meta.env.BASE_URL}/${section.href}`}>进入分区 →</a>
         </article>
       ))}
     </section>

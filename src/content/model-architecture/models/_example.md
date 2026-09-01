@@ -1,11 +1,11 @@
 ---
-title: 双臂模型条目模板
-category: dual-arm
+title: 模型架构条目模板
+category: model-architecture
 kind: model
 organization: Example Lab
 releaseDate: 2026-01-01
-summary: 复制此文件并去掉 draft，用于添加新的双臂模型技术档案。
-tags: [dual-arm, manipulation]
+summary: 复制此文件并去掉 draft，用于添加新的开源模型架构档案。
+tags: [model-architecture, embodied-ai]
 draft: true
 references: []
 ---

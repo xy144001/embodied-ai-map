@@ -1,6 +1,7 @@
-/src/content/dexterous-hand/ @starrysky77
-/src/content/dual-arm/ @xy144001
-/src/content/humanoid/ @SyouSanGin
+/src/content/datasets/ @starrysky77
+/src/content/model-architecture/ @xy144001
+/public/model-architecture/ @xy144001
+/src/content/evaluation/ @SyouSanGin
 
 /src/components/ @xy144001 @starrysky77 @SyouSanGin
 /src/layouts/ @xy144001 @starrysky77 @SyouSanGin

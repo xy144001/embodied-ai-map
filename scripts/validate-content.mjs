@@ -3,7 +3,7 @@ import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const root = fileURLToPath(new URL("../src/content/", import.meta.url));
-const categories = new Set(["dexterous-hand", "dual-arm", "humanoid"]);
+const categories = new Set(["datasets", "model-architecture", "evaluation"]);
 const ids = new Set();
 let checked = 0;
 
