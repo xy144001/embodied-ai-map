@@ -19,7 +19,7 @@ const sections = [
           <span class="owner">{section.owner}</span>
           <h2>{section.title}</h2>
           <p>{section.description}</p>
-          <a href={`${import.meta.env.BASE_URL}${section.key}/`}>进入分区 →</a>
+          <a href={`${import.meta.env.BASE_URL}/${section.key}/`}>进入分区 →</a>
         </article>
       ))}
     </section>
