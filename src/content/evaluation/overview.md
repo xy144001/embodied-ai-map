@@ -53,6 +53,10 @@ references:
 | Mimicking-Bench | 高：6 个家庭 humanoid-scene interaction 任务 | 以人类动作与交互几何为核心，适配 AMASS/GRAB/OMOMO/BEHAVE | [条目](../benchmarks/mimicking-bench/) |
 | LeVERB-Bench | 高：150+ vision-language WBC 任务（论文报告） | MoCap 重定向与渲染数据；HumanML3D/EgoBody/H2O 可做前端迁移 | [条目](../benchmarks/leverb-bench/) |
 | SIMPLE | 高：60 task / 50 scene 候选（项目报告） | Open X/RH20T 作 VLA 预训练，GRAB/BEHAVE/OMOMO 作接触与感知先验 | [条目](../benchmarks/simple/) |
+| SMPLOlympics / HumanoidOlympics | 高：全身体育、对抗与动态接触 | SMPL/SMPL-X motion prior 可用于运动技能；项目结果仍按 sport-specific score 计分 | [条目](../benchmarks/smplolympics/) |
+| SPARK | 高：humanoid autonomy/teleoperation 安全控制 | 以 task performance 与 safety constraint log 联合计分 | [条目](../benchmarks/spark/) |
+| BiGym | 迁移：移动双臂家庭操作，默认非双足 humanoid | 人类 demonstrations 可作上游操作数据；不能替代双足全身测试 | [条目](../benchmarks/bigym/) |
+| ManiSkill-HAB（MS-HAB） | 迁移：家居重排与低层全身控制，默认非双足 humanoid | RL/IL demos 与长时程 task graph 可迁移；需重写足部评测 | [条目](../benchmarks/mshab/) |
 | Benchmark—数据集关联总览 | 明确数据角色、去泄漏和闭环计分 | 连接全部数据集与目标 benchmark | [总览](../benchmarks/overview/) |
 | Benchmark 对比指南 | 横向解释任务、数据模态、输入输出与 success predicate | 防止把 data metric 当作 benchmark score | [指南](../benchmarks/comparison-guide/) |
 | Benchmark 输入与量化指标手册 | 统一定义 observation、action、success 与安全/效率诊断量 | 用于复现与横向比较 | [手册](../benchmarks/input-metrics-guide/) |
@@ -101,6 +105,8 @@ references:
 ## 关联矩阵
 
 平台、数据集、benchmark 和代表工作的证据等级矩阵见[关系矩阵](relationship-matrices/)。矩阵把“官方直接使用/已发表外部使用/仅兼容建议”分别标成 D、E、C，避免把可接入误报为已使用。
+
+仿真技术栈到具体 benchmark 的选择、原生/适配边界与迁移接口见[仿真方法—Benchmark 适配地图](simulator-benchmark-map/)。
 
 ## 选择建议
 

@@ -28,6 +28,10 @@ references:
 | [Mimicking-Bench](../mimicking-bench/) | 6 household human-scene tasks | 20K synthetic + 3K real human references、11K object shapes、scene geometry、robot rollout | human reference + robot/scene state；具体视觉依 release | retargeted reference 或全身 control | task success + scene geometry generalization |
 | [LeVERB-Bench](../leverb-bench/) | 10 categories、150+ vision-language WBC tasks | retargeted MoCap、ray-traced ego/third-person render、language/task metadata、robot state | image history + language + proprioception | latent behavior + dynamics-level WBC action | vision-language closed-loop success |
 | [SIMPLE](../simple/) | 60 loco-manipulation tasks、50 scenes、1K+ objects | scene/object assets、MuJoCo contact state、Isaac Sim visuals、task language/config、planner/VR demonstrations | visual/proprioception + task condition | whole-body action/action chunk | task completion + safety/OOD |
+| [SMPLOlympics](../smplolympics/) | individual sport + 1v1/2v2 sports | SMPL/SMPL-X-compatible humanoid、sports assets、可选 motion prior | humanoid/object/opponent state；具体视觉依 env | whole-body control | sport-specific distance/score/win rate + stability |
+| [SPARK](../spark/) | safety in humanoid autonomy/teleoperation | state、nominal command、safety constraints、risk logs | robot/environment state + nominal action | filtered safe action | task performance + constraint violation/intervention/latency |
+| [BiGym](../bigym/) | 40 mobile bimanual home tasks（迁移） | human demos、proprioception、RGB、3-view depth | demo + state/visual observation | mobile-base + bimanual action | task success；非双足 humanoid score |
+| [MS-HAB](../mshab/) | TidyHouse/PrepareGroceries/SetTable（迁移） | RL/IL demos、state、2×RGB-D | low-level state/visual observation | navigation + manipulation control | subtask/long-horizon success + collision safety |
 
 ## 2. 同一“搬运物体”问题在四者里有什么不同
 
