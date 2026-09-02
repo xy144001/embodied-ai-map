@@ -8,12 +8,31 @@ export function getStaticPaths() {
 const labels = { datasets: "数据集", evaluation: "评测", "macro-thinking": "宏观思想" } as const;
 const category = Astro.params.category as keyof typeof labels;
 const items = (await getCollection("dossier", ({ data }) => data.category === category && !data.draft));
+const macroAuthors = [
+  { key: "xiaoyazhai", title: "翟老师撰写", handle: "@xiaoyazhai" },
+  { key: "youchengcai", title: "蔡老师撰写", handle: "@youchengcai" },
+] as const;
 ---
 <BaseLayout title={`${labels[category]}｜具身机器人技术地图`}>
   <main>
     <a class="back" href={import.meta.env.BASE_URL}>← 返回首页</a>
     <header class="section-head"><p class="eyebrow">SECTION</p><h1>{labels[category]}</h1></header>
-    {items.length === 0 ? <p class="empty">该分区已就绪，等待负责人提交第一篇内容。</p> : (
+    {category === "macro-thinking" ? (
+      <section class="author-grid" aria-label="宏观思想作者分区">
+        {macroAuthors.map((author) => {
+          const authorItems = items.filter((item) => item.data.author === author.key);
+          return <article class="author-column">
+            <span class="owner">{author.handle}</span>
+            <h2>{author.title}</h2>
+            {authorItems.length === 0 ? <p class="empty">等待第一篇宏观路线文章。</p> : (
+              <div class="list">
+                {authorItems.map((item) => <article class="item"><span>{item.data.kind}</span><h3>{item.data.title}</h3><p>{item.data.summary}</p></article>)}
+              </div>
+            )}
+          </article>;
+        })}
+      </section>
+    ) : items.length === 0 ? <p class="empty">该分区已就绪，等待负责人提交第一篇内容。</p> : (
       <section class="list">
         {items.map((item) => <article class="item"><span>{item.data.kind}</span><h2>{item.data.title}</h2><p>{item.data.summary}</p></article>)}
       </section>

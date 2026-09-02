@@ -16,4 +16,8 @@ a { color: #b8efff; text-decoration: none; font-weight: 650; }
 .section-head { margin-bottom: 36px; }
 .list { display: grid; gap: 16px; }
 .item h2 { margin: 8px 0; }
-@media (max-width: 760px) { main { padding: 44px 0; } .grid { grid-template-columns: 1fr; } }
+.item h3 { margin: 8px 0; font-size: 1.25rem; }
+.author-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; }
+.author-column { min-height: 240px; background: rgba(12, 29, 50, .54); border: 1px solid #244767; border-radius: 18px; padding: 28px; }
+.author-column > h2 { margin: 10px 0 24px; }
+@media (max-width: 760px) { main { padding: 44px 0; } .grid, .author-grid { grid-template-columns: 1fr; } }
