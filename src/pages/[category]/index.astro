@@ -3,9 +3,9 @@ import { getCollection } from "astro:content";
 import BaseLayout from "../../layouts/BaseLayout.astro";
 
 export function getStaticPaths() {
-  return ["datasets", "evaluation"].map((category) => ({ params: { category } }));
+  return ["datasets", "evaluation", "macro-thinking"].map((category) => ({ params: { category } }));
 }
-const labels = { datasets: "数据集", evaluation: "评测" } as const;
+const labels = { datasets: "数据集", evaluation: "评测", "macro-thinking": "宏观思想" } as const;
 const category = Astro.params.category as keyof typeof labels;
 const items = (await getCollection("dossier", ({ data }) => data.category === category && !data.draft));
 ---

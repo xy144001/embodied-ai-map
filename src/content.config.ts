@@ -5,8 +5,8 @@ const dossier = defineCollection({
   loader: glob({ pattern: "**/*.{md,mdx}", base: "./src/content" }),
   schema: z.object({
     title: z.string(),
-    category: z.enum(["datasets", "model-architecture", "evaluation"]),
-    kind: z.enum(["model", "dataset", "benchmark", "evaluation", "theory"]),
+    category: z.enum(["datasets", "model-architecture", "evaluation", "macro-thinking"]),
+    kind: z.enum(["model", "dataset", "benchmark", "evaluation", "theory", "guidance", "roadmap"]),
     organization: z.string().optional(),
     releaseDate: z.coerce.date().optional(),
     summary: z.string(),

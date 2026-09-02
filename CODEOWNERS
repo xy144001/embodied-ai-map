@@ -2,6 +2,7 @@
 /src/content/model-architecture/ @xy144001
 /public/model-architecture/ @xy144001
 /src/content/evaluation/ @SyouSanGin
+# 宏观思想负责人：xiaoya93@mail.ustc.edu.cn（待补 GitHub 用户名后启用 CODEOWNER）
 
 /src/components/ @xy144001 @starrysky77 @SyouSanGin
 /src/layouts/ @xy144001 @starrysky77 @SyouSanGin
