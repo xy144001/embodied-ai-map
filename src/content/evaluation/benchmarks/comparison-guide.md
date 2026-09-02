@@ -1,0 +1,61 @@
+---
+title: Benchmark 对比：数据类型、判分对象与适用问题
+category: evaluation
+kind: guidance
+organization: Embodied AI Map
+releaseDate: 2026-09-02
+summary: 用同一张具体矩阵对比 HumanoidBench、Mimicking-Bench、LeVERB-Bench 与 SIMPLE：各自到底随基准提供什么数据、算法输入输出是什么、最后如何判定成功，以及外部数据集处于什么位置。
+tags: [whole-body-humanoid, benchmark, comparison, data-modalities, metrics]
+draft: false
+references:
+  - title: HumanoidBench
+    url: https://humanoid-bench.github.io/
+  - title: Mimicking-Bench
+    url: https://mimicking-bench.github.io/
+  - title: LeVERB paper
+    url: https://arxiv.org/abs/2506.13751
+  - title: SIMPLE
+    url: https://psi-lab.ai/SIMPLE/
+---
+
+## 1. 四个 benchmark 的共同最小单元
+
+四者的最终计分单位都是一个 **closed-loop episode**：给定固定 reset、算法反复读取 observation 并输出 action，物理环境推进直到 success、failure 或 horizon。区别在于每个 benchmark 固定了什么输入模态、任务分布和成功条件。
+
+| Benchmark | 固定任务分布 | benchmark 自带/生成的数据类型 | policy 的典型输入 | policy 输出 | 主判分对象 |
+|---|---|---|---|---|---|
+| [HumanoidBench](../humanoidbench/) | 12 locomotion + 15 whole-body manipulation | MuJoCo robot/object/scene asset；state、可选头部 RGB、448-taxel tactile、contact/episode log | proprioception；可选视觉/触觉/特权 task state | robot actuator command | 每任务 task success rate |
+| [Mimicking-Bench](../mimicking-bench/) | 6 household human-scene tasks | 20K synthetic + 3K real human references、11K object shapes、scene geometry、robot rollout | human reference + robot/scene state；具体视觉依 release | retargeted reference 或全身 control | task success + scene geometry generalization |
+| [LeVERB-Bench](../leverb-bench/) | 10 categories、150+ vision-language WBC tasks | retargeted MoCap、ray-traced ego/third-person render、language/task metadata、robot state | image history + language + proprioception | latent behavior + dynamics-level WBC action | vision-language closed-loop success |
+| [SIMPLE](../simple/) | 60 loco-manipulation tasks、50 scenes、1K+ objects | scene/object assets、MuJoCo contact state、Isaac Sim visuals、task language/config、planner/VR demonstrations | visual/proprioception + task condition | whole-body action/action chunk | task completion + safety/OOD |
+
+## 2. 同一“搬运物体”问题在四者里有什么不同
+
+| 问题 | HumanoidBench | Mimicking-Bench | LeVERB-Bench | SIMPLE |
+|---|---|---|---|---|
+| 你先给模型什么 | 环境状态或相机/触觉 | 一段人类交互参考 + 新对象几何 | 图像 + “做什么”的语言 | 场景视觉 + 任务目标/指令 |
+| 真正难点 | 在固定物理任务中不跌倒并达成物体目标 | 人类动作能否迁移到未见几何 | 看懂指令/视觉后选对全身行为 | 走、看、接触、搬运、放置的长链路 |
+| 不能只看什么 | reward 或手离物体的距离 | human-motion tracking error | 离线 language/latent accuracy | action prediction loss 或 demo replay |
+| 最后要看什么 | object/task predicate + robot 存活 | interaction predicate + physical executability | 指令条件下实际闭环完成 | object/task completion + fall/drop/collision |
+
+## 3. 数据集在 benchmark 中的正确身份
+
+外部 Dataset 不是 benchmark 的“答案文件”。它通常扮演四种角色：
+
+| 数据角色 | 例子 | 进入哪个环节 | 最终不替代什么 |
+|---|---|---|---|
+| motion prior | AMASS、HumanML3D | train low-level WBC / language-motion representation | target benchmark success |
+| contact/interaction prior | GRAB、OMOMO | retarget、hand-object contact、object trajectory condition | robot physical grasp/hold/place |
+| visual pretraining | BEHAVE、H2O、EgoBody | object/hand/body pose or ego vision front end | simulator 中实时 perception-to-action |
+| cross-embodiment policy pretraining | RH20T、Open X | VLA/action representation pretraining | humanoid action decoding 和目标场景闭环 |
+
+因此正确实验表述应是：**“用 GRAB 预训练接触表示后，在 HumanoidBench 的 `g1-package-v0` 上报告 20 个 evaluation seeds 的 success/fall/drop。”** 而不是“GRAB 的接触 F1 提升，所以 humanoid 搬运能力提升”。
+
+## 4. 选 benchmark 的实用决策
+
+- 要比较低层全身控制、接触、分层 walk/reach skill：选 **HumanoidBench**。
+- 要研究 human-to-humanoid、未见家具/物体几何：选 **Mimicking-Bench**。
+- 要研究图像 + 语言如何触发稳定 WBC：选 **LeVERB-Bench**。
+- 要比较 VLA/WAM、场景级移动操作和数据生成策略：选 **SIMPLE**。
+
+无论选择哪一个，报告都应附 task list、asset version、action adapter、observation fields、evaluation seeds、success predicate 和失败类别；这样“benchmark 分数”才是可复查的科学结果。
