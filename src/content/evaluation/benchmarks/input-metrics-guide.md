@@ -16,6 +16,16 @@ references:
     url: https://arxiv.org/abs/2506.13751
   - title: SIMPLE paper
     url: https://arxiv.org/abs/2606.08278
+  - title: LIBERO official repository
+    url: https://github.com/Lifelong-Robot-Learning/LIBERO
+  - title: CALVIN official repository
+    url: https://github.com/mees/calvin
+  - title: RoboTwin 2.0 evaluation documentation
+    url: https://huggingface.co/docs/lerobot/en/robotwin
+  - title: SimplerEnv official repository
+    url: https://github.com/allenai/SimplerEnv
+  - title: BEHAVIOR-1K official repository
+    url: https://github.com/StanfordVL/BEHAVIOR-1K
 ---
 
 ## 1. 先统一符号：一个 benchmark episode 是什么
@@ -50,7 +60,7 @@ $$
 
 没有这些字段，两个“success rate”并不具有可比性。
 
-## 3. 主量化指标：四类 benchmark 各如何读数
+## 3. 主量化指标：核心全身 benchmark 各如何读数
 
 | Benchmark | 官方/核心主指标 | 应如何汇总 | 具体例子 |
 |---|---|---|---|
@@ -58,6 +68,14 @@ $$
 | Mimicking-Bench | 每个 household task 的 completion/success，重点是 seen vs unseen geometry | 六任务逐项列出，并把 training shape 与未见 chair/bed/box shape 分开 | `lift box`：箱体满足抬起条件、全身动作物理可执行，不是 hand tracking 小就得分 |
 | LeVERB-Bench | vision-language closed-loop success；论文报告 10 categories / 150+ tasks 的分类/总体成功 | task 与 category success 分开；image/state、with/without language 分开 | 论文报告 LeVERB 总体 58.5%、简单视觉导航 80.0%；只能在同一设定下比较 |
 | SIMPLE | per-task closed-loop task completion，论文强调大规模 policy benchmark 与 sim-real correlation | 60 task 逐项，另按 scene/object/instruction OOD 聚合 | 搬运：走到正确对象、稳定持物并到达目标，且无 fall/drop/非法终止 |
+| LIBERO | per-task/suite episode success；终身学习可加 T×T 的 ASR/BWT/F | Spatial/Object/Goal/LIBERO-90/LIBERO-10 分开，明确 dataset revision 与预训练 | 不把 demonstration loss 或语言相似度当最终分数 |
+| CALVIN | MTLC 与 LH-MTLC（连续 chain 完成长度） | 按 1–5 子任务、环境 split、sensor suite 分开 | 单步 success 不能替代 chain-level 结果 |
+| RoboTwin 2.0 | clean2clean 与 clean2random success | 50 tasks 逐项，并分别聚合 easy/hard | 不混淆 14D action adapter 与其他机器人版本 |
+| RoboCasa / RoboCasa365 | per-task success 与 seen/unseen 聚合 | atomic/composite、任务集和场景生成版本分开 | 子集结果不能写成全量 365-task 结果 |
+| SimplerEnv | success + sim/real rank correlation（如 Pearson、MMRV） | visual matching、variant aggregation、仿真/真实分别报告 | 仿真成功率不是现实机器人成功率 |
+| BEHAVIOR-1K | activity success predicate | 任务子集、场景/物体版本、长程失败类型分开 | 运行 subset 不能宣称覆盖 1,000 活动 |
+| Habitat-Lab | success、SPL（导航）或 rearrangement task success | PointNav/ObjectNav/Rearrange/social nav 分开；RGB-D 与 oracle state 分开 | 导航 SPL 不能替代操作或双足全身成功 |
+| ManiSkill | per-task success、return/效率；部分环境支持 real2sim 对照 | environment ID、robot、资产版本、并行规模和 observation track 分开 | 自定义任务结果不能冒充官方统一榜单 |
 
 ### 3.1 success 之外的量：必须标成“诊断”而非偷换主结论
 

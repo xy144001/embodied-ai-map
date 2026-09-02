@@ -36,10 +36,10 @@ references:
 | **MuJoCo（经典 CPU/GPU）** | **N** | A | — | **N**（动力学侧） | HumanoidBench 官方环境使用 MuJoCo；SIMPLE 明确用 MuJoCo 做接触动力学。迁移 Mimicking-Bench 需要重建 humanoid/scene/contact 与其 success predicate。 |
 | **MuJoCo MJX + JAX** | **D**（低层批量训练） | A | — | A | HumanoidBench 官方仓库含 `mjx/` 与低层技能训练路径。MJX 提供吞吐，但不能自动复用视觉/任务 evaluator。 |
 | **Isaac Sim + Isaac Lab** | A | A | **N**（视觉/物理链路） | **N**（渲染侧） | LeVERB 的合成 visual pipeline 用 Isaac Sim；SIMPLE 用 Isaac Sim 做写实渲染。迁移 HumanoidBench/Mimicking-Bench 要重新验证 physics 差异，结果不能与原榜单混列。 |
-| **Isaac Lab manager-based env + RL 栈** | A | A | A | A | 适合把任务资产包装成 vectorized Gym 环境、接 PPO/RSL-RL/VLA adapter；但四个 benchmark 的 success predicate、随机化和 split 仍必须原样实现。 |
-| **Genesis World** | A | A | A | A | 可以加载自定义 humanoid/scene、跑 physics/sensor/action loop；没有本页四个 benchmark 的官方 runner。适合原型或 cross-simulator robustness，不可直接报“官方 benchmark 分数”。 |
+| **Isaac Lab manager-based env + RL 栈** | A | A | A | A | 适合把任务资产包装成 vectorized Gym 环境、接 PPO/RSL-RL/VLA adapter；但本页原有四个全身 benchmark 的 success predicate、随机化和 split 仍必须原样实现。 |
+| **Genesis World** | A | A | A | A | 可以加载自定义 humanoid/scene、跑 physics/sensor/action loop；没有本页原有四个全身 benchmark 的官方 runner。适合原型或 cross-simulator robustness，不可直接报“官方 benchmark 分数”。 |
 | **SAPIEN + ManiSkill** | A（操作子任务） | A | A | A（操作子任务） | GPU 并行 manipulation 很适合手—物消融；但双足落足、whole-body balance、原 task assets 与 evaluator 均需自建。 |
-| **OmniGibson / BEHAVIOR** | — | A（家庭场景概念） | A（视觉场景） | A（家庭场景） | 适合扩展家居场景/对象状态，但并非这四个 benchmark 的原始 robot、物理或 task runner。 |
+| **OmniGibson / BEHAVIOR** | — | A（家庭场景概念） | A（视觉场景） | A（家庭场景） | 适合扩展家居场景/对象状态，但并非本页原有四个全身 benchmark 的原始 robot、物理或 task runner。 |
 | **InternUtopia** | — | A（场景泛化） | A（视觉/导航） | A（大场景） | 提供大场景导航/移动操作基础设施；要变成双足 humanoid benchmark，必须自建 full-body asset、落足/跌倒规则和 evaluator。 |
 
 ### 新补充 benchmark 的适配结论

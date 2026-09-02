@@ -4,7 +4,7 @@ category: evaluation
 kind: roadmap
 organization: Embodied AI Map
 releaseDate: 2026-09-02
-summary: 区分仿真平台与 benchmark，并把 HumanoidBench、Mimicking-Bench、LeVERB-Bench、SIMPLE 的任务协议连接到 AMASS、GRAB、BEHAVE、OMOMO、HumanML3D 等可获取数据集。
+summary: 区分仿真平台与 benchmark，并把全身人形、导航、通用操作、家庭活动与 VLA 套件的任务协议连接到可获取数据集和统一复现字段。
 tags: [whole-body-humanoid, benchmark, datasets, evaluation-protocol, locomanipulation]
 draft: false
 references:
@@ -16,6 +16,8 @@ references:
     url: https://arxiv.org/abs/2506.13751
   - title: SIMPLE
     url: https://psi-lab.ai/SIMPLE/
+  - title: AlphaBrain Platform
+    url: https://www.alphabrain-platform.com/
 ---
 
 ## 1. Benchmark 与平台、数据集的边界
@@ -32,6 +34,14 @@ references:
 | [Mimicking-Bench](../mimicking-bench/) | 人类动作到 humanoid-scene interaction 的 6 个家庭任务 | AMASS、GRAB、OMOMO、BEHAVE | 人类动作/交互几何是核心参考；通过 retarget 和 scene interaction generation 形成训练数据 | scene/generalization success、tracking、接触、penetration、跌倒 |
 | [LeVERB-Bench](../leverb-bench/) | vision-language humanoid WBC 的 150+ 闭环任务（论文报告） | AMASS/其他人类 MoCap、HumanML3D、EgoBody/H2O（感知迁移） | 重定向 MoCap 与 Isaac Sim 渲染构成视觉—语言训练源；视觉数据可做前端预训练，不能替换闭环评测 | 指令条件 success、视觉 OOD、跌倒/碰撞、oracle-vs-vision gap |
 | [SIMPLE](../simple/) | 60 个全身移动操作任务、50 个室内场景（项目报告） | Open X、RH20T、GRAB、BEHAVE、OMOMO | Open X/RH20T 用于 VLA 上游预训练；人—物数据用于 retarget/接触或感知；目标 task 不得泄漏到预训练 | VLA/WAM closed-loop success、对象/场景/指令 OOD、掉落/跌倒/安全 |
+
+## AlphaBrain Platform 评测套件（编排层）
+
+[AlphaBrain Platform](./alphabrain-platform/) 将 LIBERO（Spatial/Object/Goal/Long）、LIBERO-plus、CALVIN、RoboTwin、RoboCasa/RoboCasa365、SimplerEnv 与 BEHAVIOR-1K 接入统一的 policy-server / simulation-client 流程。它复用各 benchmark 的官方任务协议，不应被计作新的第九个 benchmark；持续学习场景可在 T×T 矩阵上补充 ASR、BWT、F 指标。详细的覆盖边界、平台自报结果证据等级与全身 humanoid 迁移注意事项见 [AlphaBrain 条目](./alphabrain-platform/)。
+
+本目录现已提供各套件的独立调研卡片： [LIBERO](./libero/)、[LIBERO-plus](./libero-plus/)、[CALVIN](./calvin/)、[RoboTwin 2.0](./robotwin/)、[RoboCasa/RoboCasa365](./robocasa/)、[SimplerEnv](./simplerenv/) 与 [BEHAVIOR-1K](./behavior-1k/)。
+
+导航与通用操作补充卡片： [Habitat-Lab](./habitat-lab/) 与 [ManiSkill](./maniskill/)。二者都是可组合的 benchmark/仿真栈；使用自定义任务时，必须把结果标成项目协议或迁移实验。
 
 ## 3. 数据集—benchmark 的合规连接流程
 

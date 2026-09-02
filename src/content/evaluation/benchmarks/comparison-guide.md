@@ -4,7 +4,7 @@ category: evaluation
 kind: guidance
 organization: Embodied AI Map
 releaseDate: 2026-09-02
-summary: 用同一张具体矩阵对比 HumanoidBench、Mimicking-Bench、LeVERB-Bench 与 SIMPLE：各自到底随基准提供什么数据、算法输入输出是什么、最后如何判定成功，以及外部数据集处于什么位置。
+summary: 用统一矩阵对比核心全身 humanoid benchmark 与 AlphaBrain 适配的操作/长程套件：明确各自的数据、输入输出、成功判定、指标和外部数据集角色，避免把不同本体的分数直接横比。
 tags: [whole-body-humanoid, benchmark, comparison, data-modalities, metrics]
 draft: false
 references:
@@ -16,9 +16,21 @@ references:
     url: https://arxiv.org/abs/2506.13751
   - title: SIMPLE
     url: https://psi-lab.ai/SIMPLE/
+  - title: LIBERO
+    url: https://github.com/Lifelong-Robot-Learning/LIBERO
+  - title: CALVIN
+    url: https://calvin.cs.uni-freiburg.de/
+  - title: RoboTwin 2.0
+    url: https://robotwin-platform.github.io/leaderboard
+  - title: RoboCasa
+    url: https://github.com/robocasa/robocasa
+  - title: SimplerEnv
+    url: https://github.com/allenai/SimplerEnv
+  - title: BEHAVIOR-1K
+    url: https://github.com/StanfordVL/BEHAVIOR-1K
 ---
 
-## 1. 四个 benchmark 的共同最小单元
+## 1. 四类全身 benchmark 的共同最小单元
 
 四者的最终计分单位都是一个 **closed-loop episode**：给定固定 reset、算法反复读取 observation 并输出 action，物理环境推进直到 success、failure 或 horizon。区别在于每个 benchmark 固定了什么输入模态、任务分布和成功条件。
 
@@ -28,6 +40,13 @@ references:
 | [Mimicking-Bench](../mimicking-bench/) | 6 household human-scene tasks | 20K synthetic + 3K real human references、11K object shapes、scene geometry、robot rollout | human reference + robot/scene state；具体视觉依 release | retargeted reference 或全身 control | task success + scene geometry generalization |
 | [LeVERB-Bench](../leverb-bench/) | 10 categories、150+ vision-language WBC tasks | retargeted MoCap、ray-traced ego/third-person render、language/task metadata、robot state | image history + language + proprioception | latent behavior + dynamics-level WBC action | vision-language closed-loop success |
 | [SIMPLE](../simple/) | 60 loco-manipulation tasks、50 scenes、1K+ objects | scene/object assets、MuJoCo contact state、Isaac Sim visuals、task language/config、planner/VR demonstrations | visual/proprioception + task condition | whole-body action/action chunk | task completion + safety/OOD |
+| [LIBERO](../libero/) | 4 个官方 suite、130 tasks（现代接口拆为 5 个 CLI suite） | MuJoCo/robosuite assets、RGB/proprioception、语言与 PDDL、human demonstrations | RGB/proprioception + language | 7D end-effector / robot action（依 adapter） | per-task/suite episode success；终身学习另报 ASR/BWT/F |
+| [CALVIN](../calvin/) | 长时程语言 chain（1–5 个连续子任务） | 仿真 Franka、语言指令、可选 RGB/proprioception | image/state + language | 典型 8D joint+gripper action | MTLC/LH-MTLC；按 chain 长度与环境 split 报告 |
+| [RoboTwin 2.0](../robotwin/) | 50 双臂任务，clean/randomized | SAPIEN assets、50 demo/task、三路相机与域随机化 | 多视角 RGB + task condition | 14D Aloha-AgileX joint action（版本相关） | clean2clean / clean2random success |
+| [RoboCasa / RoboCasa365](../robocasa/) | 厨房 atomic/composite；365-task 扩展 | 程序化厨房、任务/场景生成器、LeRobot mixtures | 视觉/状态 + task condition | 机器人相关 action adapter | seen/unseen 与 per-task success |
+| [BEHAVIOR-1K](../behavior-1k/) | 1,000 个家居活动（可按子集运行） | OmniGibson/BEHAVIOR assets、活动定义与多对象状态 | 机器人/场景观测 + activity goal | embodiment-specific action | task predicate success + 长程失败类别 |
+| [Habitat-Lab](../habitat-lab/) | PointNav/ObjectNav/Rearrange/social nav | Habitat-Sim scenes、RGB-D、GPS/compass 或 state | RGB-D/state + task goal | base velocity 或 mobile-manipulator action | success、SPL、distance 与安全 |
+| [ManiSkill](../maniskill/) | 通用操作、灵巧手、移动操作 | SAPIEN assets、state/RGB-D/segmentation | state/视觉/触觉（依 environment ID） | joint/EE/torque action | per-task success、效率与 sim2real gap |
 | [SMPLOlympics](../smplolympics/) | individual sport + 1v1/2v2 sports | SMPL/SMPL-X-compatible humanoid、sports assets、可选 motion prior | humanoid/object/opponent state；具体视觉依 env | whole-body control | sport-specific distance/score/win rate + stability |
 | [SPARK](../spark/) | safety in humanoid autonomy/teleoperation | state、nominal command、safety constraints、risk logs | robot/environment state + nominal action | filtered safe action | task performance + constraint violation/intervention/latency |
 | [BiGym](../bigym/) | 40 mobile bimanual home tasks（迁移） | human demos、proprioception、RGB、3-view depth | demo + state/visual observation | mobile-base + bimanual action | task success；非双足 humanoid score |

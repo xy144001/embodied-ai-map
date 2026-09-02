@@ -14,6 +14,8 @@ references:
     url: https://isaac-sim.github.io/IsaacLab/develop/source/overview/imitation-learning/humanoids_imitation.html
   - title: Mimicking-Bench
     url: https://mimicking-bench.github.io/
+  - title: AlphaBrain Platform
+    url: https://www.alphabrain-platform.com/
 ---
 
 ## Overview：这里的“全身”是什么
@@ -21,6 +23,44 @@ references:
 本文只把**有双臂/手、双腿/脚，且需要站立、行走、改变支撑关系并在移动中操作物体**的系统计为核心对象。单机械臂、轮式移动操作、四足、仅上半身双臂桌面操作可作为迁移数据或软件组件，但不能证明全身人形的 loco-manipulation（移动操作）能力。
 
 本目录把“平台”分成两层：**仿真引擎/训练栈**负责把状态、传感器、动作和物理接起来；**基准**额外固定任务、初始条件、成功判定与汇总规则。不要把“可加载人形 URDF”误报为“已有全身评测基准”。
+
+## 先看结论：Benchmark 不是一条排行榜
+
+对第一次接触具身智能的人，可以先用下面三问定位一个 benchmark：
+
+1. **它测哪条能力轴？** 是走路/平衡、手—物接触、语言长程规划、视觉鲁棒性，还是安全约束？
+2. **它的 robot 是否真的需要双足全身？** 桌面双臂或 Franka 的高分，不能直接外推到双足移动操作。
+3. **它的数字来自哪里？** 只有锁定任务版本、split、seed、checkpoint 和 evaluator 的 closed-loop rollout 才是可复核的 benchmark score；平台网页自报或论文摘要数字应单独标注。
+
+| 能力轴 | 首选入口 | 适合回答的问题 | 不应据此宣称 |
+|---|---|---|---|
+| 全身 locomotion + 接触 | [HumanoidBench](../benchmarks/humanoidbench/)、[SMPLOlympics](../benchmarks/smplolympics/) | 机器人能否走、转身、保持平衡并完成接触任务？ | 已具备通用家务或语言泛化 |
+| 人类动作重定向与场景交互 | [Mimicking-Bench](../benchmarks/mimicking-bench/)、[LeVERB-Bench](../benchmarks/leverb-bench/) | 人类动作/语言能否转成可执行的全身行为？ | 真实世界成功率或大规模家务覆盖 |
+| VLA 桌面/双臂操作 | [LIBERO](../benchmarks/libero/)、[CALVIN](../benchmarks/calvin/)、[RoboTwin](../benchmarks/robotwin/) | 语言条件操作、长程 chain、双臂泛化是否提升？ | 双足平衡、足底接触和跌倒鲁棒性 |
+| 家庭场景规模与 sim-to-real | [RoboCasa](../benchmarks/robocasa/)、[BEHAVIOR-1K](../benchmarks/behavior-1k/)、[SimplerEnv](../benchmarks/simplerenv/)、[SIMPLE](../benchmarks/simple/) | 多对象、未见场景或仿真—现实排序是否可靠？ | 只跑一个子集就覆盖全部任务，或把仿真分数当真机分数 |
+| 安全与约束 | [SPARK](../benchmarks/spark/) | 完成任务时是否违反安全约束、碰撞或跌倒？ | 低违规率等于高任务泛化 |
+
+这些轴可以组合成一份评测包，但分数必须按 benchmark 分开报告；不存在一个“总分”能替代能力拆解。
+
+## 各评测方面的主流代表
+
+下面按“要回答的研究问题”归纳主流 benchmark。每一类的分数只在同一协议内可比，跨类只能作为能力画像的不同切片。
+
+| 评测方面 | 主流代表 | 主要测量内容 | 读者应记住的边界 |
+|---|---|---|---|
+| **下肢运动与全身控制** | [HumanoidBench](../benchmarks/humanoidbench/)、[HumanoidOlympics](../benchmarks/smplolympics/)、Isaac Lab humanoid tasks | 行走、平衡、动态接触、全身动作控制 | locomotion 成功不等于会抓取、搬运或理解语言；Isaac Lab 自定义任务不是天然排行榜 |
+| **人类动作重定向与交互** | [Mimicking-Bench](../benchmarks/mimicking-bench/)、[LeVERB-Bench](../benchmarks/leverb-bench/)、HOVER | MoCap→robot retarget、手—物接触、视觉/语言触发全身动作 | tracking/penetration 等离线或几何指标，不能替代真实 task success |
+| **桌面操作与终身学习** | [LIBERO](../benchmarks/libero/)、[LIBERO-plus](../benchmarks/libero-plus/)、[Meta-World](https://github.com/Farama-Foundation/Metaworld) | 多任务抓取放置、语言条件操作、持续学习与 zero-shot 鲁棒性 | 以固定机械臂为主，不能直接证明双足稳定性或移动操作 |
+| **长程语言—动作链** | [CALVIN](../benchmarks/calvin/)、[RoboCasa/RoboCasa365](../benchmarks/robocasa/)、[BEHAVIOR-1K](../benchmarks/behavior-1k/) | 多阶段子任务、语言指令、家庭物体状态变化 | 必须报告 chain/task completion；单步成功率会掩盖长程失败 |
+| **双臂与视觉泛化** | [RoboTwin 2.0](../benchmarks/robotwin/)、[BiGym](../benchmarks/bigym/) | 双臂协同、clean→random、移动双臂家庭任务 | 多数是轮式或固定底座，本体动作空间与 humanoid 不同 |
+| **导航与空间理解** | [Habitat-Lab](../benchmarks/habitat-lab/)、Habitat 3.0、ObjectNav/PointNav | 目标导航、重排、社会导航、SPL 与路径效率 | 导航指标不能替代接触操控；RGB-D、GPS/compass、oracle state 必须分轨 |
+| **家庭规模与真实—仿真一致性** | [BEHAVIOR-1K](../benchmarks/behavior-1k/)、[RoboCasa365](../benchmarks/robocasa/)、[SimplerEnv](../benchmarks/simplerenv/)、SIMPLE | 多对象家务、未见场景、sim-to-real 排序相关性 | 子集结果不能写成全量覆盖；仿真 success 不是现实成功率 |
+| **通用操作与高吞吐训练** | [ManiSkill](../benchmarks/maniskill/)、SAPIEN/ManiSkill-HAB | GPU 并行数据采集、跨机器人操作、real2sim/sim2real | 框架可自定义任务；必须锁定 environment ID、资产和 evaluator 才能复现 |
+| **安全与约束** | [SPARK](../benchmarks/spark/)、安全控制/遥操作 benchmark | 约束违规、碰撞、跌倒、干预延迟与任务性能权衡 | 安全低违规率不等于任务泛化；应与 success、效率一起报告 |
+
+### 最小阅读顺序
+
+若只想快速建立全局认识：先读 **HumanoidBench**（全身核心）、再读 **LIBERO/CALVIN**（操作与语言链）、**Habitat-Lab**（导航）、**BEHAVIOR-1K/SIMPLE**（家庭规模），最后用 **SPARK** 补安全轴。这样能覆盖“走—看—拿—做—长期执行—安全”六个互补方面。
 
 ## 导航
 
@@ -50,6 +90,15 @@ references:
 | Benchmark | 直接全身程度 | 核心数据关联 | 入口 |
 |---|---:|---|---|
 | HumanoidBench | 高：27 个 locomotion + whole-body manipulation 任务 | AMASS/GRAB/OMOMO 可作技能或接触先验；最终按环境 rollout 计分 | [条目](../benchmarks/humanoidbench/) |
+| LIBERO | 中：130 个终身学习操作任务（4 个官方 suite；现代接口拆为 5 个 CLI suite） | 官方 MuJoCo/robosuite 任务与 human demonstrations；非全身 humanoid | [条目](../benchmarks/libero/) |
+| LIBERO-plus | 中：LIBERO 多维鲁棒性扰动 | 相机、机器人、语言、光照等 zero-shot 诊断；非新的全身任务集 | [条目](../benchmarks/libero-plus/) |
+| CALVIN | 中：语言条件长时程操作 chain | 仿真 Franka、语言与多模态观测；按 MTLC/LH-MTLC 计分 | [条目](../benchmarks/calvin/) |
+| RoboTwin 2.0 | 中：50 个双臂操作任务 | SAPIEN、Aloha-AgileX、clean/randomized；非双足全身 | [条目](../benchmarks/robotwin/) |
+| RoboCasa / RoboCasa365 | 中：厨房 atomic/composite；365-task 扩展 | 程序化家庭场景与任务生成；按 seen/unseen 分开 | [条目](../benchmarks/robocasa/) |
+| SimplerEnv | 迁移评测环境：real-to-sim | 视觉匹配、变体聚合与 sim-real 排序相关性；不是独立 humanoid 榜单 | [条目](../benchmarks/simplerenv/) |
+| BEHAVIOR-1K | 中：1,000 个家居活动（实际可按子集运行） | OmniGibson/BEHAVIOR 家庭资产与活动 predicate；非默认双足全身 | [条目](../benchmarks/behavior-1k/) |
+| Habitat-Lab | 迁移：PointNav/ObjectNav/Rearrange/社会导航 | Habitat-Sim 场景、RGB-D 与导航 episode；双足需自建接口 | [条目](../benchmarks/habitat-lab/) |
+| ManiSkill | 迁移：高吞吐通用操作与跨本体任务 | SAPIEN 资产、GPU 并行 state/RGB-D；任务可自定义 | [条目](../benchmarks/maniskill/) |
 | Mimicking-Bench | 高：6 个家庭 humanoid-scene interaction 任务 | 以人类动作与交互几何为核心，适配 AMASS/GRAB/OMOMO/BEHAVE | [条目](../benchmarks/mimicking-bench/) |
 | LeVERB-Bench | 高：150+ vision-language WBC 任务（论文报告） | MoCap 重定向与渲染数据；HumanML3D/EgoBody/H2O 可做前端迁移 | [条目](../benchmarks/leverb-bench/) |
 | SIMPLE | 高：60 task / 50 scene 候选（项目报告） | Open X/RH20T 作 VLA 预训练，GRAB/BEHAVE/OMOMO 作接触与感知先验 | [条目](../benchmarks/simple/) |

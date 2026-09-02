@@ -4,7 +4,7 @@ category: evaluation
 kind: guidance
 organization: Embodied AI Map
 releaseDate: 2026-09-02
-summary: 用证据等级矩阵展示可部署仿真平台、数据集、benchmark 与已发表/项目工作的关系；明确“可兼容”不等于“已在论文中使用”。
+summary: 用证据等级矩阵展示可部署仿真平台、数据集、核心全身 benchmark 与操作/家庭评测套件的关系；明确“可兼容”不等于“已在论文中使用”。
 tags: [whole-body-humanoid, matrix, simulator, dataset, benchmark, evidence]
 draft: false
 references:
@@ -16,6 +16,14 @@ references:
     url: https://mimicking-bench.github.io/
   - title: Open X-Embodiment
     url: https://github.com/google-deepmind/open_x_embodiment
+  - title: LIBERO
+    url: https://github.com/Lifelong-Robot-Learning/LIBERO
+  - title: CALVIN
+    url: https://github.com/mees/calvin
+  - title: RoboTwin 2.0
+    url: https://huggingface.co/docs/lerobot/en/robotwin
+  - title: BEHAVIOR-1K
+    url: https://github.com/StanfordVL/BEHAVIOR-1K
 ---
 
 ## 图例：先看证据等级
@@ -81,6 +89,27 @@ flowchart LR
 | EgoBody | EgoBody pose/mesh estimation 工作 | ego/multi-view 人体姿态与形状恢复 | pose/mesh/scene 泛化 |
 | RH20T | RH20T one-shot learning | 人类 demo + robot visual/force/audio/action | one-shot manipulation 与多模态策略 |
 | Open X | RT-1-X / RT-2-X | 统一 RLDS 的跨本体数据预训练 | 跨机器人/新技能 transfer；非双足 humanoid 原生 |
+
+## 6. Benchmark × 能力轴 × 可比边界
+
+这一张表是给读者做选型用的：**“高”只表示该 benchmark 的任务协议确实覆盖该轴，不表示它在其它轴上也有同等证据。**“迁移”表示可以作为补充实验或适配起点，不能与原生 benchmark 分数直接横排。
+
+| Benchmark | 主要能力轴 | 原生 embodiment / 仿真 | 结果最小单位 | 与双足全身结论的距离 |
+|---|---|---|---|---|
+| HumanoidBench | locomotion、平衡、whole-body manipulation | humanoid；MuJoCo/MJX | 每任务 closed-loop success / return | 近：可作为核心控制对照 |
+| Mimicking-Bench | human-to-humanoid、接触与场景交互 | humanoid；官方任务协议 | 每任务 success + tracking/contact | 近：强调重定向与交互几何 |
+| LeVERB-Bench | vision-language WBC | humanoid；论文/项目协议 | 每任务语言条件 success | 近：需核对 runner、资产与版本 |
+| SIMPLE | VLA 全身移动操作、sim-to-real | humanoid；MuJoCo + Isaac Sim（项目报告） | task/scene/instruction success | 近：规模大但版本与复现要求高 |
+| LIBERO / LIBERO-plus | 桌面操作、终身学习、zero-shot 鲁棒性 | Franka/桌面；MuJoCo/robosuite | 每任务 success；ASR/BWT/F | 远：操作迁移诊断，不测双足 |
+| CALVIN | 语言条件长程 chain | Franka；仿真环境 | MTLC / LH-MTLC | 远：长程语言操作，不测行走 |
+| RoboTwin 2.0 | 双臂任务与 clean→random 泛化 | Aloha-AgileX；SAPIEN | 每任务 clean/random success | 远：双臂操作，非双足 |
+| RoboCasa / BEHAVIOR-1K | 厨房/家庭多对象长程活动 | Panda/家庭 agent；程序化场景 | atomic/composite 或 activity predicate | 中远：场景迁移价值高，需自建全身接口 |
+| SimplerEnv | real-to-sim 视觉匹配与排序相关性 | ManiSkill/SAPIEN | success + sim/real correlation | 迁移：不是独立 humanoid 榜单 |
+| Habitat-Lab | 导航、重排、社会交互 | Habitat-Sim；PointNav/ObjectNav/Rearrange 配置 | success、SPL 或 task predicate | 迁移：补空间/社会能力，双足需自建接口 |
+| ManiSkill | 高吞吐通用操作、跨本体消融 | SAPIEN；GPU 并行多机器人环境 | per-task success、效率、sim2real | 迁移：可承载 humanoid，但 task/evaluator 需冻结 |
+| SPARK | 安全约束与任务性能权衡 | 可配置 humanoid 控制任务 | performance + violation/safety log | 近但单轴：不能替代任务泛化 |
+
+**读表规则：**同一行内可以比较方法；跨行比较前，必须同时对齐 embodiment、任务集合、观测、动作接口、成功判定和统计聚合。只要其中一项不一致，就应写成“迁移实验”或“补充诊断”，而不是统一排名。
 
 ## 使用这五张矩阵的规则
 
