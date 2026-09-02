@@ -7,7 +7,7 @@
 - 数据集：`@starrysky77`
 - 模型架构：`@xy144001`
 - 评测：`@SyouSanGin`
-- 宏观思想：`xiaoya93@mail.ustc.edu.cn`（待补 GitHub 用户名）
+- 宏观思想：`@xiaoyazhai`
 
 模型架构版块当前收录 π₀.₅、X‑VLA 0.9B、LingBot‑VLA 2.0 6B、Light‑WAM 和 LingBot‑VA。
 
