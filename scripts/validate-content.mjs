@@ -14,11 +14,11 @@ async function walk(directory) {
     if (entry.isDirectory()) await walk(path);
     if (!entry.isFile() || !/\.mdx?$/.test(entry.name)) continue;
     const text = await readFile(path, "utf8");
-    const frontmatter = text.match(/^---\n([\s\S]*?)\n---/);
+    const frontmatter = text.match(/^---\r?\n([\s\S]*?)\r?\n---/);
     if (!frontmatter) throw new Error(`${path}: missing frontmatter`);
     const category = frontmatter[1].match(/^category:\s*(.+)$/m)?.[1]?.trim();
     if (!categories.has(category)) throw new Error(`${path}: invalid category`);
-    const id = path.replace(root, "");
+    const id = path.replace(root, "").replaceAll("\\", "/");
     if (category === "macro-thinking") {
       const author = frontmatter[1].match(/^author:\s*(.+)$/m)?.[1]?.trim();
       if (!macroAuthors.has(author)) throw new Error(`${path}: invalid or missing macro-thinking author`);

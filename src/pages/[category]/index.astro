@@ -8,14 +8,21 @@ export function getStaticPaths() {
 const labels = { datasets: "数据集", evaluation: "评测", "macro-thinking": "宏观思想" } as const;
 const category = Astro.params.category as keyof typeof labels;
 const items = (await getCollection("dossier", ({ data }) => data.category === category && !data.draft));
+const evaluationGroups = [
+  { key: "overview", title: "总览与评测范式", description: "范围界定、数据—仿真—基准链路，以及统一报告协议。" },
+  { key: "platforms", title: "仿真与评测平台", description: "将算法部署到虚拟 humanoid、接入物理/传感器并执行 rollout 的引擎、训练栈与控制框架。" },
+  { key: "datasets", title: "数据集", description: "用于预训练、动作重定向、感知评测和 benchmark 构造的全身运动、人—物交互与跨本体数据。" },
+  { key: "benchmarks", title: "Benchmark", description: "固定任务、初始条件、成功判定和数据关联的可比评测协议；与上方数据集的使用路径单独说明。" },
+];
 const macroAuthors = [
   { key: "xiaoyazhai", title: "翟老师撰写", handle: "@xiaoyazhai" },
   { key: "youchengcai", title: "蔡老师撰写", handle: "@youchengcai" },
 ] as const;
+const itemHref = (item: (typeof items)[number]) => `${import.meta.env.BASE_URL}/${category}/${item.id.split('/').slice(1).join('/')}/`;
 ---
 <BaseLayout title={`${labels[category]}｜具身机器人技术地图`}>
   <main>
-    <a class="back" href={import.meta.env.BASE_URL}>← 返回首页</a>
+    <a class="back" href={`${import.meta.env.BASE_URL}/`}>← 返回首页</a>
     <header class="section-head"><p class="eyebrow">SECTION</p><h1>{labels[category]}</h1></header>
     {category === "macro-thinking" ? (
       <section class="author-grid" aria-label="宏观思想作者分区">
@@ -26,15 +33,25 @@ const macroAuthors = [
             <h2>{author.title}</h2>
             {authorItems.length === 0 ? <p class="empty">等待第一篇宏观路线文章。</p> : (
               <div class="list">
-                {authorItems.map((item) => <article class="item"><span>{item.data.kind}</span><h3>{item.data.title}</h3><p>{item.data.summary}</p></article>)}
+                {authorItems.map((item) => <article class="item"><span>{item.data.kind}</span><h3><a href={itemHref(item)}>{item.data.title}</a></h3><p>{item.data.summary}</p></article>)}
               </div>
             )}
           </article>;
         })}
       </section>
-    ) : items.length === 0 ? <p class="empty">该分区已就绪，等待负责人提交第一篇内容。</p> : (
+    ) : items.length === 0 ? <p class="empty">该分区已就绪，等待负责人提交第一篇内容。</p> : category === "evaluation" ? (
+      <div class="content-groups">
+        {evaluationGroups.map((group) => {
+          const groupItems = items.filter((item) => item.id.split("/")[1] === group.key);
+          return groupItems.length > 0 && <section class="content-group">
+            <header><p class="eyebrow">{group.key.toUpperCase()}</p><h2>{group.title}</h2><p>{group.description}</p></header>
+            <div class="list">{groupItems.map((item) => <article class="item"><span>{item.data.kind}</span><h3><a href={itemHref(item)}>{item.data.title}</a></h3><p>{item.data.summary}</p></article>)}</div>
+          </section>;
+        })}
+      </div>
+    ) : (
       <section class="list">
-        {items.map((item) => <article class="item"><span>{item.data.kind}</span><h2>{item.data.title}</h2><p>{item.data.summary}</p></article>)}
+        {items.map((item) => <article class="item"><span>{item.data.kind}</span><h2><a href={itemHref(item)}>{item.data.title}</a></h2><p>{item.data.summary}</p></article>)}
       </section>
     )}
   </main>
