@@ -7,7 +7,8 @@
 | 数据集 | `src/content/datasets/` | `@starrysky77` |
 | 模型架构 | `src/content/model-architecture/`、`public/model-architecture/` | `@xy144001` |
 | 评测 | `src/content/evaluation/` | `@SyouSanGin` |
-| 宏观思想 | `src/content/macro-thinking/` | `@xiaoyazhai` |
+| 宏观思想·翟老师 | `src/content/macro-thinking/xiaoyazhai/` | `@xiaoyazhai` |
+| 宏观思想·蔡老师 | `src/content/macro-thinking/youchengcai/` | `@youchengcai` |
 
 ## 工作流
 

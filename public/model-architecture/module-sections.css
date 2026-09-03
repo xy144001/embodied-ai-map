@@ -1,0 +1,20 @@
+.module-tabs{max-width:1440px;margin:24px auto 0;padding:0 clamp(20px,4vw,64px);display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.module-tabs a{border:1px solid #26303c;background:#0e131a;color:#8490a0;padding:14px 18px;text-decoration:none;text-align:center;font:600 14px ui-monospace;transition:.18s}
+.module-tabs a:hover{color:#eef2f7;border-color:#526276}
+.module-tabs a.active{color:#fff;border-color:#79a8ff;background:#101827;box-shadow:inset 0 -3px #79a8ff}
+.subpage{min-height:100vh;margin:0;color:#eef2f7;background:radial-gradient(circle at 80% 0,#172033 0,transparent 30rem),linear-gradient(#ffffff06 1px,transparent 1px),linear-gradient(90deg,#ffffff06 1px,transparent 1px),#080b10;background-size:auto,40px 40px,40px 40px;font-family:Inter,"Noto Sans SC",system-ui,sans-serif}
+.subpage *{box-sizing:border-box}
+.subpage .top{position:sticky;top:0;z-index:10;height:62px;padding:0 clamp(20px,4vw,64px);display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #26303c;background:#080b10ed;backdrop-filter:blur(12px)}
+.subpage .brand{font:700 12px ui-monospace;letter-spacing:.1em}.subpage .brand b{color:#79a8ff}
+.subpage .home-link{color:#9aa7b6;text-decoration:none;font:12px ui-monospace;border:1px solid #303b48;padding:8px 11px}.subpage .home-link:hover{color:#eef2f7;border-color:#79a8ff}
+.subpage .status{font:12px ui-monospace;color:#778395}
+.section-main{max-width:1100px;margin:auto;padding:72px clamp(20px,5vw,72px) 120px}
+.section-main .eyebrow{margin:0 0 18px;color:#79a8ff;font:700 12px ui-monospace;letter-spacing:.16em}
+.section-main h1{margin:0;font-size:clamp(48px,8vw,86px);letter-spacing:-.055em;line-height:1}
+.section-main .intro{max-width:720px;margin:24px 0 48px;color:#9aa7b6;font-size:17px;line-height:1.8}
+.task-card,.empty-card{border:1px solid #303b48;border-top:3px solid #79a8ff;background:radial-gradient(circle at 90% 0,#79a8ff18,transparent 24rem),#0e131a;padding:clamp(26px,5vw,52px)}
+.task-meta{display:flex;justify-content:space-between;gap:20px;color:#79a8ff;font:700 12px ui-monospace;letter-spacing:.1em}
+.task-card h2{margin:34px 0 18px;font-size:clamp(28px,4vw,44px);letter-spacing:-.035em}
+.task-card p{margin:0;color:#d9e0e9;font-size:clamp(18px,2vw,22px);line-height:1.9}
+.empty-card h2{margin:0 0 14px;font-size:28px}.empty-card p{margin:0;color:#9aa7b6;font-size:16px;line-height:1.8}
+@media(max-width:700px){.module-tabs{margin-top:16px}.subpage .status{display:none}.section-main{padding-top:52px}.task-meta{flex-direction:column}.task-card,.empty-card{padding:24px}}
