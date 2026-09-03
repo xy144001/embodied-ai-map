@@ -3,5 +3,46 @@
 <body class="subpage">
 <header class="top"><div class="brand">MODEL<b>/</b>ATLAS</div><a class="home-link" href="../../">← 返回技术地图</a><div class="status">@xy144001 · 问题</div></header>
 <nav class="module-tabs" aria-label="模型架构组版块"><a href="../">架构</a><a class="active" href="./">问题</a><a href="../tasks/">任务</a></nav>
-<main class="section-main"><p class="eyebrow">ARCHITECTURE GROUP · QUESTIONS</p><h1>问题</h1><p class="intro">集中整理模型架构学习、复现与融合过程中尚未解决的问题。</p><section class="empty-card"><h2>暂未录入问题</h2><p>后续问题条目将在这里统一整理。</p></section></main>
+<main class="section-main questions-main">
+  <p class="eyebrow">ARCHITECTURE GROUP · QUESTIONS</p>
+  <h1>两个核心问题</h1>
+  <p class="intro">19 个开源模型看起来结构各异，但主要都在回答两个问题。把它们分别作为横轴和纵轴，就能理解模型为什么会走向不同技术路线。</p>
+
+  <section class="question-card">
+    <div class="question-index">QUESTION 01 · ACTION & COORDINATION</div>
+    <h2>Action 怎么表示，以及身体怎么协调？</h2>
+    <p class="question-lead">关键不只是“输出什么动作”，还包括身体各部分的协调发生在哪一层，以及协调过程能否被直接观察和追踪。</p>
+    <div class="level-grid three-levels">
+      <article><span>01</span><h3>显式 physical / task-space action</h3><p>VLA 直接输出关节、末端位姿或动作块。手、臂、腿、腰等部位的目标可逐维追踪，身体协调主要发生在 VLA 内部。</p><b>代表：X‑VLA、π₀.₅、LingBot‑VLA 2.0、Dexora、UnifoLM‑VLA‑0、OpenHLM</b></article>
+      <article><span>02</span><h3>结构化显式 / 混合分层</h3><p>高层模型给出技能、子目标或结构化动作，低层控制器负责完成连续控制。语义决策仍显式，但协调责任在不同层之间拆分。</p><b>代表：GO‑1、Ψ₀，以及部分分层 VLA</b></article>
+      <article><span>03</span><h3>latent / motor representation</h3><p>高层只产生潜在运动意图或 motor token，再由 motor model、WBC 或低层 controller 解码为全身动作。身体协调更多在控制器中完成。</p><b>代表：GR00T N1.7 + SONIC、Cosmos Policy 等</b></article>
+    </div>
+  </section>
+
+  <section class="question-card">
+    <div class="question-index">QUESTION 02 · FUTURE & WORLD MODELING</div>
+    <h2>模型需不需要看到未来，以及需要看到哪种程度的未来？</h2>
+    <p class="question-lead">“看到未来”并不是单一开关：模型可以完全反应式，也可以只学习未来特征、用未来监督训练策略，或显式联合生成未来世界与动作。</p>
+    <div class="level-grid four-levels">
+      <article><span>01</span><h3>Reactive</h3><p>依据当前观测直接预测动作，不显式建立未来世界模型。结构简单、闭环频率高，但长程规划和失败预判较弱。</p></article>
+      <article><span>02</span><h3>轻量预测表征</h3><p>预测未来 latent、视觉特征或语义状态，用作动作生成的辅助条件；不要求重建完整未来视频。</p></article>
+      <article><span>03</span><h3>训练期 WAM / future-conditioned</h3><p>训练时使用未来帧、未来状态或世界模型监督，让策略学会时空动力学；部署时可以关闭昂贵的视频生成分支。</p></article>
+      <article><span>04</span><h3>强 World Modeling / 联合 World–Action</h3><p>世界分支和动作分支共同建模，甚至在线因果滚动预测。未来信息最强，但训练、推理和系统集成成本也最高。</p></article>
+    </div>
+  </section>
+
+  <section class="route-section">
+    <p class="eyebrow">ROUTES FROM THE TWO QUESTIONS</p>
+    <h2>由两个问题形成的主要技术路线</h2>
+    <div class="route-grid">
+      <article><span>路线 A</span><h3>经典反应式 VLA</h3><p>显式动作 + 无显式世界建模。模型从当前视觉、语言和本体状态直接生成动作块，结构最清晰，适合作为通用基线。</p></article>
+      <article><span>路线 B</span><h3>分层 Latent Control</h3><p>潜在运动表示 + 反应式决策。高层负责意图，低层 motor model / WBC 负责全身协调，以降低高维动作学习难度。</p></article>
+      <article><span>路线 C</span><h3>预测式 VLA / 轻量 WAM</h3><p>显式或结构化动作 + 未来 latent 表征。模型获得“接下来会发生什么”的提示，同时避免完整视频生成的高成本。</p></article>
+      <article><span>路线 D</span><h3>Future-conditioned Policy</h3><p>训练期引入未来帧、状态或教师特征，利用未来监督塑造动作策略；部署时仍以当前真实观测反复闭环。</p></article>
+      <article><span>路线 E</span><h3>联合 World–Action Model</h3><p>世界与动作两条生成分支共享条件或中间特征，同时学习未来动力学和控制，是当前 World Modeling 最强的一类路线。</p></article>
+      <article><span>路线 F</span><h3>混合分层世界模型</h3><p>将世界预测、语义规划、潜在技能和低层控制分层组合。目标是在可解释动作、长程预测和全身协调之间取得平衡。</p></article>
+    </div>
+    <p class="route-note">二维谱系中的位置表示相对技术倾向，不表示绝对优劣或官方分类；同一个模型也可能跨越相邻路线。</p>
+  </section>
+</main>
 </body></html>
