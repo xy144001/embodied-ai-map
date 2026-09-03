@@ -1,0 +1,488 @@
+﻿subdataset_id,dataset_name,first_public_year,year_basis,in_scope_2022_2026,robot,robot_morphology,episodes,file_size_gb,mb_per_episode,registered_dataset_name,open_x_access_status,data_collect_method,action_space,control_frequency,citation,notes,parent_aggregate,source_url
+OX001,RT-1 Robot Action,2022,2022（官方表Citation字段）,true,Google Robot,Mobile Manipulator,73499,111.06,1.511,fractal20220817_data,可从Open X注册清单获取,Human VR,EEF Position,3,"@article{brohan2022rt,
+  title={Rt-1: Robotics transformer for real-world control at scale},
+  author={Brohan, Anthony and Brown, Noah and Carbajal, Justice and Chebotar, Yevgen and Dabis, Joseph and Finn, Chelsea and Gopalakrishnan, Keerthana and Hausman, Karol and Herzog, Alex and Hsu, Jasmine and others},
+  journal={arXiv preprint arXiv:2212.06817},
+  year={2022}
+}",,Open X-Embodiment,https://docs.google.com/spreadsheets/d/1rPBD77tk60AEIGZrGSODwyyzs5FgCU9Uz3h-3_t2A9g/edit#gid=0
+OX002,QT-Opt,2018,2018（官方表Citation字段）,false,Kuka iiwa,Single Arm,580392,778.02,1.3405,kuka,可从Open X注册清单获取,Expert Policy,EEF Position,10,"@article{kalashnikov2018qt,
+  title={Qt-opt: Scalable deep reinforcement learning for vision-based robotic manipulation},
+  author={Kalashnikov, Dmitry and Irpan, Alex and Pastor, Peter and Ibarz, Julian and Herzog, Alexander and Jang, Eric and Quillen, Deirdre and Holly, Ethan and Kalakrishnan, Mrinal and Vanhoucke, Vincent and others},
+  journal={arXiv preprint arXiv:1806.10293},
+  year={2018}
+}",,Open X-Embodiment,https://docs.google.com/spreadsheets/d/1rPBD77tk60AEIGZrGSODwyyzs5FgCU9Uz3h-3_t2A9g/edit#gid=0
+OX003,Berkeley Bridge,2023,2023（官方表Citation字段）,true,WidowX,Single Arm,25460,387.49,15.2196,bridge,可从Open X注册清单获取,Human VR,EEF Position,5,"@inproceedings{walke2023bridgedata,
+    title={BridgeData V2: A Dataset for Robot Learning at Scale},
+    author={Walke, Homer and Black, Kevin and Lee, Abraham and Kim, Moo Jin and Du, Max and Zheng, Chongyi and Zhao, Tony and Hansen-Estruch, Philippe and Vuong, Quan and He, Andre and Myers, Vivek and Fang, Kuan and Finn, Chelsea and Levine, Sergey},
+    booktitle={Conference on Robot Learning (CoRL)},
+    year={2023}
+}",,Open X-Embodiment,https://docs.google.com/spreadsheets/d/1rPBD77tk60AEIGZrGSODwyyzs5FgCU9Uz3h-3_t2A9g/edit#gid=0
+OX004,Freiburg Franka Play,2022,2022（官方表Citation字段）,true,Franka,Single Arm,3242,47.77,14.7347,taco_play,可从Open X注册清单获取,Human VR,EEF Position,15,"@inproceedings{rosete2022tacorl,
+author = {Erick Rosete-Beas and Oier Mees and Gabriel Kalweit and Joschka Boedecker and Wolfram Burgard},
+title = {Latent Plans for Task Agnostic Offline Reinforcement Learning},
+journal = {Proceedings of the 6th Conference on Robot Learning (CoRL)},
+year = {2022}
+}
+@inproceedings{mees23hulc2,
+title={Grounding  Language  with  Visual  Affordances  over  Unstructured  Data},
+author={Oier Mees and Jessica Borja-Diaz and Wolfram Burgard},
+booktitle = {Proceedings of the IEEE International Conference on Robotics and Automation (ICRA)},
+year={2023},
+address = {London, UK}
+}",,Open X-Embodiment,https://docs.google.com/spreadsheets/d/1rPBD77tk60AEIGZrGSODwyyzs5FgCU9Uz3h-3_t2A9g/edit#gid=0
+OX005,USC Jaco Play,2023,2023（官方表Citation字段）,true,Jaco 2,Single Arm,976,9.24,9.4672,jaco_play,可从Open X注册清单获取,Human VR,EEF Position,10,"@software{dass2023jacoplay,
+  author = {Dass, Shivin and Yapeter, Jullian and Zhang, Jesse and Zhang, Jiahui
+            and Pertsch, Karl and Nikolaidis, Stefanos and Lim, Joseph J.},
+  title = {CLVR Jaco Play Dataset},
+  url = {https://github.com/clvrai/clvr_jaco_play_dataset},
+  version = {1.0.0},
+  year = {2023}
+}",,Open X-Embodiment,https://docs.google.com/spreadsheets/d/1rPBD77tk60AEIGZrGSODwyyzs5FgCU9Uz3h-3_t2A9g/edit#gid=0
+OX006,Berkeley Cable Routing,2023,2023（官方表Citation字段）,true,Franka,Single Arm,1482,4.67,3.1511,berkeley_cable_routing,可从Open X注册清单获取,Human VR,EEF velocity,10,"@article{luo2023multistage,
+  author    = {Jianlan Luo and Charles Xu and Xinyang Geng and Gilbert Feng and Kuan Fang and Liam Tan and Stefan Schaal and Sergey Levine},
+  title     = {Multi-Stage Cable Routing through Hierarchical Imitation Learning},
+  journal   = {arXiv pre-print},
+  year      = {2023},
+  url       = {https://arxiv.org/abs/2307.08927},
+}",,Open X-Embodiment,https://docs.google.com/spreadsheets/d/1rPBD77tk60AEIGZrGSODwyyzs5FgCU9Uz3h-3_t2A9g/edit#gid=0
+OX007,Roboturk,2019,2019（官方表Citation字段）,false,Sawyer,Single Arm,2144,45.39,21.1707,roboturk,可从Open X注册清单获取,Human VR,EEF Position,10,"@inproceedings{mandlekar2019scaling,
+          title={Scaling robot supervision to hundreds of hours with roboturk: Robotic manipulation dataset through human reasoning and dexterity},
+          author={Mandlekar, Ajay and Booher, Jonathan and Spero, Max and Tung, Albert and Gupta, Anchit and Zhu, Yuke and Garg, Animesh and Savarese, Silvio and Fei-Fei, Li},
+          booktitle={2019 IEEE/RSJ International Conference on Intelligent Robots and Systems (IROS)},
+          pages={1048--1055},
+          year={2019},
+          organization={IEEE}
+        }",,Open X-Embodiment,https://docs.google.com/spreadsheets/d/1rPBD77tk60AEIGZrGSODwyyzs5FgCU9Uz3h-3_t2A9g/edit#gid=0
+OX008,NYU VINN,2021,2021（官方表Citation字段）,false,Hello Stretch,Mobile Manipulator,435,7.12,16.3678,nyu_door_opening_surprising_effectiveness,可从Open X注册清单获取,Human Kinesthetic,EEF Position,3,"@misc{pari2021surprising,
+    title={The Surprising Effectiveness of Representation Learning for Visual Imitation}, 
+    author={Jyothish Pari and Nur Muhammad Shafiullah and Sridhar Pandian Arunachalam and Lerrel Pinto},
+    year={2021},
+    eprint={2112.01511},
+    archivePrefix={arXiv},
+    primaryClass={cs.RO}
+}",,Open X-Embodiment,https://docs.google.com/spreadsheets/d/1rPBD77tk60AEIGZrGSODwyyzs5FgCU9Uz3h-3_t2A9g/edit#gid=0
+OX009,Austin VIOLA,2022,2022（官方表Citation字段）,true,Franka,Single Arm,135,10.4,77.037,viola,可从Open X注册清单获取,Human Spacemouse,EEF Position,20,"@article{zhu2022viola,
+  title={VIOLA: Imitation Learning for Vision-Based Manipulation with Object Proposal Priors},
+  author={Zhu, Yifeng and Joshi, Abhishek and Stone, Peter and Zhu, Yuke},
+  journal={6th Annual Conference on Robot Learning (CoRL)},
+  year={2022}
+}",,Open X-Embodiment,https://docs.google.com/spreadsheets/d/1rPBD77tk60AEIGZrGSODwyyzs5FgCU9Uz3h-3_t2A9g/edit#gid=0
+OX010,Berkeley Autolab UR5,2023,2023（最早可验证：Open X公开入口）,true,UR5,Single Arm,896,76.39,85.2567,berkeley_autolab_ur5,可从Open X注册清单获取,Human Spacemouse,EEF Position,5,"@misc{BerkeleyUR5Website,
+  title = {Berkeley {UR5} Demonstration Dataset},
+  author = {Lawrence Yunliang Chen and Simeon Adebola and Ken Goldberg},
+  howpublished = {https://sites.google.com/view/berkeley-ur5/home},
+}",未找到独立年份字段；按Open X于2023公开时的最早可验证入口记年。,Open X-Embodiment,https://docs.google.com/spreadsheets/d/1rPBD77tk60AEIGZrGSODwyyzs5FgCU9Uz3h-3_t2A9g/edit#gid=0
+OX011,TOTO Benchmark,2023,2023（官方表Citation字段）,true,Franka,Single Arm,901,127.66,141.687,toto,可从Open X注册清单获取,"The dataset is collected in 3 ways: Human teleoperation -- VR Teleop, trained state-based BC policies, and trajectory replay with noise",Joint position,30,"@inproceedings{zhou2023train,
+  author={Zhou, Gaoyue and Dean, Victoria and Srirama, Mohan Kumar and Rajeswaran, Aravind and Pari, Jyothish and Hatch, Kyle and Jain, Aryan and Yu, Tianhe and Abbeel, Pieter and Pinto, Lerrel and Finn, Chelsea and Gupta, Abhinav},
+  booktitle={2023 IEEE International Conference on Robotics and Automation (ICRA)}, 
+  title={Train Offline, Test Online: A Real Robot Learning Benchmark}, 
+  year={2023},
+ }",,Open X-Embodiment,https://docs.google.com/spreadsheets/d/1rPBD77tk60AEIGZrGSODwyyzs5FgCU9Uz3h-3_t2A9g/edit#gid=0
+OX012,Language Table,2023,2023（官方表Citation字段）,true,xArm,Single Arm,442226,399.22,0.9028,language_table,可从Open X注册清单获取,Human VR,EEF Position,10,"@article{lynch2023interactive,
+  title={Interactive language: Talking to robots in real time},
+  author={Lynch, Corey and Wahid, Ayzaan and Tompson, Jonathan and Ding, Tianli and Betker, James and Baruch, Robert and Armstrong, Travis and Florence, Pete},
+  journal={IEEE Robotics and Automation Letters},
+  year={2023},
+  publisher={IEEE}
+}",,Open X-Embodiment,https://docs.google.com/spreadsheets/d/1rPBD77tk60AEIGZrGSODwyyzs5FgCU9Uz3h-3_t2A9g/edit#gid=0
+OX013,Columbia PushT Dataset,2023,2023（官方表Citation字段）,true,UR5,Single Arm,122,2.8,22.9508,columbia_cairlab_pusht_real,可从Open X注册清单获取,Human VR,EEF Position,10,"@inproceedings{chi2023diffusionpolicy,
+	title={Diffusion Policy: Visuomotor Policy Learning via Action Diffusion},
+	author={Chi, Cheng and Feng, Siyuan and Du, Yilun and Xu, Zhenjia and Cousineau, Eric and Burchfiel, Benjamin and Song, Shuran},
+	booktitle={Proceedings of Robotics: Science and Systems (RSS)},
+	year={2023}
+}",,Open X-Embodiment,https://docs.google.com/spreadsheets/d/1rPBD77tk60AEIGZrGSODwyyzs5FgCU9Uz3h-3_t2A9g/edit#gid=0
+OX014,Stanford Kuka Multimodal,2019,2019（官方表Citation字段）,false,Kuka iiwa,Single Arm,3000,31.98,10.66,stanford_kuka_multimodal_dataset_converted_externally_to_rlds,可从Open X注册清单获取,Expert Policy,EEF Position,20,"@inproceedings{lee2019icra,
+  title={Making sense of vision and touch: Self-supervised learning of multimodal representations for contact-rich tasks},
+  author={Lee, Michelle A and Zhu, Yuke and Srinivasan, Krishnan and Shah, Parth and Savarese, Silvio and Fei-Fei, Li and  Garg, Animesh and Bohg, Jeannette},
+  booktitle={2019 IEEE International Conference on Robotics and Automation (ICRA)},
+  year={2019},
+  url={https://arxiv.org/abs/1810.10191}
+}",,Open X-Embodiment,https://docs.google.com/spreadsheets/d/1rPBD77tk60AEIGZrGSODwyyzs5FgCU9Uz3h-3_t2A9g/edit#gid=0
+OX015,NYU ROT,2023,2023（官方表Citation字段）,true,xArm,Single Arm,14,0.01,0.7143,nyu_rot_dataset_converted_externally_to_rlds,可从Open X注册清单获取,Human Joystick,EEF Position,3,"@inproceedings{haldar2023watch,
+  title={Watch and match: Supercharging imitation with regularized optimal transport},
+  author={Haldar, Siddhant and Mathur, Vaibhav and Yarats, Denis and Pinto, Lerrel},
+  booktitle={Conference on Robot Learning},
+  pages={32--43},
+  year={2023},
+  organization={PMLR}
+}",,Open X-Embodiment,https://docs.google.com/spreadsheets/d/1rPBD77tk60AEIGZrGSODwyyzs5FgCU9Uz3h-3_t2A9g/edit#gid=0
+OX016,Stanford HYDRA,2023,2023（官方表Citation字段）,true,Franka,Single Arm,550,72.48,131.7818,stanford_hydra_dataset_converted_externally_to_rlds,可从Open X注册清单获取,Human VR,EEF Position,10,"@article{belkhale2023hydra,
+ title={HYDRA: Hybrid Robot Actions for Imitation Learning},
+ author={Belkhale, Suneel and Cui, Yuchen and Sadigh, Dorsa},
+ journal={arxiv},
+ year={2023}
+}",,Open X-Embodiment,https://docs.google.com/spreadsheets/d/1rPBD77tk60AEIGZrGSODwyyzs5FgCU9Uz3h-3_t2A9g/edit#gid=0
+OX017,Austin BUDS,2022,2022（官方表Citation字段）,true,Franka,Single Arm,50,1.49,29.8,austin_buds_dataset_converted_externally_to_rlds,可从Open X注册清单获取,Human Spacemouse,EEF Position,20,"@article{zhu2022bottom,
+  title={Bottom-Up Skill Discovery From Unsegmented Demonstrations for Long-Horizon Robot Manipulation},
+  author={Zhu, Yifeng and Stone, Peter and Zhu, Yuke},
+  journal={IEEE Robotics and Automation Letters},
+  volume={7},
+  number={2},
+  pages={4126--4133},
+  year={2022},
+  publisher={IEEE}
+}",,Open X-Embodiment,https://docs.google.com/spreadsheets/d/1rPBD77tk60AEIGZrGSODwyyzs5FgCU9Uz3h-3_t2A9g/edit#gid=0
+OX018,NYU Franka Play,2022,2022（官方表Citation字段）,true,Franka,Single Arm,456,5.18,11.3596,nyu_franka_play_dataset_converted_externally_to_rlds,可从Open X注册清单获取,Human VR,EEF velocity,3,"@article{cui2022play,
+  title   = {From Play to Policy: Conditional Behavior Generation from Uncurated Robot Data},
+  author  = {Cui, Zichen Jeff and Wang, Yibin and Shafiullah, Nur Muhammad Mahi and Pinto, Lerrel},
+  journal = {arXiv preprint arXiv:2210.10047},
+  year    = {2022}
+}",,Open X-Embodiment,https://docs.google.com/spreadsheets/d/1rPBD77tk60AEIGZrGSODwyyzs5FgCU9Uz3h-3_t2A9g/edit#gid=0
+OX019,Maniskill,2023,2023（官方表Citation字段）,true,Franka,Single Arm,30000,151.05,5.035,maniskill_dataset_converted_externally_to_rlds,可从Open X注册清单获取,Scripted,EEF Position,20,"@inproceedings{gu2023maniskill2,
+  title={ManiSkill2: A Unified Benchmark for Generalizable Manipulation Skills},
+  author={Gu, Jiayuan and Xiang, Fanbo and Li, Xuanlin and Ling, Zhan and Liu, Xiqiang and Mu, Tongzhou and Tang, Yihe and Tao, Stone and Wei, Xinyue and Yao, Yunchao and Yuan, Xiaodi and Xie, Pengwei and Huang, Zhiao and Chen, Rui and Su, Hao},
+  booktitle={International Conference on Learning Representations},
+  year={2023}
+}",,Open X-Embodiment,https://docs.google.com/spreadsheets/d/1rPBD77tk60AEIGZrGSODwyyzs5FgCU9Uz3h-3_t2A9g/edit#gid=0
+OX020,Furniture Bench,2023,2023（官方表Citation字段）,true,Franka,Single Arm,5100,110,21.5686,furniture_bench_dataset_converted_externally_to_rlds,可从Open X注册清单获取,Human VR,EEF velocity,10,"@inproceedings{heo2023furniturebench,
+  title={FurnitureBench: Reproducible Real-World Benchmark for Long-Horizon Complex Manipulation},
+  author={Minho Heo and Youngwoon Lee and Doohyun Lee and Joseph J. Lim},
+  booktitle={Robotics: Science and Systems},
+  year={2023}
+}",,Open X-Embodiment,https://docs.google.com/spreadsheets/d/1rPBD77tk60AEIGZrGSODwyyzs5FgCU9Uz3h-3_t2A9g/edit#gid=0
+OX021,CMU Franka Exploration,2023,2023（官方表Citation字段）,true,Franka,Single Arm,200,0.59,2.95,cmu_franka_exploration_dataset_converted_externally_to_rlds,可从Open X注册清单获取,Expert Policy,EEF Position,10,"@inproceedings{mendonca2023structured,
+              title={Structured World Models from Human Videos},
+              author={Mendonca, Russell  and Bahl, Shikhar and Pathak, Deepak},
+              journal={RSS},
+              year={2023}
+            }",,Open X-Embodiment,https://docs.google.com/spreadsheets/d/1rPBD77tk60AEIGZrGSODwyyzs5FgCU9Uz3h-3_t2A9g/edit#gid=0
+OX022,UCSD Kitchen,2023,2023（官方表Citation字段）,true,xArm,Single Arm,150,1.33,8.8667,ucsd_kitchen_dataset_converted_externally_to_rlds,可从Open X注册清单获取,Human VR,EEF Position,2,"@ARTICLE{ucsd_kitchens,
+  author = {Ge Yan, Kris Wu, and Xiaolong Wang},
+  title = {{ucsd kitchens Dataset}},
+  year = {2023},
+  month = {August}
+}",,Open X-Embodiment,https://docs.google.com/spreadsheets/d/1rPBD77tk60AEIGZrGSODwyyzs5FgCU9Uz3h-3_t2A9g/edit#gid=0
+OX023,UCSD Pick Place,2023,2023（官方表Citation字段）,true,xArm,Single Arm,1355,3.53,2.6052,ucsd_pick_and_place_dataset_converted_externally_to_rlds,可从Open X注册清单获取,Expert Policy,EEF velocity,3,"@preprint{Feng2023Finetuning,
+	title={Finetuning Offline World Models in the Real World},
+	author={Yunhai Feng, Nicklas Hansen, Ziyan Xiong, Chandramouli Rajagopalan, Xiaolong Wang},
+	year={2023}
+}",,Open X-Embodiment,https://docs.google.com/spreadsheets/d/1rPBD77tk60AEIGZrGSODwyyzs5FgCU9Uz3h-3_t2A9g/edit#gid=0
+OX024,Austin Sailor,2022,2022（官方表Citation字段）,true,Franka,Single Arm,250,18.85,75.4,austin_sailor_dataset_converted_externally_to_rlds,可从Open X注册清单获取,Human Spacemouse,EEF velocity,20,"@inproceedings{nasiriany2022sailor,
+      title={Learning and Retrieval from Prior Data for Skill-based Imitation Learning},
+      author={Soroush Nasiriany and Tian Gao and Ajay Mandlekar and Yuke Zhu},
+      booktitle={Conference on Robot Learning (CoRL)},
+      year={2022}
+    }",,Open X-Embodiment,https://docs.google.com/spreadsheets/d/1rPBD77tk60AEIGZrGSODwyyzs5FgCU9Uz3h-3_t2A9g/edit#gid=0
+OX025,Austin Sirius,2023,2023（官方表Citation字段）,true,Franka,Single Arm,600,6.55,10.9167,austin_sirius_dataset_converted_externally_to_rlds,可从Open X注册清单获取,Human Spacemouse,EEF velocity,20,"@inproceedings{liu2022robot,
+    title = {Robot Learning on the Job: Human-in-the-Loop Autonomy and Learning During Deployment},
+    author = {Huihan Liu and Soroush Nasiriany and Lance Zhang and Zhiyao Bao and Yuke Zhu},
+    booktitle = {Robotics: Science and Systems (RSS)},
+    year = {2023}
+}",,Open X-Embodiment,https://docs.google.com/spreadsheets/d/1rPBD77tk60AEIGZrGSODwyyzs5FgCU9Uz3h-3_t2A9g/edit#gid=0
+OX026,BC-Z,2021,2021（官方表Citation字段）,false,Google Robot,Mobile Manipulator,39350,80.54,2.0468,bc_z,可从Open X注册清单获取,Human VR,EEF Position,10,"@inproceedings{jang2021bc,
+title={{BC}-Z: Zero-Shot Task Generalization with Robotic Imitation Learning},
+author={Eric Jang and Alex Irpan and Mohi Khansari and Daniel Kappler and Frederik Ebert and Corey Lynch and Sergey Levine and Chelsea Finn},
+booktitle={5th Annual Conference on Robot Learning},
+year={2021},
+url={https://openreview.net/forum?id=8kbp23tSGYv}}",,Open X-Embodiment,https://docs.google.com/spreadsheets/d/1rPBD77tk60AEIGZrGSODwyyzs5FgCU9Uz3h-3_t2A9g/edit#gid=0
+OX027,USC Cloth Sim,2022,2022（官方表Citation字段）,true,Franka,Single Arm,1000,0.25,0.25,usc_cloth_sim_converted_externally_to_rlds,可从Open X注册清单获取,Scripted,EEF Position,10,"@article{salhotra2022dmfd,
+    author={Salhotra, Gautam and Liu, I-Chun Arthur and Dominguez-Kuhne, Marcus and Sukhatme, Gaurav S.},
+    journal={IEEE Robotics and Automation Letters},
+    title={Learning Deformable Object Manipulation From Expert Demonstrations},
+    year={2022},
+    volume={7},
+    number={4},
+    pages={8775-8782},
+    doi={10.1109/LRA.2022.3187843}
+}",,Open X-Embodiment,https://docs.google.com/spreadsheets/d/1rPBD77tk60AEIGZrGSODwyyzs5FgCU9Uz3h-3_t2A9g/edit#gid=0
+OX028,Tokyo PR2 Fridge Opening,2023,2023（官方表Citation字段）,true,PR2,Single Arm,64,0.35,5.4688,utokyo_pr2_opening_fridge_converted_externally_to_rlds,可从Open X注册清单获取,Human VR,EEF Position,10,"@misc{oh2023pr2utokyodatasets,
+  author={Jihoon Oh and Naoaki Kanazawa and Kento Kawaharazuka},
+  title={X-Embodiment U-Tokyo PR2 Datasets},
+  year={2023},
+  url={https://github.com/ojh6404/rlds_dataset_builder},
+}",,Open X-Embodiment,https://docs.google.com/spreadsheets/d/1rPBD77tk60AEIGZrGSODwyyzs5FgCU9Uz3h-3_t2A9g/edit#gid=0
+OX029,Tokyo PR2 Tabletop Manipulation,2023,2023（官方表Citation字段）,true,PR2,Single Arm,192,0.81,4.2188,utokyo_pr2_tabletop_manipulation_converted_externally_to_rlds,可从Open X注册清单获取,Human VR,EEF Position,10,"@misc{oh2023pr2utokyodatasets,
+  author={Jihoon Oh and Naoaki Kanazawa and Kento Kawaharazuka},
+  title={X-Embodiment U-Tokyo PR2 Datasets},
+  year={2023},
+  url={https://github.com/ojh6404/rlds_dataset_builder},
+}",,Open X-Embodiment,https://docs.google.com/spreadsheets/d/1rPBD77tk60AEIGZrGSODwyyzs5FgCU9Uz3h-3_t2A9g/edit#gid=0
+OX030,Saytap,2023,2023（官方表Citation字段）,true,Unitree A1,Quadrupedal Robot,20,0.05,2.5,utokyo_saytap_converted_externally_to_rlds,可从Open X注册清单获取,Expert Policy,Joint position,50,"@article{saytap2023,
+  author = {Yujin Tang and Wenhao Yu and Jie Tan and Heiga Zen and Aleksandra Faust and
+Tatsuya Harada},
+  title  = {SayTap: Language to Quadrupedal Locomotion},
+  eprint = {arXiv:2306.07580},
+  url    = {https://saytap.github.io},
+  note   = ""{https://saytap.github.io}"",
+  year   = {2023}
+}",,Open X-Embodiment,https://docs.google.com/spreadsheets/d/1rPBD77tk60AEIGZrGSODwyyzs5FgCU9Uz3h-3_t2A9g/edit#gid=0
+OX031,UTokyo xArm PickPlace,2023,2023（官方表Citation字段）,true,xArm,Single Arm,95,1.29,13.5789,utokyo_xarm_pick_and_place_converted_externally_to_rlds,可从Open X注册清单获取,Human Puppeteering,EEF Position,10,"@misc{matsushima2023weblab,
+  title={Weblab xArm Dataset},
+  author={Tatsuya Matsushima and Hiroki Furuta and Yusuke Iwasawa and Yutaka Matsuo},
+  year={2023},
+}",,Open X-Embodiment,https://docs.google.com/spreadsheets/d/1rPBD77tk60AEIGZrGSODwyyzs5FgCU9Uz3h-3_t2A9g/edit#gid=0
+OX032,UTokyo xArm Bimanual,2023,2023（官方表Citation字段）,true,xArm Bimanual,Bi-Manual,70,0.14,2,utokyo_xarm_bimanual_converted_externally_to_rlds,可从Open X注册清单获取,Human Puppeteering,EEF Position,10,"@misc{matsushima2023weblab,
+  title={Weblab xArm Dataset},
+  author={Tatsuya Matsushima and Hiroki Furuta and Yusuke Iwasawa and Yutaka Matsuo},
+  year={2023},
+}",,Open X-Embodiment,https://docs.google.com/spreadsheets/d/1rPBD77tk60AEIGZrGSODwyyzs5FgCU9Uz3h-3_t2A9g/edit#gid=0
+OX033,Robonet,2019,2019（官方表Citation字段）,false,Multi-Robot,Single Arm,82432,799.91,9.7039,robo_net,可从Open X注册清单获取,Scripted,EEF velocity,1,"@inproceedings{dasari2019robonet,
+    title={RoboNet: Large-Scale Multi-Robot Learning},
+    author={Sudeep Dasari and Frederik Ebert and Stephen Tian and Suraj Nair and Bernadette Bucher and Karl Schmeckpeper and Siddharth Singh and Sergey Levine and Chelsea Finn},
+    year={2019},
+    eprint={1910.11215},
+    archivePrefix={arXiv},
+    primaryClass={cs.RO},
+    booktitle={CoRL 2019: Volume 100 Proceedings of Machine Learning Research}
+}",,Open X-Embodiment,https://docs.google.com/spreadsheets/d/1rPBD77tk60AEIGZrGSODwyyzs5FgCU9Uz3h-3_t2A9g/edit#gid=0
+OX034,Berkeley MVP Data,2022,2022（官方表Citation字段）,true,xArm,Single Arm,480,12.34,25.7083,berkeley_mvp_converted_externally_to_rlds,可从Open X注册清单获取,Human VR,Joint position,5,"@InProceedings{Radosavovic2022,
+  title = {Real-World Robot Learning with Masked Visual Pre-training},
+  author = {Ilija Radosavovic and Tete Xiao and Stephen James and Pieter Abbeel and Jitendra Malik and Trevor Darrell},
+  booktitle = {CoRL},
+  year = {2022}
+}",,Open X-Embodiment,https://docs.google.com/spreadsheets/d/1rPBD77tk60AEIGZrGSODwyyzs5FgCU9Uz3h-3_t2A9g/edit#gid=0
+OX035,Berkeley RPT Data,2023,2023（官方表Citation字段）,true,Franka,Single Arm,960,40.64,42.3333,berkeley_rpt_converted_externally_to_rlds,可从Open X注册清单获取,Scripted,Joint position,30,"@article{Radosavovic2023,
+  title={Robot Learning with Sensorimotor Pre-training},
+  author={Ilija Radosavovic and Baifeng Shi and Letian Fu and Ken Goldberg and Trevor Darrell and Jitendra Malik},
+  year={2023},
+  journal={arXiv:2306.10007}
+}",,Open X-Embodiment,https://docs.google.com/spreadsheets/d/1rPBD77tk60AEIGZrGSODwyyzs5FgCU9Uz3h-3_t2A9g/edit#gid=0
+OX036,KAIST Nonprehensile Objects,2023,2023（官方表Citation字段）,true,Franka,Single Arm,201,11.71,58.2587,kaist_nonprehensile_converted_externally_to_rlds,可从Open X注册清单获取,Expert Policy,EEF Position,10,"@article{kimpre,
+  title={Pre-and post-contact policy decomposition for non-prehensile manipulation with zero-shot sim-to-real transfer},
+  author={Kim, Minchan and Han, Junhyek and Kim, Jaehyung and Kim, Beomjoon},
+  booktitle={2023 IEEE/RSJ International Conference on Intelligent Robots and Systems (IROS)},
+  year={2023},
+  organization={IEEE}
+}",,Open X-Embodiment,https://docs.google.com/spreadsheets/d/1rPBD77tk60AEIGZrGSODwyyzs5FgCU9Uz3h-3_t2A9g/edit#gid=0
+OX037,QUT Dynamic Grasping,2023,2023（官方表Citation字段）,true,Franka,Single Arm,812,,,,未在Open X注册清单；需查原项目,Scripted,EEF Position,30,"@misc{rana2023dgrasp,
+author = {Krishan Rana, Ben Burgess-Limerick, Jad Abou-Chakra, Niko S{\""u}nderhauf},
+title = {DGrasp: A Large Scale Dataset for Dynamic Grasping of Moving Objects.},
+year = {2023}}",未进入Open X注册下载清单，需从原项目入口获取。,Open X-Embodiment,https://docs.google.com/spreadsheets/d/1rPBD77tk60AEIGZrGSODwyyzs5FgCU9Uz3h-3_t2A9g/edit#gid=0
+OX038,Stanford MaskVIT Data,2022,2022（官方表Citation字段）,true,Sawyer,Single Arm,9200,76.17,8.2793,stanford_mask_vit_converted_externally_to_rlds,可从Open X注册清单获取,Scripted,EEF Position,"N/A, actions are run until robot comes to rest near the target position (quasistatic assumption)","@inproceedings{gupta2022maskvit,
+  title={MaskViT: Masked Visual Pre-Training for Video Prediction},
+  author={Agrim Gupta and Stephen Tian and Yunzhi Zhang and Jiajun Wu and Roberto Martín-Martín and Li Fei-Fei},
+  booktitle={International Conference on Learning Representations},
+  year={2022}
+}",,Open X-Embodiment,https://docs.google.com/spreadsheets/d/1rPBD77tk60AEIGZrGSODwyyzs5FgCU9Uz3h-3_t2A9g/edit#gid=0
+OX039,LSMO Dataset,2022,2022（官方表Citation字段）,true,Cobotta,Single Arm,50,0.33,6.6,tokyo_u_lsmo_converted_externally_to_rlds,可从Open X注册清单获取,Expert Policy,EEF velocity,10,"@Article{Osa22,
+  author  = {Takayuki Osa},
+  journal = {The International Journal of Robotics Research},
+  title   = {Motion Planning by Learning the Solution Manifold in Trajectory Optimization},
+  year    = {2022},
+  number  = {3},
+  pages   = {291--311},
+  volume  = {41},
+}",,Open X-Embodiment,https://docs.google.com/spreadsheets/d/1rPBD77tk60AEIGZrGSODwyyzs5FgCU9Uz3h-3_t2A9g/edit#gid=0
+OX040,DLR Sara Pour Dataset,2023,2023（官方表Citation字段）,true,DLR SARA,Single Arm,100,2.92,29.2,dlr_sara_pour_converted_externally_to_rlds,可从Open X注册清单获取,Expert Policy,EEF velocity,10,"@inproceedings{padalkar2023guiding,
+  title={Guiding Reinforcement Learning with Shared Control Templates},
+  author={Padalkar, Abhishek and Quere, Gabriel and Steinmetz, Franz and Raffin, Antonin and Nieuwenhuisen, Matthias and Silv{\'e}rio, Jo{\~a}o and Stulp, Freek},
+  booktitle={40th IEEE International Conference on Robotics and Automation, ICRA 2023},
+  year={2023},
+  organization={IEEE}
+}",,Open X-Embodiment,https://docs.google.com/spreadsheets/d/1rPBD77tk60AEIGZrGSODwyyzs5FgCU9Uz3h-3_t2A9g/edit#gid=0
+OX041,DLR Sara Grid Clamp Dataset,2023,2023（官方表Citation字段）,true,DLR SARA,Single Arm,100,1.65,16.5,dlr_sara_grid_clamp_converted_externally_to_rlds,可从Open X注册清单获取,Expert Policy,EEF velocity,10,"@article{padalkar2023guided,
+  title={A guided reinforcement learning approach using shared control templates for learning manipulation skills in the real world},
+  author={Padalkar, Abhishek and Quere, Gabriel and Raffin, Antonin and Silv{\'e}rio, Jo{\~a}o and Stulp, Freek},
+  journal={Research square preprint rs-3289569/v1},
+  year={2023}
+}",,Open X-Embodiment,https://docs.google.com/spreadsheets/d/1rPBD77tk60AEIGZrGSODwyyzs5FgCU9Uz3h-3_t2A9g/edit#gid=0
+OX042,DLR Wheelchair Shared Control,2020,2020（官方表Citation字段）,false,DLR EDAN,Single Arm,100,3.09,30.9,dlr_edan_shared_control_converted_externally_to_rlds,可从Open X注册清单获取,Human teleoperation using Shared Control Templates,EEF Position,5,"@inproceedings{vogel_edan_2020,
+        title = {EDAN - an EMG-Controlled Daily Assistant to Help People with Physical Disabilities},
+        language = {en},
+        booktitle = {2020 {IEEE}/{RSJ} {International} {Conference} on {Intelligent} {Robots} and {Systems} ({IROS})},
+        author = {Vogel, Jörn and Hagengruber, Annette and Iskandar, Maged and Quere, Gabriel and Leipscher, Ulrike and Bustamante, Samuel and Dietrich, Alexander and Hoeppner, Hannes and Leidner, Daniel and Albu-Schäffer, Alin},
+        year = {2020}
+}
+@inproceedings{quere_shared_2020,
+        address = {Paris, France},
+        title = {Shared {Control} {Templates} for {Assistive} {Robotics}},
+        language = {en},
+        booktitle = {2020 {IEEE} {International} {Conference} on {Robotics} and {Automation} ({ICRA})},
+        author = {Quere, Gabriel and Hagengruber, Annette and Iskandar, Maged and Bustamante, Samuel and Leidner, Daniel and Stulp, Freek and Vogel, Joern},
+        year = {2020},
+        pages = {7},
+}",,Open X-Embodiment,https://docs.google.com/spreadsheets/d/1rPBD77tk60AEIGZrGSODwyyzs5FgCU9Uz3h-3_t2A9g/edit#gid=0
+OX043,ASU TableTop Manipulation,2023,2023（官方表Citation字段）,true,UR5,Single Arm,110,0.72,6.5455,asu_table_top_converted_externally_to_rlds,可从Open X注册清单获取,Scripted,EEF Position,12.5,"@inproceedings{zhou2023modularity,
+  title={Modularity through Attention: Efficient Training and Transfer of Language-Conditioned Policies for Robot Manipulation},
+  author={Zhou, Yifan and Sonawani, Shubham and Phielipp, Mariano and Stepputtis, Simon and Amor, Heni},
+  booktitle={Conference on Robot Learning},
+  pages={1684--1695},
+  year={2023},
+  organization={PMLR}
+}
+@article{zhou2023learning,
+  title={Learning modular language-conditioned robot policies through attention},
+  author={Zhou, Yifan and Sonawani, Shubham and Phielipp, Mariano and Ben Amor, Heni and Stepputtis, Simon},
+  journal={Autonomous Robots},
+  pages={1--21},
+  year={2023},
+  publisher={Springer}
+}",,Open X-Embodiment,https://docs.google.com/spreadsheets/d/1rPBD77tk60AEIGZrGSODwyyzs5FgCU9Uz3h-3_t2A9g/edit#gid=0
+OX044,Stanford Robocook,2023,2023（官方表Citation字段）,true,Franka,Single Arm,2460,124.62,50.6585,stanford_robocook_converted_externally_to_rlds,可从Open X注册清单获取,Scripted,EEF Position,5,"@article{shi2023robocook,
+  title={RoboCook: Long-Horizon Elasto-Plastic Object Manipulation with Diverse Tools},
+  author={Shi, Haochen and Xu, Huazhe and Clarke, Samuel and Li, Yunzhu and Wu, Jiajun},
+  journal={arXiv preprint arXiv:2306.14447},
+  year={2023}
+}",,Open X-Embodiment,https://docs.google.com/spreadsheets/d/1rPBD77tk60AEIGZrGSODwyyzs5FgCU9Uz3h-3_t2A9g/edit#gid=0
+OX045,ETH Agent Affordances,2023,2023（官方表Citation字段）,true,Franka,Mobile Manipulator,120,17.27,143.9167,eth_agent_affordances,可从Open X注册清单获取,Expert Policy,EEF Position,66.6,"@inproceedings{schiavi2023learning,
+  title={Learning agent-aware affordances for closed-loop interaction with articulated objects},
+  author={Schiavi, Giulio and Wulkop, Paula and Rizzi, Giuseppe and Ott, Lionel and Siegwart, Roland and Chung, Jen Jen},
+  booktitle={2023 IEEE International Conference on Robotics and Automation (ICRA)},
+  pages={5916--5922},
+  year={2023},
+  organization={IEEE}
+}",,Open X-Embodiment,https://docs.google.com/spreadsheets/d/1rPBD77tk60AEIGZrGSODwyyzs5FgCU9Uz3h-3_t2A9g/edit#gid=0
+OX046,Imperial Wrist Cam,2023,2023（最早可验证：Open X公开入口）,true,Sawyer,Single Arm,170,0.08,0.4706,imperialcollege_sawyer_wrist_cam,可从Open X注册清单获取,Human Kinesthetic,EEF Position,10,,未找到独立年份字段；按Open X于2023公开时的最早可验证入口记年。,Open X-Embodiment,https://docs.google.com/spreadsheets/d/1rPBD77tk60AEIGZrGSODwyyzs5FgCU9Uz3h-3_t2A9g/edit#gid=0
+OX047,CMU Franka Pick-Insert Data,2023,2023（官方表Citation字段）,true,Franka,Single Arm,520,50.29,96.7115,iamlab_cmu_pickup_insert_converted_externally_to_rlds,可从Open X注册清单获取,Human VR,EEF Position,20,"@inproceedings{saxena2023multiresolution,
+title={Multi-Resolution Sensing for Real-Time Control with Vision-Language Models},
+author={Saumya Saxena and Mohit Sharma and Oliver Kroemer},
+booktitle={7th Annual Conference on Robot Learning},
+year={2023},
+url={https://openreview.net/forum?id=WuBv9-IGDUA}
+}",,Open X-Embodiment,https://docs.google.com/spreadsheets/d/1rPBD77tk60AEIGZrGSODwyyzs5FgCU9Uz3h-3_t2A9g/edit#gid=0
+OX048,QUT Dexterous Manpulation,2023,2023（官方表Citation字段）,true,Franka,Mobile Manipulator,200,,,qut_dexterous_manipulation,可从Open X注册清单获取,Human VR,EEF Position,30,"@misc{ceola2023lhmanip,
+author = {Federico Ceola, Krishan Rana, Niko S{\""u}nderhauf},
+title = {LHManip: A Dataset for Long Horizon Manipulation Tasks.},
+year = {2023}}",,Open X-Embodiment,https://docs.google.com/spreadsheets/d/1rPBD77tk60AEIGZrGSODwyyzs5FgCU9Uz3h-3_t2A9g/edit#gid=0
+OX049,MPI Muscular Proprioception,2023,2023（官方表Citation字段）,true,PAMY2,Single Arm,256,,,,未在Open X注册清单；需查原项目,Scripted,Desired pressures for the artificial muscles,500,"@article{guist2023robust,
+  title={A Robust Open-source Tendon-driven Robot Arm for Learning Control of Dynamic Motions},
+  author={Guist, Simon and Schneider, Jan and Ma, Hao and Berenz, Vincent and Martus, Julian and Gr{\""u}ninger, Felix and M{\""u}hlebach, Michael and Fiene, Jonathan and Sch{\""o}lkopf, Bernhard and B{\""u}chler, Dieter},
+  journal={arXiv preprint arXiv:2307.02654},
+  year={2023}
+}",未进入Open X注册下载清单，需从原项目入口获取。,Open X-Embodiment,https://docs.google.com/spreadsheets/d/1rPBD77tk60AEIGZrGSODwyyzs5FgCU9Uz3h-3_t2A9g/edit#gid=0
+OX050,UIUC D3Field,2023,2023（官方表Citation字段）,true,Kinova Gen3,Single Arm,196,15.82,80.7143,uiuc_d3field,可从Open X注册清单获取,Scripted,EEF Position,1,"@article{wang2023d3field,
+  title={D^3Field: Dynamic 3D Descriptor Fields for Generalizable Robotic Manipulation}, 
+  author={Wang, Yixuan and Li, Zhuoran and Zhang, Mingtong and Driggs-Campbell, Katherine and Wu, Jiajun and Fei-Fei, Li and Li, Yunzhu},
+  journal={arXiv preprint arXiv:},
+  year={2023},
+}",,Open X-Embodiment,https://docs.google.com/spreadsheets/d/1rPBD77tk60AEIGZrGSODwyyzs5FgCU9Uz3h-3_t2A9g/edit#gid=0
+OX051,Austin Mutex,2023,2023（官方表Citation字段）,true,Franka,Single Arm,1500,20.79,13.86,utaustin_mutex,可从Open X注册清单获取,Human Spacemouse,EEF Position,20,"@inproceedings{shah2023mutex,
+    title={{MUTEX}: Learning Unified Policies from Multimodal Task Specifications},
+    author={Rutav Shah and Roberto Mart{\'\i}n-Mart{\'\i}n and Yuke Zhu},
+    booktitle={7th Annual Conference on Robot Learning},
+    year={2023},
+    url={https://openreview.net/forum?id=PwqiqaaEzJ}
+}",,Open X-Embodiment,https://docs.google.com/spreadsheets/d/1rPBD77tk60AEIGZrGSODwyyzs5FgCU9Uz3h-3_t2A9g/edit#gid=0
+OX052,Berkeley Fanuc Manipulation,2023,2023（官方表Citation字段）,true,Fanuc Mate,Single Arm,415,8.85,21.3253,berkeley_fanuc_manipulation,可从Open X注册清单获取,Human VR,EEF Position,10,"@article{fanuc_manipulation2023,
+  title={Fanuc Manipulation: A Dataset for Learning-based Manipulation with FANUC Mate 200iD Robot},
+  author={Zhu, Xinghao and Tian, Ran and Xu, Chenfeng and Ding, Mingyu and Zhan, Wei and Tomizuka, Masayoshi},
+  year={2023},
+}",,Open X-Embodiment,https://docs.google.com/spreadsheets/d/1rPBD77tk60AEIGZrGSODwyyzs5FgCU9Uz3h-3_t2A9g/edit#gid=0
+OX053,CMU Food Manipulation,2021,2021（官方表Citation字段）,false,Franka,Single Arm,4200,720,171.4286,cmu_playing_with_food,可从Open X注册清单获取,Scripted,EEF Position,10,"@inproceedings{sawhney2021playing,
+  title={Playing with food: Learning food item representations through interactive exploration},
+  author={Sawhney, Amrita and Lee, Steven and Zhang, Kevin and Veloso, Manuela and Kroemer, Oliver},
+  booktitle={Experimental Robotics: The 17th International Symposium},
+  pages={309--322},
+  year={2021},
+  organization={Springer}
+}",,Open X-Embodiment,https://docs.google.com/spreadsheets/d/1rPBD77tk60AEIGZrGSODwyyzs5FgCU9Uz3h-3_t2A9g/edit#gid=0
+OX054,CMU Play Fusion,2023,2023（官方表Citation字段）,true,Franka,Single Arm,576,6.68,11.5972,cmu_play_fusion,可从Open X注册清单获取,Human VR,EEF Position,5,"@inproceedings{chen2023playfusion,
+  title={PlayFusion: Skill Acquisition via Diffusion from Language-Annotated Play},
+  author={Chen, Lili and Bahl, Shikhar and Pathak, Deepak},
+  booktitle={CoRL},
+  year={2023}
+}",,Open X-Embodiment,https://docs.google.com/spreadsheets/d/1rPBD77tk60AEIGZrGSODwyyzs5FgCU9Uz3h-3_t2A9g/edit#gid=0
+OX055,CMU Stretch,2023,2023（官方表Citation字段）,true,Hello Stretch,Mobile Manipulator,135,0.71,5.2593,cmu_stretch,可从Open X注册清单获取,Expert Policy,EEF Position,10,"@inproceedings{bahl2023affordances,
+  title={Affordances from Human Videos as a Versatile Representation for Robotics},
+  author={Bahl, Shikhar and Mendonca, Russell and Chen, Lili and Jain, Unnat and Pathak, Deepak},
+  booktitle={CVPR},
+  year={2023}
+}
+@article{mendonca2023structured,
+  title={Structured World Models from Human Videos},
+  author={Mendonca, Russell and Bahl, Shikhar and Pathak, Deepak},
+  journal={CoRL},
+  year={2023}
+}",,Open X-Embodiment,https://docs.google.com/spreadsheets/d/1rPBD77tk60AEIGZrGSODwyyzs5FgCU9Uz3h-3_t2A9g/edit#gid=0
+OX056,RECON,2021,2021（官方表Citation字段）,false,Jackal,Wheeled Robot,11830,18.73,1.5833,berkeley_gnm_recon,可从Open X注册清单获取,Scripted,EEF velocity,3,"@inproceedings{shah2021rapid,
+title={{Rapid Exploration for Open-World Navigation with Latent Goal Models}},
+author={Dhruv Shah and Benjamin Eysenbach and Nicholas Rhinehart and Sergey Levine},
+booktitle={5th Annual Conference on Robot Learning },
+year={2021},
+url={https://openreview.net/forum?id=d_SWJhyKfVw}
+}",,Open X-Embodiment,https://docs.google.com/spreadsheets/d/1rPBD77tk60AEIGZrGSODwyyzs5FgCU9Uz3h-3_t2A9g/edit#gid=0
+OX057,CoryHall,2018,2018（官方表Citation字段）,false,RC Car,Wheeled Robot,7328,1.39,0.1897,berkeley_gnm_cory_hall,可从Open X注册清单获取,Expert Policy,EEF velocity,5,"@inproceedings{kahn2018self,
+  title={Self-supervised deep reinforcement learning with generalized computation graphs for robot navigation},
+  author={Kahn, Gregory and Villaflor, Adam and Ding, Bosen and Abbeel, Pieter and Levine, Sergey},
+  booktitle={2018 IEEE international conference on robotics and automation (ICRA)},
+  pages={5129--5136},
+  year={2018},
+  organization={IEEE}
+}",,Open X-Embodiment,https://docs.google.com/spreadsheets/d/1rPBD77tk60AEIGZrGSODwyyzs5FgCU9Uz3h-3_t2A9g/edit#gid=0
+OX058,SACSoN,2023,2023（官方表Citation字段）,true,TurtleBot 2,Wheeled Robot,3000,7,2.3333,berkeley_gnm_sac_son,可从Open X注册清单获取,Expert Policy,EEF Position,10,"@article{hirose2023sacson,
+  title={SACSoN: Scalable Autonomous Data Collection for Social Navigation},
+  author={Hirose, Noriaki and Shah, Dhruv and Sridhar, Ajay and Levine, Sergey},
+  journal={arXiv preprint arXiv:2306.01874},
+  year={2023}
+}",,Open X-Embodiment,https://docs.google.com/spreadsheets/d/1rPBD77tk60AEIGZrGSODwyyzs5FgCU9Uz3h-3_t2A9g/edit#gid=0
+OX059,RoboVQA,2023,2023（arXiv首次公开；ICRA 2024）,true,Google Robot,"3 embodiments: single-armed robot, single-armed human, single-armed human using grasping tools",61153,,,robot_vqa,可从Open X注册清单获取,Human VR,EEF Position,10,,首次预印本为2023；ICRA正式发表为2024。,Open X-Embodiment,https://docs.google.com/spreadsheets/d/1rPBD77tk60AEIGZrGSODwyyzs5FgCU9Uz3h-3_t2A9g/edit#gid=0
+OX060,ALOHA,2023,2023（官方表Citation字段）,true,ViperX Bimanual,Bi-Manual,451,,,,未在Open X注册清单；需查原项目,Human Puppeteering,EEF Position,50,"@article{Zhao2023LearningFB,
+  title={Learning Fine-Grained Bimanual Manipulation with Low-Cost Hardware},
+  author={Tony Zhao and Vikash Kumar and Sergey Levine and Chelsea Finn},
+  journal={RSS},
+  year={2023},
+  volume={abs/2304.13705},
+  url={https://arxiv.org/abs/2304.13705}
+}",未进入Open X注册下载清单，需从原项目入口获取。,Open X-Embodiment,https://docs.google.com/spreadsheets/d/1rPBD77tk60AEIGZrGSODwyyzs5FgCU9Uz3h-3_t2A9g/edit#gid=0
+OX061,DROID,2024,2024（官方表Citation字段）,true,Franka,Single Arm,92233,1670,18.1063,droid,可从Open X注册清单获取,Human VR,EEF Position,15,"@article{khazatsky2024droid,
+    title   = {DROID: A Large-Scale In-The-Wild Robot Manipulation Dataset},
+    author  = {Alexander Khazatsky and Karl Pertsch and Suraj Nair and Ashwin Balakrishna and Sudeep Dasari and Siddharth Karamcheti and Soroush Nasiriany and Mohan Kumar Srirama and Lawrence Yunliang Chen and Kirsty Ellis and Peter David Fagan and Joey Hejna and Masha Itkina and Marion Lepert and Yecheng Jason Ma and Patrick Tree Miller and Jimmy Wu and Suneel Belkhale and Shivin Dass and Huy Ha and Arhan Jain and Abraham Lee and Youngwoon Lee and Marius Memmel and Sungjae Park and Ilija Radosavovic and Kaiyuan Wang and Albert Zhan and Kevin Black and Cheng Chi and Kyle Beltran Hatch and Shan Lin and Jingpei Lu and Jean Mercat and Abdul Rehman and Pannag R Sanketi and Archit Sharma and Cody Simpson and Quan Vuong and Homer Rich Walke and Blake Wulfe and Ted Xiao and Jonathan Heewon Yang and Arefeh Yavary and Tony Z. Zhao and Christopher Agia and Rohan Baijal and Mateo Guaman Castro and Daphne Chen and Qiuyu Chen and Trinity Chung and Jaimyn Drake and Ethan Paul Foster and Jensen Gao and David Antonio Herrera and Minho Heo and Kyle Hsu and Jiaheng Hu and Donovon Jackson and Charlotte Le and Yunshuang Li and Kevin Lin and Roy Lin and Zehan Ma and Abhiram Maddukuri and Suvir Mirchandani and Daniel Morton and Tony Nguyen and Abigail O'Neill and Rosario Scalise and Derick Seale and Victor Son and Stephen Tian and Emi Tran and Andrew E. Wang and Yilin Wu and Annie Xie and Jingyun Yang and Patrick Yin and Yunchu Zhang and Osbert Bastani and Glen Berseth and Jeannette Bohg and Ken Goldberg and Abhinav Gupta and Abhishek Gupta and Dinesh Jayaraman and Joseph J Lim and Jitendra Malik and Roberto Martín-Martín and Subramanian Ramamoorthy and Dorsa Sadigh and Shuran Song and Jiajun Wu and Michael C. Yip and Yuke Zhu and Thomas Kollar and Sergey Levine and Chelsea Finn},
+    year    = {2024},
+}",,Open X-Embodiment,https://docs.google.com/spreadsheets/d/1rPBD77tk60AEIGZrGSODwyyzs5FgCU9Uz3h-3_t2A9g/edit#gid=0
+OX062,ConqHose,2024,2024（官方表Citation字段）,true,Spot,Mobile Manipulator,139,2.71,19.4964,conq_hose_manipulation,可从Open X注册清单获取,Scripted,EEF velocity,30,"@misc{ConqHoseManipData,
+author={Peter Mitrano and Dmitry Berenson},
+title={Conq Hose Manipulation Dataset, v1.15.0},
+year={2024},
+howpublished={https://sites.google.com/view/conq-hose-manipulation-dataset}
+}",,Open X-Embodiment,https://docs.google.com/spreadsheets/d/1rPBD77tk60AEIGZrGSODwyyzs5FgCU9Uz3h-3_t2A9g/edit#gid=0
+OX063,DobbE,2023,2023（官方表Citation字段）,true,Hello Stretch,Mobile Manipulator,5208,21.1,4.0515,dobbe,可从Open X注册清单获取,Human collection using tools,EEF Position,3.75,"@misc{shafiullah2023dobbe,
+    title={On Bringing Robots Home}, 
+    author={Nur Muhammad Mahi Shafiullah and Anant Rai and Haritheja Etukuru and Yiqian Liu and Ishan Misra and Soumith Chintala and Lerrel Pinto},
+    year={2023},
+    eprint={2311.16098},
+    archivePrefix={arXiv},
+    primaryClass={cs.RO}
+}",,Open X-Embodiment,https://docs.google.com/spreadsheets/d/1rPBD77tk60AEIGZrGSODwyyzs5FgCU9Uz3h-3_t2A9g/edit#gid=0
+OX064,FMB,2024,2024（官方表Citation字段）,true,Franka,Single Arm,1804,356.5,197.6164,fmb,可从Open X注册清单获取,Human VR,EEF velocity,10,"@article{luo2024fmb,
+  title={FMB: a Functional Manipulation Benchmark for Generalizable Robotic Learning},
+  author={Luo, Jianlan and Xu, Charles and Liu, Fangchen and Tan, Liam and Lin, Zipeng and Wu, Jeffrey and Abbeel, Pieter and Levine, Sergey},
+  journal={arXiv preprint arXiv:2401.08553},
+  year={2024}
+}",,Open X-Embodiment,https://docs.google.com/spreadsheets/d/1rPBD77tk60AEIGZrGSODwyyzs5FgCU9Uz3h-3_t2A9g/edit#gid=0
+OX065,IO-AI Office PicknPlace,2023,2023（最早可验证：Open X公开入口）,true,Human,Human,3847,89.33,23.2207,io_ai_tech,可从Open X注册清单获取,Directly collected on human body with mocap devices and aruco markers,EEF Position,30,,未找到独立年份字段；按Open X于2023公开时的最早可验证入口记年。,Open X-Embodiment,https://docs.google.com/spreadsheets/d/1rPBD77tk60AEIGZrGSODwyyzs5FgCU9Uz3h-3_t2A9g/edit#gid=0
+OX066,MimicPlay,2023,2023（官方表Citation字段）,true,Franka,Single Arm,378,7.13,18.8624,mimic_play,可从Open X注册清单获取,Human VR,"Operational space control (OSC), which is similar to Task space position control but OSC is impedance control with consideration of the mass matrix. OSC is also used by VIOLA.",15,"@article{wang2023mimicplay,
+    title={Mimicplay: Long-horizon imitation learning by watching human play},
+    author={Wang, Chen and Fan, Linxi and Sun, Jiankai and Zhang, Ruohan and Fei-Fei, Li and Xu, Danfei and Zhu, Yuke and
+    Anandkumar, Anima},
+    journal={arXiv preprint arXiv:2302.12422},
+    year={2023}
+}",,Open X-Embodiment,https://docs.google.com/spreadsheets/d/1rPBD77tk60AEIGZrGSODwyyzs5FgCU9Uz3h-3_t2A9g/edit#gid=0
+OX067,MobileALOHA,2024,2024（官方表Citation字段）,true,MobileALOHA,Mobile Manipulator,276,47.83,173.2971,aloha_mobile,可从Open X注册清单获取,Human Puppeteering,Joint position,50,"@inproceedings{fu2024mobile,
+  author    = {Fu, Zipeng and Zhao, Tony Z. and Finn, Chelsea},
+  title     = {Mobile ALOHA: Learning Bimanual Mobile Manipulation with Low-Cost Whole-Body Teleoperation},
+  booktitle = {arXiv},
+  year      = {2024},
+}",,Open X-Embodiment,https://docs.google.com/spreadsheets/d/1rPBD77tk60AEIGZrGSODwyyzs5FgCU9Uz3h-3_t2A9g/edit#gid=0
+OX068,RoboSet,2023,2023（官方表Citation字段）,true,Franka,Single Arm,18250,178.65,9.789,robo_set,可从Open X注册清单获取,Human VR,Joint position,5,"@misc{bharadhwaj2023roboagent,
+                            title={RoboAgent: Generalization and Efficiency in Robot Manipulation via Semantic Augmentations and Action Chunking},
+                            author={Homanga Bharadhwaj and Jay Vakil and Mohit Sharma and Abhinav Gupta and Shubham Tulsiani and Vikash Kumar},
+                            year={2023},
+                            eprint={2309.01918},
+                            archivePrefix={arXiv},
+                            primaryClass={cs.RO}
+                      }",,Open X-Embodiment,https://docs.google.com/spreadsheets/d/1rPBD77tk60AEIGZrGSODwyyzs5FgCU9Uz3h-3_t2A9g/edit#gid=0
+OX069,TidyBot,2023,2023（官方表Citation字段）,true,TidyBot,Mobile Manipulator,24,0.02,0.8333,tidybot,可从Open X注册清单获取,Human writes preferred object placements in text form,Our dataset specifies a target receptacle for each object,N/A,"@article{wu2023tidybot,
+  title = {TidyBot: Personalized Robot Assistance with Large Language Models},
+  author = {Wu, Jimmy and Antonova, Rika and Kan, Adam and Lepert, Marion and Zeng, Andy and Song, Shuran and Bohg, Jeannette and Rusinkiewicz, Szymon and Funkhouser, Thomas},
+  journal = {Autonomous Robots},
+  year = {2023}
+}",,Open X-Embodiment,https://docs.google.com/spreadsheets/d/1rPBD77tk60AEIGZrGSODwyyzs5FgCU9Uz3h-3_t2A9g/edit#gid=0
+OX070,VIMA,2023,2023（官方表Citation字段）,true,UR5,Single Arm,660103,1390,2.1057,vima_converted_externally_to_rlds,可从Open X注册清单获取,Scripted,Primitive skills (pick-place and push),N/A due to use of primitive skills,"@inproceedings{jiang2023vima,
+  title     = {VIMA: General Robot Manipulation with Multimodal Prompts},
+  author    = {Yunfan Jiang and Agrim Gupta and Zichen Zhang and Guanzhi Wang and Yongqiang Dou and Yanjun Chen and Li Fei-Fei and Anima Anandkumar and Yuke Zhu and Linxi Fan},
+  booktitle = {Fortieth International Conference on Machine Learning},
+  year      = {2023}
+}",,Open X-Embodiment,https://docs.google.com/spreadsheets/d/1rPBD77tk60AEIGZrGSODwyyzs5FgCU9Uz3h-3_t2A9g/edit#gid=0
+OX071,SPOC,2023,2023（官方表Citation字段）,true,Hello Stretch,Single Arm,233000,765,3.2833,spoc,可从Open X注册清单获取,Scripted,Joint position,10,"@article{spoc2023,        
+        author    = {Kiana Ehsani, Tanmay Gupta, Rose Hendrix, Jordi Salvador, Luca Weihs, Kuo-Hao Zeng, Kunal Pratap Singh, Yejin Kim, Winson Han, Alvaro Herrasti, Ranjay Krishna, Dustin Schwenk, Eli VanderBilt, Aniruddha Kembhavi},
+        title     = {Imitating Shortest Paths in Simulation Enables Effective Navigation and Manipulation in the Real World},
+        journal   = {arXiv},
+        year      = {2023},
+        eprint    = {2312.02976},
+}",,Open X-Embodiment,https://docs.google.com/spreadsheets/d/1rPBD77tk60AEIGZrGSODwyyzs5FgCU9Uz3h-3_t2A9g/edit#gid=0
+OX072,Plex RoboSuite,2023,2023（官方表Citation字段）,true,Franka,Single Arm,450,1.26,2.8,plex_robosuite,可从Open X注册清单获取,Human Keyboard,EEF Position,20,"@inproceedings{thomas2023plex,
+    title={PLEX: Making the Most of the Available Data for Robotic Manipulation Pretraining},
+    author={Garrett Thomas and Ching-An Cheng and Ricky Loynd and Felipe Vieira Frujeri and Vibhav Vineet and Mihai Jalobeanu and Andrey Kolobov},
+    booktitle={CoRL},
+    year={2023}
+}",,Open X-Embodiment,https://docs.google.com/spreadsheets/d/1rPBD77tk60AEIGZrGSODwyyzs5FgCU9Uz3h-3_t2A9g/edit#gid=0
