@@ -9,6 +9,8 @@
 - 评测：`@SyouSanGin`
 - 宏观思想：翟老师 `@xiaoyazhai`、蔡老师 `@youchengcai`
 
+数据集版块当前收录 64 个数据集、benchmark、采集系统与数据管线，支持按 Full-body 层级、数据来源和证据等级筛选，并包含采集系统、数据格式与任务覆盖专题。
+
 模型架构版块当前收录 π₀.₅、X‑VLA 0.9B、LingBot‑VLA 2.0 6B、Light‑WAM 和 LingBot‑VA。
 
 ## 本地运行
