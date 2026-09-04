@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>架构问题 · 具身机器人技术地图</title><link rel="stylesheet" href="../module-sections.css"></head>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>架构问题 · 具身机器人技术地图</title><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/katex.min.css"><link rel="stylesheet" href="../module-sections.css"><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/katex.min.js"></script></head>
 <body class="subpage">
 <header class="top"><div class="brand">MODEL<b>/</b>ATLAS</div><a class="home-link" href="../../">← 返回技术地图</a><div class="status">@xy144001 · 问题</div></header>
 <nav class="module-tabs" aria-label="模型架构组版块"><a href="../">架构</a><a class="active" href="./">问题</a><a href="../tasks/">任务</a></nav>
@@ -23,11 +23,35 @@
     <div class="question-index">QUESTION 02 · FUTURE & WORLD MODELING</div>
     <h2>模型需不需要看到未来，以及需要看到哪种程度的未来？</h2>
     <p class="question-lead">“看到未来”并不是单一开关：模型可以完全反应式，也可以只学习未来特征、用未来监督训练策略，或显式联合生成未来世界与动作。</p>
-    <div class="level-grid four-levels">
-      <article><span>01</span><h3>Reactive</h3><p>依据当前观测直接预测动作，不显式建立未来世界模型。结构简单、闭环频率高，但长程规划和失败预判较弱。</p></article>
-      <article><span>02</span><h3>轻量预测表征</h3><p>预测未来 latent、视觉特征或语义状态，用作动作生成的辅助条件；不要求重建完整未来视频。</p></article>
-      <article><span>03</span><h3>训练期 WAM / future-conditioned</h3><p>训练时使用未来帧、未来状态或世界模型监督，让策略学会时空动力学；部署时可以关闭昂贵的视频生成分支。</p></article>
-      <article><span>04</span><h3>强 World Modeling / 联合 World–Action</h3><p>世界分支和动作分支共同建模，甚至在线因果滚动预测。未来信息最强，但训练、推理和系统集成成本也最高。</p></article>
+    <div class="level-grid four-levels future-levels">
+      <article>
+        <span>LEVEL 01</span><h3>Reactive：不显式看未来</h3>
+        <p>策略只根据截至当前时刻的观测、机器人状态和语言指令直接生成动作块。它可能在网络隐状态中形成短期直觉，但没有单独的未来预测目标。</p>
+        <p class="level-difference"><b>核心区别：</b>只学习“现在应该怎么动”，不要求回答“动作之后世界会怎样”。</p>
+        <div class="formula-stack"><small>直接策略</small><div class="level-formula">\boxed{\hat{A}_{t:t+H}=f_{\theta}(O_{\le t},S_t,L)}</div><small>条件分布</small><div class="level-formula">p_{\theta}(A_{t:t+H}\mid O_{\le t},S_t,L)</div></div>
+        <p class="formula-caption"><b>含义：</b>输入中没有显式的未来观测或未来 latent；每执行一段动作，再读取新的真实观测闭环修正。</p>
+      </article>
+      <article>
+        <span>LEVEL 02</span><h3>轻量预测表征：看到“未来特征”</h3>
+        <p>模型不重建完整未来视频，而是预测未来的视觉 latent、语义状态、深度/几何特征或任务进展，并把它作为动作生成的辅助条件。</p>
+        <p class="level-difference"><b>核心区别：</b>未来被压缩成低维表征；模型知道大致会发生什么，但不需要生成可观看的未来画面。</p>
+        <div class="formula-stack"><small>未来表征预测</small><div class="level-formula">\hat{Z}_{t+\Delta}=g_{\phi}(O_{\le t},L)</div><small>未来条件动作</small><div class="level-formula">\hat{A}_{t:t+H}=f_{\theta}(O_t,S_t,L,\hat{Z}_{t+\Delta})</div><small>特征监督</small><div class="level-formula">\mathcal{L}_{\mathrm{future}}=\lVert \hat{Z}_{t+\Delta}-\operatorname{sg}(Z_{t+\Delta})\rVert_2^2</div></div>
+        <p class="formula-caption"><b>含义：</b><span class="inline-formula">Z</span> 可以来自 DINO、深度教师或未来状态编码器；<span class="inline-formula">\operatorname{sg}</span> 表示教师特征停止梯度。</p>
+      </article>
+      <article>
+        <span>LEVEL 03</span><h3>训练期 WAM / Future-Conditioned Policy</h3>
+        <p>这一层真的使用生成式 World Model 学习世界动态。训练时显式建模未来帧或未来 latent，并用未来信息塑造动作策略；部署时可关闭昂贵的视频生成分支。</p>
+        <p class="level-difference"><b>与 Level 2 的区别：</b>Level 2 只预测辅助特征；Level 3 学的是未来观测分布或未来世界 latent 的生成过程。</p>
+        <div class="formula-stack"><small>未来观测生成</small><div class="level-formula">\boxed{p_{\phi}(O_{t+1:t+K}\mid O_{\le t},L)}</div><small>未来世界 latent</small><div class="level-formula">p_{\phi}(Z_{\mathrm{future}}\mid O_{\le t},L)</div><small>联合训练目标</small><div class="level-formula">\mathcal{L}=\mathcal{L}_{\mathrm{action}}+\lambda_{\mathrm{world}}\mathcal{L}_{\mathrm{world}}</div></div>
+        <p class="formula-caption"><b>含义：</b>模型在训练期借助真实未来学习动力学；推理时究竟是否生成未来，取决于模型是否保留 world branch。</p>
+      </article>
+      <article>
+        <span>LEVEL 04</span><h3>强 World Modeling / 联合 World–Action</h3>
+        <p>世界分支和动作分支被放进同一个联合生成过程，模型同时预测未来世界与动作，或在执行时持续因果滚动。未来不再只是训练辅助，而是推理闭环的一部分。</p>
+        <p class="level-difference"><b>与 Level 3 的区别：</b>Level 3 可以“训练时看未来、部署时关闭”；Level 4 在推理时仍显式利用世界预测来产生或校验动作。</p>
+        <div class="formula-stack"><small>世界—动作联合分布</small><div class="level-formula">\boxed{p_{\theta}(O_{t+1:t+K},A_{t:t+H}\mid O_{\le t},S_t,L)}</div><small>在线因果滚动</small><div class="level-formula">(\hat{O}_{t+1},\hat{A}_t)\sim p_{\theta}(\,\cdot\mid O_{\le t},A_{&lt;t},L)</div><small>真实环境闭环</small><div class="level-formula">O_{t+1}=\operatorname{Env}(O_t,A_t)</div></div>
+        <p class="formula-caption"><b>含义：</b>预测世界用于引导、筛选或修正动作，但执行后仍必须以真实环境返回的 <span class="inline-formula">O_{t+1}</span> 覆盖想象结果。</p>
+      </article>
     </div>
   </section>
 
@@ -45,4 +69,5 @@
     <p class="route-note">二维谱系中的位置表示相对技术倾向，不表示绝对优劣或官方分类；同一个模型也可能跨越相邻路线。</p>
   </section>
 </main>
+<script>window.addEventListener('DOMContentLoaded',()=>{if(!window.katex)return;document.querySelectorAll('.level-formula').forEach(el=>katex.render(el.textContent,el,{displayMode:true,throwOnError:false,strict:false}));document.querySelectorAll('.inline-formula').forEach(el=>katex.render(el.textContent,el,{displayMode:false,throwOnError:false,strict:false}))});</script>
 </body></html>

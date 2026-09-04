@@ -30,6 +30,16 @@
 .level-grid h3,.route-grid h3{margin:14px 0 10px;font-size:19px;line-height:1.45}
 .level-grid p,.route-grid p{margin:0;color:#a9b5c4;font-size:14px;line-height:1.8}
 .level-grid b{display:block;margin-top:16px;color:#d7e2ef;font-size:12px;line-height:1.7;font-weight:600}
+.future-levels article{padding:clamp(22px,3vw,30px)}
+.future-levels article>p{font-size:15px;line-height:1.85}
+.future-levels .level-difference{margin-top:16px;padding:13px 15px;border-left:2px solid #79a8ff;background:#101827;color:#c7d2df}
+.future-levels .level-difference b,.future-levels .formula-caption b{display:inline;margin:0;color:#eef2f7;font-size:inherit}
+.formula-stack{display:grid;gap:9px;margin-top:22px}
+.formula-stack small{margin-top:5px;color:#71839a;font:700 10px ui-monospace;letter-spacing:.1em;text-transform:uppercase}
+.level-formula{min-height:70px;display:grid;place-items:center;overflow-x:auto;padding:17px 12px;border:1px solid #314155;background:#070b10;color:#e5eeff;font-size:clamp(15px,1.65vw,20px)}
+.level-formula .katex-display{margin:0;min-width:max-content}
+.future-levels .formula-caption{margin-top:16px;color:#8f9eaf;font-size:13px;line-height:1.75}
+.future-levels .formula-caption .inline-formula{color:#dbe8ff}
 .route-section{margin-top:64px}.route-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:28px}
 .route-note{margin:18px 0 0;padding-left:16px;border-left:2px solid #ffb86b;color:#99a7b8;font-size:13px;line-height:1.75}
 .example-section{display:grid;gap:28px}.example-head{margin-bottom:4px}
