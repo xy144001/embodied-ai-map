@@ -2,6 +2,7 @@
 .module-tabs a{border:1px solid #26303c;background:#0e131a;color:#8490a0;padding:14px 18px;text-decoration:none;text-align:center;font:600 14px ui-monospace;transition:.18s}
 .module-tabs a:hover{color:#eef2f7;border-color:#526276}
 .module-tabs a.active{color:#fff;border-color:#79a8ff;background:#101827;box-shadow:inset 0 -3px #79a8ff}
+.module-tabs .breakdown-tab{grid-column:1/-1}
 .lineage-hero{max-width:1440px;margin:42px auto 34px;padding:0 clamp(20px,4vw,64px)}
 .lineage-hero img{display:block;width:100%;height:auto;border:1px solid #303b48;background:#fff;box-shadow:0 24px 70px #0007}
 .subpage{min-height:100vh;margin:0;color:#eef2f7;background:radial-gradient(circle at 80% 0,#172033 0,transparent 30rem),linear-gradient(#ffffff06 1px,transparent 1px),linear-gradient(90deg,#ffffff06 1px,transparent 1px),#080b10;background-size:auto,40px 40px,40px 40px;font-family:Inter,"Noto Sans SC",system-ui,sans-serif}
