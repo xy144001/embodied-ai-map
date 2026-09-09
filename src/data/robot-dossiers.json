@@ -1,0 +1,225 @@
+{
+  "checkedAt": "2026-09-09",
+  "fx": {"usdCny": 6.7804, "date": "2026-09-08", "label": "中国外汇交易中心人民币汇率中间价", "url": "https://www.chinamoney.com.cn/chinese/bkccpr/"},
+  "robots": [
+    {
+      "id": "unitree-g1-edu", "name": "Unitree G1 EDU", "organization": "宇树科技 · 中国", "kind": "biped", "category": "双足人形", "focus": "全身协调 / VLA", "status": "科研配置需逐项确认",
+      "summary": "适合把手臂操作、腰部运动与行走放进同一个实验闭环。已有公开真机开发流程，但机身、末端执行器和控制器必须与选定模型一致。",
+      "configuration": "先确定 29 自由度机身；复现 DiT4DiT 当前 Real_G1 示例应核对 ALOHA 夹爪，灵巧手研究再选择 Dex3-1。",
+      "facts": [["机身 / 尺寸", "约 1.32 m；约 35 kg 起，随配置变化"], ["自由度", "EDU 系列 23–43；29 轴机身 + 两只 7 轴 Dex3-1 为 43"], ["身体构成", "单腿 6 轴；29 轴配置增加腰部与手腕自由度"], ["负载", "官方 EDU 手臂约 3 kg；受姿态和伸展距离影响"], ["感知与计算", "深度相机、3D LiDAR；高算力模块依订单选择"], ["开发接口", "EDU 二次开发、Unitree SDK / DDS；普通 G1 不支持二次开发"]],
+      "hardwareSources": [{"label": "宇树 G1 官方规格", "url": "https://www.unitree.com/g1/"}, {"label": "官方普通版 / EDU 区别", "url": "https://shop.unitree.com/products/unitree-g1"}],
+      "reference": 0, "priceHint": "中国历史低价线索：EDU 标准版 ¥169,000；不能当作当前 29 轴或灵巧手版报价。",
+      "prices": [
+        {"market": "美国", "amount": 43900, "currency": "USD", "type": "渠道公开价", "config": "G1 EDU Standard / U1，23 自由度", "date": "2026-09-09", "source": "Toborlife EDU 配置表", "url": "https://toborlife.ai/g1-edu-pro-b/", "note": "入门 EDU，不是 29 轴加双灵巧手；税运及培训范围需确认。"},
+        {"market": "美国", "amount": 53900, "currency": "USD", "type": "渠道公开价", "config": "G1 EDU Plus / U2，29 自由度", "date": "2026-09-09", "source": "Toborlife EDU 配置表", "url": "https://toborlife.ai/g1-edu-pro-b/", "note": "不能默认包含 Dex3-1、触觉、额外相机或目标示例的 ALOHA 夹爪。"},
+        {"market": "中国", "amount": 169000, "currency": "CNY", "type": "历史价格线索", "config": "EDU 标准版；报道中的进阶版为 ¥209,000", "date": "2026-04-01", "source": "华尔街见闻引用拆解报告", "url": "https://wallstreetcn.com/articles/3768947", "note": "媒体转述，不是本次获取的销售报价；先索取同配置国内正式报价。"},
+        {"market": "中国", "amount": null, "currency": "CNY", "type": "需询价", "config": "29 轴 + 指定夹爪 / 灵巧手 + 计算与遥操", "date": "2026-09-09", "source": "宇树中国官网", "url": "https://www.unitree.com/cn/g1", "note": "本次未找到可核验的完整研究配置公开现价。"}
+      ],
+      "comparison": "国内历史标价更低，值得优先向中国官方询价；现有证据不足以宣布当前同配置在中国一定更便宜。不要用普通版 ¥99,000 / US$13,500 对比 EDU，也不要把 23 轴价格套在 29 轴加手的方案上。",
+      "compatibility": [
+        {"model": "DiT4DiT", "level": "公开真机流程", "evidence": "Real_G1 教程明确要求 29-DoF G1、ALOHA gripper、Orin 与 Pico 遥操，覆盖采集、回放、训练及闭环部署。", "limit": "这修正了原稿统一推荐 Dex3-1 的说法。示例发布不代表所有真机任务权重已发布；RoboCasa GR1 权重也不是 G1 权重。", "url": "https://github.com/Mondo-Robotics/DiT4DiT/blob/main/examples/Real_G1/README.md"},
+        {"model": "GR00T N1.7", "level": "真机评测 / 可适配", "evidence": "官方仓库包含 real G1 评测与自定义本体微调、推理流程。", "limit": "本体标签、动作归一化与底层全身控制必须对应；有标签不等于任意任务零样本可用。", "url": "https://github.com/NVIDIA/Isaac-GR00T"}
+      ],
+      "strengths": ["全身协调问题可以落在真实的平衡、重心与手臂动作耦合上，适合研究两条技术轴中的身体协调。", "有可读的第三方真机流程，能够追踪从观测到策略、再到底层控制的接口。"],
+      "limits": ["摔倒保护、吊架、场地和人工复位会占用实验资源；不能把桌面仿真的 rollout 吞吐率直接外推到双足。", "换手、换相机、换动作表示都可能需要重新采集和微调；更多自由度不自动增加模型能力。"],
+      "workflow": [{"title": "对齐本体", "detail": "从目标仓库确定机身、夹爪、关节顺序、动作单位与相机视角，再让供应商按这一清单报价。"}, {"title": "建立数据闭环", "detail": "先复现遥操和轨迹回放，核查视频、关节状态、动作与时间戳能正确对应。"}, {"title": "接入策略", "detail": "策略生成动作块，经适配层和全身控制器执行；每次接收新观测后重规划。先验证桌面操作，再扩展行走操作。"}],
+      "procurement": ["把 ALOHA 夹爪、Dex3-1 与触觉版本列成独立选项。", "报价应覆盖 SDK 权限、吊架、遥操、备用电池、维修运输与交付培训。"]
+    },
+    {
+      "id": "galaxea-r1-pro", "name": "Galaxea R1 Pro", "organization": "星海图 · 中国", "kind": "wheeled", "category": "轮式双臂", "focus": "移动操作 / VLA", "status": "核对 R1 Pro 代次与配件",
+      "summary": "用全向底盘、可升降躯干和双七轴手臂研究移动操作。适合跨模型对照与长时程任务，能够把实验重点集中在操作策略上。",
+      "configuration": "R1 Pro 双 7 轴手臂；不要混入 R1、R1 Lite 的六轴手臂报价。",
+      "facts": [["形态", "轮式移动双臂；身高约 1.70 m"], ["官方自由度口径", "全身 26（标配夹爪口径）；手臂 7 × 2、躯干 4、底盘 6"], ["操作空间", "臂长 64.4 cm；垂直工作范围约 0–2 m"], ["单臂负载", "0.5 m 处额定 3.5 kg、最大 5 kg"], ["感知与计算", "力传感、相机与 LiDAR；Orin 配置和腕部相机需按订单核对"], ["遥操作", "同构遥操作；关节映射与力反馈方案见官方产品说明"]],
+      "hardwareSources": [{"label": "星海图官方 R1 系列对照", "url": "https://galaxea-ai.com/products/R1"}, {"label": "R1 Pro 官方产品页", "url": "https://galaxea-ai.com/products/R1-Pro"}],
+      "reference": 0, "priceHint": "中国历史上架价 ¥399,999；国际美元价不等于美国本地完税价。",
+      "prices": [
+        {"market": "国际渠道 / 中国发货", "amount": 69999, "currency": "USD", "type": "渠道公开价", "config": "R1 Pro，不含可选 D405 × 2 配件套装", "date": "2026-09-09", "source": "AIFitLab 商品页", "url": "https://aifitlab.com/products/galaxea-r1-pro-robot", "note": "页面标明中国发货、运费另算、缺货待补；不能标成美国本地现货。"},
+        {"market": "中国", "amount": 399999, "currency": "CNY", "type": "历史价格线索", "config": "2025 年 R1 Pro 京东上架款", "date": "2025-05-27", "source": "CNMO 上架报道", "url": "https://www.sohu.com/a/899057042_115831", "note": "历史零售价；不是已确认的 2026 同配置成交价。R1 系列 ¥199,000 起不能直接用于 Pro。"},
+        {"market": "美国", "amount": null, "currency": "USD", "type": "需询价", "config": "R1 Pro 的美国交付与本地售后方案", "date": "2026-09-09", "source": "Robots International R1 Pro", "url": "https://www.robotsinternational.com/Galaxea-R1pro-R1-Pro-Wheeled-Humanoid-Robot.htm", "note": "页面引用美元参考价，但需按交付国确认税运、相机与维保范围。"}
+      ],
+      "comparison": "中国历史 ¥399,999 低于按本页汇率折算的 US$69,999，但报价时间、配件和交付条件不同。先向中国厂商取得同代 Pro 的完整报价，再与美国交付总额对比。",
+      "compatibility": [{"model": "LingBot-VLA 2.0 / π₀.₅ / GR00T N1.7", "level": "论文真机对照", "evidence": "LingBot-VLA 2.0 官方仓库公布 Galaxea R1Pro 的跨模型真实任务对照。", "limit": "论文团队完成过适配，不代表这些基座权重装上新购机器人便能复现分数；需要对应数据、控制接口和测试场景。", "url": "https://github.com/Robbyant/lingbot-vla-v2"}],
+      "strengths": ["研究者可同时观察底盘、腰部和双臂的协同；相比双足，实验无需持续处理动态站立平衡。", "适合移动取放、双臂配合和长时程任务；已有具体真机比较证据。"],
+      "limits": ["没有双足，不能替代走路时的重心控制与腿臂协调实验。", "大型底盘需要通道和转弯空间；重物运输、楼层与实验桌高度应在采购前测量。"],
+      "workflow": [{"title": "统一坐标系", "detail": "标定相机、手臂、躯干和底盘坐标系，区分末端相对动作与关节命令。"}, {"title": "采集任务", "detail": "先固定底盘做双臂任务，建立同步数据；再增加底盘和躯干运动，避免一次引入所有变量。"}, {"title": "闭环评测", "detail": "策略输出双臂及移动目标，由本体控制器实现；比较模型时固定动作频率、控制器和任务复位规则。"}],
+      "procurement": ["明确 Pro 代次、腕部相机、夹爪、遥操器和算力模块。", "把国际报价的起运地、关税和维修回运成本算入同一预算。"]
+    },
+    {
+      "id": "agilex-cobot-magic", "name": "AgileX Cobot Magic", "organization": "松灵机器人 · 中国", "kind": "wheeled", "category": "轮式双臂 / ALOHA", "focus": "数据采集 / 双臂 VLA", "status": "整机价格需询价",
+      "summary": "Mobile ALOHA 路线的数据采集与移动操作平台。双主臂驱动双从臂，适合反复收集示范、微调策略并进行真实任务评测。",
+      "configuration": "本页以 PiPER + TRACER 2.0 方案为主；ARX X5、ViperX 和分体式 RANGER 方案不能混作同一硬件。",
+      "facts": [["执行机构", "PiPER 六轴机械臂；执行端双臂另配夹爪"], ["主从结构", "两只主臂 + 两只执行臂；主臂不是机器人额外动作自由度"], ["移动平台", "TRACER 2.0 差速底盘方案"], ["感知 / 计算", "深度相机、计算单元、数据采集组件，依套餐确定"], ["控制目标", "双臂操作 + 平面移动，不包含双足平衡"], ["开放基础", "官方基于 Mobile ALOHA 的遥操作与具身数据采集方案"]],
+      "hardwareSources": [{"label": "松灵 Cobot Magic 中国产品页", "url": "https://www.agilex.ai/page/690aef2d5e78cfa260412cb5"}, {"label": "松灵国际产品页", "url": "https://global.agilex.ai/products/cobot-magic"}],
+      "reference": 0, "priceHint": "原稿约 US$30,000 未找到可核验的中美整机报价，不把它当作采购价。",
+      "prices": [
+        {"market": "中国", "amount": null, "currency": "CNY", "type": "需询价", "config": "PiPER 双主双从 + TRACER 2.0 + 相机 / 计算", "date": "2026-09-09", "source": "松灵官方产品页", "url": "https://www.agilex.ai/page/690aef2d5e78cfa260412cb5", "note": "未找到可核验公开整机现价；单臂 PiPER 的价格不能当整机价格。"},
+        {"market": "美国", "amount": null, "currency": "USD", "type": "需询价", "config": "指定机械臂与底盘版本的美国交付方案", "date": "2026-09-09", "source": "美国渠道产品页", "url": "https://www.americansatellite.us/sp/Agilex-Cobotmagic-COBOT-Magic.htm", "note": "公开页面不足以确认完整清单及最终价；需书面报价。"}
+      ],
+      "comparison": "目前不能确定中美哪边更低。先按同一机械臂、底盘、相机和主从数量询价；原稿的美元估价及欧洲其他机械臂版本均不参加中美最低价比较。",
+      "compatibility": [
+        {"model": "LingBot-VLA 2.0", "level": "论文真机对照", "evidence": "官方结果包含 AgileX Cobot Magic；另一组任务明确写 Cobot Magic-ARX X5。", "limit": "必须进一步核对使用 PiPER 还是 ARX X5，不能仅凭 Cobot Magic 名称复用关节映射和归一化。", "url": "https://github.com/Robbyant/lingbot-vla-v2"},
+        {"model": "X-VLA / RoboTwin2", "level": "仿真权重 / 部分真机数据", "evidence": "X-VLA 模型列表中有 AgileX 的 RoboTwin2 和 SoftFold 条目。", "limit": "RoboTwin2 是仿真任务，SoftFold 是特定数据与任务；均不等于所有 Cobot Magic 版本通用。", "url": "https://github.com/2toinf/X-VLA"}
+      ],
+      "strengths": ["主从遥操直观，适合多位同学持续采集同一格式示范，为模型消融提供统一硬件。", "双臂与移动底盘可逐步纳入实验，适合从桌面任务扩展到移动操作。"],
+      "limits": ["机械臂版本差异会改变负载、关节空间与通信，报价单只写平台名远远不够。", "不能用于双足步态；任务吞吐还受复位、失败处理与数据质量影响，不能承诺一下午采多少有效轨迹。"],
+      "workflow": [{"title": "主从标定", "detail": "对齐主臂和执行臂的零点、限位、夹爪开合方向，记录实际动作维度。"}, {"title": "示范采集", "detail": "同步记录多视角视频、执行臂状态、主臂指令及底盘命令；明确数据中的 action 是目标还是反馈。"}, {"title": "策略接管", "detail": "保持执行侧接口不变，将主臂指令替换为策略输出；先用短动作块和统一复位规则评价模型。"}],
+      "procurement": ["逐项列清四只机械臂、底盘、相机、计算机、移动电源与软件交付。", "确认常用夹爪、线束和关节备件供货；比较国内直供与美国本地服务总价。"]
+    },
+    {
+      "id": "trossen-stationary-ai", "name": "Trossen Stationary AI", "organization": "Trossen Robotics · 美国", "kind": "dual", "category": "固定双臂 / ALOHA", "focus": "双臂 VLA / 可重复实验", "status": "官方公开价格",
+      "summary": "固定工作站上的 ALOHA 系列双主双从平台。适合先把采集、训练、部署和评测串起来，集中研究双臂动作策略。",
+      "configuration": "当前 WidowX AI 平台；旧 ALOHA / WidowX 硬件与新一代控制栈需分别对齐。",
+      "facts": [["结构", "2 对 WidowX AI 主从臂：2 主臂 + 2 执行臂"], ["感知", "官方列出 RealSense D405 × 4"], ["交互", "10 英寸触摸屏，框架与配件"], ["活动范围", "固定工位，无移动底盘、腿或躯干"], ["开发生态", "Trossen 数据采集工具；OpenPI 与 LeRobot 文档"], ["配套边界", "桌子不包含；高性能训练工作站单独报价"]],
+      "hardwareSources": [{"label": "Trossen 官方 Stationary AI", "url": "https://www.trossenrobotics.com/stationary-ai"}, {"label": "官方 OpenPI 教程", "url": "https://docs.trossenrobotics.com/trossen_arm/main/tutorials/openpi.html"}],
+      "reference": 0, "priceHint": "目前可核验的参考低价为美国官方 US$23,995.95；不是完整训练机房预算。",
+      "prices": [
+        {"market": "美国", "amount": 23995.95, "currency": "USD", "type": "官方公开价", "config": "Stationary AI 双主双从套件", "date": "2026-09-09", "source": "Trossen 官方商品页", "url": "https://www.trossenrobotics.com/stationary-ai", "note": "桌子不包含。基础控制电脑及选配 RTX 5090 工作站应分别确认；税运另核。"},
+        {"market": "中国", "amount": null, "currency": "CNY", "type": "需询价", "config": "同代 Stationary AI 进口整套", "date": "2026-09-09", "source": "Trossen 官方渠道入口", "url": "https://www.trossenrobotics.com/stationary-ai", "note": "未找到可核验同款国内公开现价；国产 ALOHA 复刻套件不是同款。"}
+      ],
+      "comparison": "美国原厂价可以作为进口询价基准，目前缺少中国同款对照，无法断言美国到手更便宜。不要把两套低价单臂配对系统相加就当成完整 Stationary AI。",
+      "compatibility": [
+        {"model": "π₀ / π₀.₅", "level": "厂商适配流程", "evidence": "Trossen 提供当前硬件的 OpenPI 采集、微调和推理路径。", "limit": "硬件工具链可接入，不保证公开 ALOHA 旧任务权重对当前新硬件零样本泛化。", "url": "https://docs.trossenrobotics.com/trossen_arm/main/tutorials/openpi.html"},
+        {"model": "ALOHA / OpenPI", "level": "公开本体样例", "evidence": "OpenPI 提供 ALOHA 真实机器人示例与特定任务检查点。", "limit": "需对齐关节、夹爪、相机与桌面分布；不同 ALOHA 代次仍需适配。", "url": "https://github.com/Physical-Intelligence/openpi"}
+      ],
+      "strengths": ["固定几何关系有利于重复实验，适合比较数据、动作头、历史窗口和训练目标等模型因素。", "无需先解决移动或站立控制，适合作为组内日常数据采集与基线平台。"],
+      "limits": ["研究结论主要覆盖固定工位双臂，不能由此证明移动或全身控制能力。", "成本之外还应评估负载、可达空间和任务夹具是否满足实验需求。"],
+      "workflow": [{"title": "统一工位", "detail": "固定执行臂安装位置和相机外参，建立稳定的物体布局与复位流程。"}, {"title": "记录示范", "detail": "使用主从臂采集动作和图像，转换为训练框架需要的字段、单位与归一化。"}, {"title": "对照实验", "detail": "同一硬件上替换模型或训练策略，以相同任务集、次数和成功条件比较结果。"}],
+      "procurement": ["索取当前版本完整 BOM，明确桌子、控制 PC、训练 GPU 与税运。", "新硬件必须有对应的 OpenPI / LeRobot 驱动和示例版本。"]
+    },
+    {
+      "id": "franka-research-3", "name": "Franka Research 3", "organization": "Franka Robotics · 德国", "kind": "single", "category": "单协作臂", "focus": "力控 / 接触操作 / DROID", "status": "核对 FCI 与研究套件",
+      "summary": "七轴力敏机械臂，适合精细接触、动力学和桌面策略研究。Franka / DROID 生态有价值，但 Panda、FR3 和仿真中的 Franka 不应混为一台机器人。",
+      "configuration": "FR3 + 控制柜 + FCI 权限；夹爪、视觉、采集硬件及工作站需单独列出。",
+      "facts": [["机械臂", "7 自由度，关节扭矩传感"], ["负载 / 臂展", "3 kg；855 mm"], ["底层接口", "FCI 实时控制，1 kHz 控制循环"], ["软件", "ROS 2 等研究接口；版本需与固件匹配"], ["任务范围", "固定单臂接触操作；双臂需要第二套机械臂及标定"], ["本体差异", "DROID 生态不等于任意 FR3 现货都与其采集栈一致"]],
+      "hardwareSources": [{"label": "Franka 官方 FR3", "url": "https://franka.de/franka-research-3"}, {"label": "FR3 官方规格表", "url": "https://franka.de/hubfs/Datasheet%20Franka%20Research%203_R02212_2.4_EN.pdf?hsLang=en"}],
+      "reference": 0, "priceHint": "补查找到低于原稿 US$61,900 的北美渠道单件标价；仍需确认美国交付与完整配置。",
+      "prices": [
+        {"market": "北美线上渠道", "amount": 29218.06, "currency": "USD", "type": "渠道公开价", "config": "Vention PR-FR-003-1000 / FR3", "date": "2026-09-09", "source": "Vention FR3 商品页", "url": "https://vention.com/parts/franka-robotics-fr3-4193", "note": "页面说明 FCI 与控制器规格；订单仍需逐项核实许可证、夹爪、视觉和美国交付。不是整套 DROID 实验系统价。"},
+        {"market": "中国", "amount": null, "currency": "CNY", "type": "需询价", "config": "FR3 研究版 + FCI + 指定夹爪", "date": "2026-09-09", "source": "国内 FR3 产品渠道", "url": "https://www.shqiongqi.com/page1000136?product_id=26", "note": "本次未找到可核验公开现价。不要混入 FP3、旧 Panda 或二手臂报价。"}
+      ],
+      "comparison": "以 US$29,218.06 作为本次找到的低价询价基准，不能继续把 US$61,900 当作全球最低价。国内同配置现价缺失；需比较包含 FCI、夹爪、税运和支持的总价后再选国家。",
+      "compatibility": [
+        {"model": "OpenPI / π₀.₅-DROID", "level": "DROID 本体流程", "evidence": "OpenPI 发布 DROID 权重及真实机器人推理示例。", "limit": "先核对 DROID 原本体、夹爪和控制栈与 FR3 的差异，不能将 Franka 品牌相同理解为即插即用。", "url": "https://github.com/Physical-Intelligence/openpi"},
+        {"model": "X-VLA Franka 条目", "level": "主要为仿真任务", "evidence": "官方模型表中 Franka 条目包括 CALVIN、LIBERO、VLABench。", "limit": "这些条目不证明新购 FR3 真机可直接执行相同权重。需要真机驱动、动作适配与数据。", "url": "https://github.com/2toinf/X-VLA"},
+        {"model": "Cosmos3 Nano-Policy-DROID", "level": "本组接口经验", "evidence": "此前本组测试得到 DROID 关节动作，与 LIBERO 末端增量动作不一致。", "limit": "这说明需要动作语义适配，不是 FR3 真机闭环验证。选机前应核对模型输入和控制接口。", "url": "https://github.com/NVIDIA/cosmos"}
+      ],
+      "strengths": ["关节力觉与实时控制接口适合研究接触、阻抗和模型预测对真实操作的帮助。", "固定单臂能减少移动与平衡干扰，让模型对照更聚焦。"],
+      "limits": ["单臂无法自然覆盖双手协作或腿臂协调；增加第二台会引入更多成本与互碰约束。", "价格低的裸臂仍可能缺少 FCI、夹爪、相机和支持包，必须核对许可范围。"],
+      "workflow": [{"title": "读通 FCI", "detail": "在固定固件和驱动版本上验证状态读取、基础运动和力矩反馈。"}, {"title": "对齐动作语义", "detail": "明确模型输出是关节目标、关节增量还是末端位姿，经过对应控制器转换，不用简单截断维度代替适配。"}, {"title": "接触任务闭环", "detail": "把视觉、状态与接触反馈写入数据；在相同低层控制器上对比未来预测或动作策略的增益。"}],
+      "procurement": ["合同中明确 FR3 而非 FP3 / Panda，以及 FCI、控制柜、夹爪与软件许可。", "目标若是 DROID 复现，先按其硬件与软件清单逐项对齐再购买。"]
+    },
+    {
+      "id": "unitree-h2-plus", "name": "Unitree H2 Plus", "organization": "宇树科技 · 中国", "kind": "biped", "category": "全尺寸双足人形", "focus": "全身灵巧操作 / GR00T", "status": "交付日期需书面确认",
+      "summary": "围绕 Jetson Thor、灵巧手和 NVIDIA Isaac 工具链设计的高配置人形平台。适合上限更高的全身操作研究，但应把采购交付与软件成熟度单独验证。",
+      "configuration": "31 轴机身 + 双 SharpaWave 手的 75 DoF 方案；不与低价假手版本或普通 H2 混价。",
+      "facts": [["机身", "约 1.82 m；约 70 kg（官方机身表口径）"], ["自由度", "机身 31；双手各 22 主动 DoF，合计 75"], ["身体构成", "双腿各 6、双臂各 7、腰 3、头 2"], ["单臂负载", "额定约 7 kg，峰值约 15 kg"], ["计算", "Jetson Thor / T5000；128 GB 统一内存方案"], ["感知", "头部双目、腕部相机、IMU；具体套装以订单为准"]],
+      "hardwareSources": [{"label": "H2 Plus 官方规格", "url": "https://www.unitree.com/H2plus/"}, {"label": "H2 Plus 官方商店", "url": "https://shop.unitree.com/products/unitree-h2-plus"}],
+      "reference": 0, "priceHint": "官方国际标价 US$100,000；较低的假手配置不能按 75 DoF 科研整套比较。",
+      "prices": [
+        {"market": "中国厂商 / 国际商店", "amount": 100000, "currency": "USD", "type": "官方公开价", "config": "H2 Plus；完整选配清单需销售确认", "date": "2026-09-09", "source": "Unitree 官方商店", "url": "https://shop.unitree.com/products/unitree-h2-plus", "note": "通过销售购买；不含关税。美元标价并不代表美国本地交付总价。"},
+        {"market": "美国", "amount": 66800, "currency": "USD", "type": "不同配置价格", "config": "H2 Plus Standard，假手 / Thor 可选", "date": "2026-09-09", "source": "Toborlife H2 系列配置表", "url": "https://toborlife.ai/h2/", "note": "31 自由度方案，与双 SharpaWave 的 75 DoF 目标不同，不作为同配置最低价。"},
+        {"market": "中国", "amount": null, "currency": "CNY", "type": "需询价", "config": "75 DoF、双手、Thor 与开发交付包", "date": "2026-09-09", "source": "H2 Plus 官方产品页", "url": "https://www.unitree.com/H2plus/", "note": "本次未找到同配置人民币公开现价。"}
+      ],
+      "comparison": "当前无法判断中美同配置孰低。官方美元标价可作预算基准，美国 Standard 低价对应不同手和算力配置。官方发布信息曾预计 2026 年末供货，采购前应重新确认实际交付时间。",
+      "compatibility": [{"model": "NVIDIA Isaac / GR00T", "level": "官方参考平台方案", "evidence": "官方产品介绍列出 Isaac TeleOp、GR00T、Isaac Sim / Lab、Isaac ROS 和 Thor 的工作流。", "limit": "参考平台方案不是所有 GR00T 权重已完成该硬件真机验证，更不代表 G1 的全身控制器可以直接复用。", "url": "https://www.unitree.com/H2plus/"}],
+      "strengths": ["较大的机身、手臂负载与多指手为灵巧全身操作提供更丰富的硬件空间。", "感知、计算和工具链的一体化方案有利于减少部分硬件集成工作。"],
+      "limits": ["高采购成本和较重本体提高实验场地、维护与失误成本。", "新硬件的公开任务权重、数据、控制接口和交期应逐项验收，不能仅凭参考设计名称采购。"],
+      "workflow": [{"title": "冻结配置", "detail": "先锁定双手型号、相机、Thor 和开发权限，再匹配可用遥操与控制流程。"}, {"title": "分层验证", "detail": "先验证机身控制与手部控制，再验证统一时钟和状态输入，之后接入高层策略。"}, {"title": "全身任务", "detail": "分别评价躯干和腿部协调、手内操作及二者耦合，区分模型能力与硬件升级收益。"}],
+      "procurement": ["要求交期、手部自由度、触觉、计算模块、软件版本和样机验收任务写进报价。", "若第一阶段只做夹爪取放，先评估是否有必要承担 75 DoF 平台的全部成本。"],
+      "extraSources": [{"label": "官方发布 / 供货计划", "url": "https://www.unitree.com/mobile/news/40"}]
+    },
+    {
+      "id": "dobot-atom", "name": "Dobot Atom", "organization": "越疆机器人 · 中国", "kind": "biped", "category": "双足人形", "focus": "操作精度 / 人形研发", "status": "区分发布款与 Atom Max",
+      "summary": "以工业机械臂经验延伸到人形操作。官方已给出 SDK、遥操及开发套件，但当前 Max 配置和早期 19.9 万元起的发布款不能直接混用。",
+      "configuration": "技术参数按 D20251215 官方 Atom Max 手册；价格的 ¥199,000 是 2025 年发布时的系列起价。",
+      "facts": [["Atom Max 尺寸", "约 1.65 m、58 kg；重量不含灵巧手 / 夹爪"], ["自由度", "机身 29；双手各 6，完整配置 41"], ["手臂", "单臂 7 轴；额定 3.5 kg，最大 5 kg"], ["重复定位", "官方单臂 ±0.05 mm；不是视觉任务成功率"], ["感知", "RealSense / 双目、腕部相机与 LiDAR，按配置交付"], ["开发", "SDK、遥操；Embodied AI Set 的 URDF / 训练与数据工具需核对选配"]],
+      "hardwareSources": [{"label": "Dobot 官方 Atom Max 手册（渠道镜像）", "url": "https://cdn.robotshop.com/media/D/Dot/RB-Dot-107/pdf/DOBOT-Atom-Max-Brochure.pdf"}, {"label": "Dobot Atom 官方产品页", "url": "https://www.dobot-robots.com/products/humanoid-robots/atom.html"}],
+      "reference": 0, "priceHint": "¥199,000 是历史发布起价；目前 Atom Max 科研配置需询价。",
+      "prices": [
+        {"market": "中国", "amount": 199000, "currency": "CNY", "type": "历史发布起价", "config": "2025 年 Atom 发布款 / 起配", "date": "2025-03-18", "source": "SCMP 发布报道", "url": "https://www.scmp.com/tech/tech-trends/article/3302868/chinese-robotics-firm-shenzhen-dobot-excites-investors-us27500-humanoid", "note": "不是 2026 年 Atom Max 完整开发配置的已核验报价。报道中的约 US$27,500 是换算，不是美国独立报价。"},
+        {"market": "中国 / 美国", "amount": null, "currency": "USD", "type": "需询价", "config": "当前 Atom Max + SDK / 开发套件", "date": "2026-09-09", "source": "Dobot 官方销售入口", "url": "https://www.dobot-robots.com/products/humanoid-robots/atom.html", "note": "中美同配置公开现价不足，分别取得当地报价后比较。"}
+      ],
+      "comparison": "目前只有中国历史起价可作预算线索；不能把人民币的美元换算当成美国报价，也不能用这个起价购买预期中的完整 Max 科研配置。",
+      "compatibility": [{"model": "Dobot 自有控制 / 开发套件", "level": "厂商开发工具", "evidence": "官方手册列出 SDK、遥操及可选具身 AI 工具链。", "limit": "本轮未核验到与当前 Atom Max 精确匹配的 DiT4DiT、Cosmos3 或 π₀.₅ 真机公开检查点。自定义本体通常需要驱动与数据适配。", "url": "https://cdn.robotshop.com/media/D/Dot/RB-Dot-107/pdf/DOBOT-Atom-Max-Brochure.pdf"}],
+      "strengths": ["双七轴手臂与低层开发能力适合把稳定操作、接触和人形运动放到一个平台上研究。", "国内采购可直接围绕遥操和数据工具交付谈判，评估端到端实验流程。"],
+      "limits": ["原稿 1.53 m / 62 kg 与当前 Max 手册不同，硬件代次必须写清。", "重复定位精度只衡量机械重复运动，视觉误差、物体位姿、策略与接触仍会导致任务失败。"],
+      "workflow": [{"title": "验证开放范围", "detail": "确认 SDK 能读取哪些状态、下发哪些命令，哪些功能需要额外许可证。"}, {"title": "采集与适配", "detail": "按 Atom 实际关节和末端表示建立数据转换，先复现实机回放再训练自定义本体策略。"}, {"title": "拆开评价", "detail": "分别测试运动重复性、感知误差和策略成功率，避免把机械精度改进误认为模型泛化提升。"}],
+      "procurement": ["要求明确 Max 代次、双手、AI 模块、遥操套件和开发权限。", "把目标模型跑通的小型验收任务写在技术附件中。"]
+    },
+    {
+      "id": "agibot-genie-g1", "name": "AgiBot Genie G1", "organization": "智元机器人 · 中国", "kind": "wheeled", "category": "轮式双臂", "focus": "真实数据 / 长时程操作", "status": "精灵 G1，与宇树 G1 不同",
+      "summary": "智元精灵 G1 面向移动操作和具身数据采集。AgiBot World 与对应模型资源提供研究入口，但仍要核对末端配置、开发权限和任务数据。",
+      "configuration": "精灵 G1 轮式平台，避免与宇树 G1、智元远征 A2 或更新的 G2 混淆。",
+      "facts": [["体型", "约 1.3–1.8 m 升降范围；约 150 kg"], ["自由度口径", "官方列出不含末端 20 DoF；不可直接与含双手的总 DoF 比较"], ["操作", "官方描述单臂持 3 kg 持续工作；六维力传感"], ["感知", "RGB-D × 3、鱼眼 × 5（官方配置表）"], ["计算 / 续航", "Jetson AGX Orin 64 GB；约 4 h 以上，工况相关"], ["数据采集", "VR / 动捕遥操、关节数据记录与数据管理流程"]],
+      "hardwareSources": [{"label": "智元 G1 官方规格", "url": "https://www.agibot.com/products/G1"}],
+      "reference": 0, "priceHint": "中国历史商城价 ¥450,000；当前同款报价与美国交付价需核实。",
+      "prices": [
+        {"market": "中国", "amount": 450000, "currency": "CNY", "type": "历史商城价", "config": "精灵 G1 通用具身智能机器人", "date": "2025-08-18", "source": "中新经纬对智元商城的报道", "url": "https://www.jwview.com/jingwei/html/m/08-18/628688.shtml", "note": "报道引述的商城价格，交付配置与当期报价需复核。"},
+        {"market": "中国 / 美国", "amount": null, "currency": "USD", "type": "需询价", "config": "G1 + 指定末端、开发和美国交付支持", "date": "2026-09-09", "source": "智元官方 G1 销售入口", "url": "https://www.agibot.com/products/G1", "note": "本次未取得中美同配置公开现价；不把数据库估算标成美国报价。"}
+      ],
+      "comparison": "国内历史公开价是现有预算线索，当前美国价格缺失，无法计算国别差价。先向中国官方确认 G1 仍可交付的科研配置及海外售后，再比较当地服务方案。",
+      "compatibility": [{"model": "X-VLA AgiWorld Challenge", "level": "本体对应检查点", "evidence": "X-VLA 模型表明确列出 Agibot-G1 的 X-VLA-AgiWorld-Challenge。", "limit": "它对应比赛数据与任务，不能推出一般家庭任务零样本可用；需核对挑战配置与新购硬件。", "url": "https://github.com/2toinf/X-VLA"}, {"model": "AgiBot 数据生态", "level": "数据与本体入口", "evidence": "厂商提供具身数据采集流程，X-VLA 等工作将智元平台列入研究对象。", "limit": "开放数据不等于采购设备附送所有模型权重与控制权限。", "url": "https://www.agibot.com/products/G1"}],
+      "strengths": ["真实数据与厂商本体生态相互关联，适合研究长时程操作与真实数据分布。", "轮式结构可承载更多计算与感知，适合固定室内场景中的移动双臂实验。"],
+      "limits": ["150 kg 级平台对运输、楼层和空间有要求；需要把部署条件计入成本。", "同名 G1、末端型号、开放数据和比赛检查点容易被混同，逐项对应才能复现。"],
+      "workflow": [{"title": "对照挑战配置", "detail": "从目标数据和检查点确定传感器、夹爪和 action 字段，不只依据品牌名称。"}, {"title": "本地采集", "detail": "建立可重复的遥操、数据校验、清洗与回放流程，确认是否依赖厂商云服务。"}, {"title": "任务验证", "detail": "先在训练任务附近完成闭环，再测试新物体和新场景，分别记录迁移范围。"}],
+      "procurement": ["确认 G1 / G2 代次、末端、SDK 权限、数据导出和离线运行能力。", "海外采购要确认工程支持所在地区及整机回运条件。"]
+    },
+    {
+      "id": "fourier-gr2", "name": "Fourier GR-2", "organization": "傅利叶智能 · 中国", "kind": "biped", "category": "全尺寸双足人形", "focus": "运动控制 / 灵巧人形", "status": "配置与交期需核实",
+      "summary": "全尺寸人形与灵巧手平台。官方有运动控制 SDK 和仿真 / 真机入门工具，适合需要这一机身或已有傅利叶合作条件的研究。",
+      "configuration": "GR-2，按具体机身和手部配置报价；GR-1、GR-3 和仿真中的 GR1 都是不同对象。",
+      "facts": [["体型", "官方约 1.75 m、63 kg"], ["自由度", "官方最多 53 DoF；是否包含手部须按配置表确认"], ["驱动", "FSA 2.0 执行器与自研灵巧手方案"], ["开发接口", "Aurora Python SDK，通过 DDS 与服务端通信"], ["控制开发", "状态读取、关节 / 运动命令及 RL 策略示例"], ["仿真入口", "官方文档提供仿真与真实机器人入门路径"]],
+      "hardwareSources": [{"label": "Fourier 官方 GR-2 介绍", "url": "https://support-old.fftai.com/en/docs/GR-X-Humanoid-Robot/GR2/GR-2_Introduction/"}, {"label": "Fourier 官方 GR-2 SDK", "url": "https://support-old.fftai.com/en/docs/GR-X-Humanoid-Robot/GR2/SDK/Overview/"}],
+      "reference": 0, "priceHint": "美国渠道公开标价 US$125,000；非厂家统一价，配置与现货需确认。",
+      "prices": [
+        {"market": "美国", "amount": 125000, "currency": "USD", "type": "渠道公开价", "config": "Fourier GR-2，具体手与计算配置未完整披露", "date": "2026-09-09", "source": "Robotix Market 美国站", "url": "https://robotixmarket.com/products/fourier-gr-2-humanoid-robot", "note": "页面主体列美国公司与 USD 标价；运费结算、实际库存、授权售后及 BOM 均需书面确认。"},
+        {"market": "中国", "amount": null, "currency": "CNY", "type": "需询价", "config": "相同机身、灵巧手及开发配置", "date": "2026-09-09", "source": "Fourier 官方", "url": "https://www.fftai.com/en/grx/about", "note": "未找到可核验的同配置中国公开现价。"}
+      ],
+      "comparison": "美国渠道价提供预算参考，不能证明它比中国采购低。原稿与部分数据库的其他美元估值缺少完整报价条件，本页不把估值当作最低成交价。",
+      "compatibility": [{"model": "Aurora / 运动控制生态", "level": "官方开发流程", "evidence": "官方 SDK 文档包含状态读取、关节命令、仿真和真机入门。", "limit": "这是低层开发支持，不是某个通用 VLA 已适配完成的证明。", "url": "https://support-old.fftai.com/en/docs/GR-X-Humanoid-Robot/GR2/SDK/Overview/"}, {"model": "RoboCasa GR1 / DiT4DiT", "level": "需区分仿真本体", "evidence": "DiT4DiT 项目同时涉及仿真任务和真实 G1 工作流。", "limit": "RoboCasa GR1 的模型名称不能用来推断 GR-2 真机兼容，需要单独接入传感器、控制器并采集数据。", "url": "https://github.com/Mondo-Robotics/DiT4DiT"}],
+      "strengths": ["全尺寸机身适合对人与环境尺度敏感的控制和交互实验。", "官方底层开发文档为自定义控制与策略实验提供基础。"],
+      "limits": ["高采购和维护成本需要有明确任务支撑，更多 DoF 不能替代可用检查点与数据。", "本次未核实精确匹配 GR-2 的目标 VLA/WAM 开源真机检查点。"],
+      "workflow": [{"title": "控制接口验证", "detail": "按官方 SDK 完成状态读取和仿真 / 真机基础示例，固定控制模式。"}, {"title": "选择动作层级", "detail": "决定高层策略输出关节、末端还是运动命令，明确身体协调交给哪层控制器。"}, {"title": "建立自有数据", "detail": "用本机遥操数据完成微调，再验证目标任务，不用仿真 GR1 成绩代替 GR-2 真机结果。"}],
+      "procurement": ["核对 SDK 版本对应的 GR-2 配置，特别是手部、算力和传感器。", "要求演示与交付同款机器人上的目标任务，而非其他 GR 系列视频。"]
+    },
+    {
+      "id": "limx-oli", "name": "LimX Oli", "organization": "逐际动力 · 中国", "kind": "biped", "category": "全尺寸双足人形", "focus": "RL / 运动控制 / Sim2Real", "status": "Lite / EDU / Super 分开报价",
+      "summary": "开放上下层 API 与 URDF 的全尺寸人形平台，适合步态、运动控制和 Sim2Real。与 VLA 的衔接还取决于遥操、手部和任务数据的具体交付。",
+      "configuration": "本页采购参考为 Oli EDU；中国系列 Lite 起价不能直接对比美国 EDU。",
+      "facts": [["本体尺寸", "官方基础页面约 1.65 m"], ["自由度口径", "官方机身 31；美国 EDU 渠道列含末端 33，需核对定义"], ["机械设计", "可替换末端、快换电池与模块化结构"], ["感知", "IMU、深度相机及外接传感器接口"], ["开发接口", "Python、模块化 SDK、上下层 API、URDF"], ["仿真支持", "官方列 Isaac Sim、MuJoCo、Gazebo"]],
+      "hardwareSources": [{"label": "LimX Oli 官方产品与开发说明", "url": "https://www.limxdynamics.com/en/products/oli"}],
+      "reference": 0, "priceHint": "EDU 美国渠道 US$59,800；中国 ¥158,000 为系列历史起价，配置不同。",
+      "prices": [
+        {"market": "美国", "amount": 59800, "currency": "USD", "type": "渠道公开价", "config": "Oli EDU，渠道列 33 DoF", "date": "2026-09-09", "source": "US Robot Store", "url": "https://www.usrobotstore.com/products/limx-dynamics-humanoid-robot-oli-edu", "note": "最终手部、计算配置与税运条款需确认。"},
+        {"market": "美国", "amount": 70499, "currency": "USD", "type": "渠道公开价", "config": "Oli EDU，平行夹爪方案", "date": "2026-09-09", "source": "RobotShop 美国站", "url": "https://www.robotshop.com/products/limx-dynamics-oli-edu-humanoid-robot", "note": "明确含美国关税，运费结算时计算；与较低渠道价的税费口径未必相同。"},
+        {"market": "中国", "amount": 158000, "currency": "CNY", "type": "历史系列起价", "config": "Oli 系列 Lite / EDU / Super 的入门起价", "date": "2025-08-01", "source": "Interesting Engineering 发布报道", "url": "https://interestingengineering.com/innovation/chinas-humanoid-robot-shows-off-new-moves", "note": "不能将系列起价认定为 EDU 科研整机价格。"},
+        {"market": "中国", "amount": null, "currency": "CNY", "type": "需询价", "config": "与美国 EDU 相同的末端和计算配置", "date": "2026-09-09", "source": "LimX 官方", "url": "https://www.limxdynamics.com/en/products/oli", "note": "本次未获得可核验国内同配置 EDU 现价。"}
+      ],
+      "comparison": "本次美国可查标价中 US$59,800 较低，但另一个报价明确含关税；是否更低需统一税费。中国入门价明显更低却不是已确认的同款 EDU，所以优先询国内 EDU，暂不宣布国别赢家。",
+      "compatibility": [{"model": "Isaac / MuJoCo / Gazebo", "level": "官方仿真与 SDK 支持", "evidence": "官方提供 URDF、上下层 API 与主流仿真开发支持。", "limit": "URDF 可加载只说明模型资产可用，不代表动力学完全一致或策略已经完成 Sim2Real。", "url": "https://www.limxdynamics.com/en/products/oli"}, {"model": "目标 VLA / WAM", "level": "需自行适配", "evidence": "本轮找到的是控制与开发工具链。", "limit": "未核验精确对应 Oli EDU 的 DiT4DiT、Cosmos3 真机公开检查点；需要数据、末端映射与控制器对齐。", "url": "https://www.limxdynamics.com/en/products/oli"}],
+      "strengths": ["开放控制层级便于研究高层策略与低层控制如何分工。", "模块化结构与明确仿真入口适合先做 RL、运动技能与现实迁移。"],
+      "limits": ["31 与 33 DoF、不同手和算力配置容易造成价格及能力误判。", "步态工具成熟不意味着操作数据、动作检查点和遥操流程同样完备。"],
+      "workflow": [{"title": "匹配仿真模型", "detail": "核对 URDF、质量惯量、关节限制及执行器接口，与交付硬件逐项对齐。"}, {"title": "运动控制基线", "detail": "先完成站立、基础运动与控制模式切换，再研究高层动作对低层技能的调用。"}, {"title": "扩展操作", "detail": "围绕已安装手部建立遥操和视频动作数据，之后微调 VLA，并单独评估控制与感知误差。"}],
+      "procurement": ["锁定 EDU 版本及含末端的 DoF 口径，不与 Lite 起价混比。", "询问 SDK、仿真资产、控制权限、售后和相机是否在基础套餐内。"]
+    },
+    {
+      "id": "booster-t1", "name": "Booster T1", "organization": "加速进化 · 中国", "kind": "biped", "category": "双足人形", "focus": "运动控制 / RoboCup / RL", "status": "已有渠道提示停产换代",
+      "summary": "面向开发者的轻量人形，运动控制与 RoboCup 开源资源是主要入口。采购时需要先核对 T1 库存、备件和 T2 换代支持。",
+      "configuration": "T1 Basic、Standard、Gripper、Dexterous Hands 分开报价；不要把 Basic 价与灵巧手版能力放在一起。",
+      "facts": [["体型", "官方约 1.2 m、30 kg"], ["自由度", "系列 23–41，依配置变化"], ["标准机身构成", "头 2、每臂 4、腰 1、每腿 6，共 23；不含可动末端"], ["研究接口", "官方 SDK、ROS 2 SDK 与开源工具"], ["研究资源", "Booster Gym 运动 RL、RoboCup demo"], ["采购状态", "RobotShop 提示 T1 停产准备 T2；其他渠道仍列库存价"]],
+      "hardwareSources": [{"label": "Booster 官方 T1", "url": "https://www.booster.tech/booster-t1/"}, {"label": "Booster 官方开源入口", "url": "https://www.booster.tech/open-source/"}, {"label": "RobotShop T1 规格与换代提示", "url": "https://www.robotshop.com/products/booster-t1-humanoid-robot-standard"}],
+      "reference": 0, "priceHint": "美国 Basic 公开价 US$29,800；夹爪与灵巧手版明显更高，先确认库存。",
+      "prices": [
+        {"market": "美国", "amount": 29800, "currency": "USD", "type": "渠道公开价", "config": "T1 Basic", "date": "2026-09-09", "source": "Robots USA 关联商品报价", "url": "https://www.robotsusa.com/Booster-T2-Humanoid-Robot.htm", "note": "该页关联商品列出 T1 Basic 标价；需确认库存和开发配置，不能视为灵巧手版。"},
+        {"market": "美国", "amount": 49000, "currency": "USD", "type": "不同配置价格", "config": "T1 Standard + Dexterous Hands", "date": "2026-09-09", "source": "AltHumans 美国商品页", "url": "https://www.althumans.com/booster-robotics-t1-humanoid-robot-w-dextrous-hands.html", "note": "手部升级版。税费、运输与当前备件支持需确认。"},
+        {"market": "中国", "amount": null, "currency": "CNY", "type": "需询价", "config": "指定 T1 版本及售后期", "date": "2026-09-09", "source": "Booster 官方", "url": "https://www.booster.tech/booster-t1/", "note": "未找到可核验同配置中国公开现价；优先确认是否仍建议采购 T1。"}
+      ],
+      "comparison": "US$29,800 是本次核验到的美国 Basic 标价，不是全功能研究配置。国内报价未知且存在换代，需把库存、备件年限和 T2 迁移成本一起比较，不能只选清仓低价。",
+      "compatibility": [{"model": "Booster Gym / RoboCup", "level": "官方开源任务生态", "evidence": "厂商公开 RL 运动框架与 RoboCup demo，适合从运动技能和控制进入。", "limit": "RoboCup 的感知和运动任务不等同于通用 VLA 操作；需要额外手部与示范数据。", "url": "https://github.com/BoosterRobotics"}, {"model": "DiT4DiT / Cosmos3", "level": "尚需本体适配", "evidence": "本次未核验精确对应 T1 的公开真机检查点。", "limit": "若主要目标是操作模型复现，先要求供应商展示对应版本完整流程再选机。", "url": "https://www.booster.tech/open-source/"}],
+      "strengths": ["运动控制与比赛生态适合学习感知、决策与低层技能如何组合。", "相对紧凑的机身有利于实验部署，但仍需防跌与活动空间。"],
+      "limits": ["Basic 手臂与末端能力限制操作任务，不能据此承担复杂灵巧操作。", "换代期间即使可购买库存，也应确认软件更新和关节备件期限。"],
+      "workflow": [{"title": "跑通运动框架", "detail": "先用官方 SDK / Gym 验证硬件状态、控制模式和仿真策略。"}, {"title": "确认操作能力", "detail": "按实际安装的夹爪或手部建立命令接口，再决定能开展哪些 manipulation 任务。"}, {"title": "连接高层模型", "detail": "把高层视觉语言指令转成可执行的技能或动作，评价任务成功而不仅是步态展示。"}],
+      "procurement": ["询问 T1 的出厂日期、备件供应和固件维护，记录 T2 迁移安排。", "只比较同一末端、同一计算和同一售后套餐的中美价格。"]
+    }
+  ]
+}
