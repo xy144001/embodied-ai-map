@@ -2,6 +2,7 @@
 import WeeklyLayout from "../../../../layouts/WeeklyLayout.astro";
 import FlowFormula from "../../../../components/FlowFormula.astro";
 import WbcCatalog from "../../../../components/WbcCatalog.astro";
+import Week2Examples from "../../../../components/Week2Examples.astro";
 import "katex/dist/katex.min.css";
 
 const sources = {
@@ -51,6 +52,7 @@ const sources = {
       <a href="#teleoperation">遥操作与模型部署</a>
       <a href="#data-impact">数据为什么会变</a>
       <a href="#data-transfer">哪些数据能够复用</a>
+      <a href="#teaching-examples">三个架构讲解示例</a>
       <a href="#references">官方资料</a>
       <a href="#wbc-catalog">最后 · 八类主流 WBC</a>
     </aside>
@@ -281,6 +283,8 @@ const sources = {
         <p>记录机器人配置、控制器名称与 checkpoint、命令字段定义、关节顺序、坐标系和单位、参考 / 实测量的区别、采集与控制频率、时间戳与延迟、归一化方式，以及必要的输入模式和校准信息。这样才能判断差异来自模型，还是来自数据与控制接口。</p>
         <p><strong>本周比较模型时的落点：</strong>先写“模型向下输出什么”，再写“下层控制器如何解释它”，最后写“训练数据里的 action 究竟记录了哪个环节”。这三项对齐后，大小脑的分工、全身协调的位置与数据是否兼容才有清晰答案。</p>
       </section>
+
+      <Week2Examples />
 
       <section id="references" class="weekly-sources" aria-labelledby="sources-title">
         <h2 id="sources-title">官方资料与实现入口</h2>
