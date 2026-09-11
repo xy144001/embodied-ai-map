@@ -1,6 +1,7 @@
 ---
 import WeeklyLayout from "../../../../layouts/WeeklyLayout.astro";
 import FlowFormula from "../../../../components/FlowFormula.astro";
+import WbcCatalog from "../../../../components/WbcCatalog.astro";
 import "katex/dist/katex.min.css";
 
 const sources = {
@@ -51,6 +52,7 @@ const sources = {
       <a href="#data-impact">数据为什么会变</a>
       <a href="#data-transfer">哪些数据能够复用</a>
       <a href="#references">官方资料</a>
+      <a href="#wbc-catalog">最后 · 八类主流 WBC</a>
     </aside>
 
     <div class="weekly-article">
@@ -292,6 +294,7 @@ const sources = {
           <li><a href={sources.sonicPaper}>SONIC：运动跟踪、运动先验与任务接口</a> · <a href={sources.realtime}>ROS 2：实时系统的时限与延迟要求</a></li>
         </ul>
       </section>
+      <WbcCatalog />
     </div>
   </div>
 </WeeklyLayout>
