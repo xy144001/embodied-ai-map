@@ -20,9 +20,11 @@ const sources = {
   qp: "https://arxiv.org/abs/1311.1839",
   helix: "https://www.figure.ai/news/helix-02",
   unitreeLow: "https://github.com/unitreerobotics/unitree_sdk2/blob/main/example/g1/low_level/g1_ankle_swing_example.cpp",
+  sonicPaper: "https://arxiv.org/abs/2511.07820",
+  realtime: "https://design.ros2.org/articles/realtime_background.html",
 };
 ---
-<WeeklyLayout title="Week 2 · 大小脑、WBC 与数据" description="从 VLA 与 WBC 的更新频率解释为什么需要小脑，并理解控制器指令空间如何影响遥操作数据、动作标签与迁移。" section="problems" week={2}>
+<WeeklyLayout title="Week 2 · 大小脑、WBC 与数据" description="从反馈频率、身体状态、动力学约束、训练数据、运动先验与实时执行解释为什么需要小脑，并理解 WBC 指令空间对数据的影响。" section="problems" week={2}>
   <p class="eyebrow">ARCHITECTURE GROUP · WEEK 2 QUESTIONS</p>
   <h1>从“大小脑”到 WBC：<br />谁决策，谁执行？</h1>
   <p class="intro">这一周沿着信息流继续往下看：模型输出的 action 交给谁？谁把参考动作变成真实运动？当底层控制器改变时，原来采集的数据还代表同一件事吗？</p>
@@ -39,8 +41,9 @@ const sources = {
       <a href="#big-small">问题 1 · 大小脑</a>
       <a href="#levels">大小脑的功能分工</a>
       <a href="#control-rates">常用 Hz 与具体实例</a>
-      <a href="#why-cerebellum">为什么需要快速反馈</a>
+      <a href="#why-cerebellum">为什么需要小脑：六个原因</a>
       <a href="#action-chunks">动作块与反馈频率</a>
+      <a href="#direct-control">能否全部交给 VLA 学习</a>
       <a href="#model-examples">模型与控制器怎样配合</a>
       <a href="#wbc-data">问题 2 · WBC</a>
       <a href="#command-spaces">不同指令空间</a>
@@ -52,10 +55,10 @@ const sources = {
 
     <div class="weekly-article">
       <section class="weekly-question" id="big-small" aria-labelledby="question-one-title">
-        <div class="question-number">QUESTION 01 · MULTI-RATE CONTROL</div>
+        <div class="question-number">QUESTION 01 · TASK POLICY & MOTOR CONTROL</div>
         <h2 id="question-one-title">具身智能的大小脑到底是什么？为什么需要小脑</h2>
         <div class="weekly-callout">
-          <p><strong>这里把负责理解任务、生成动作参考的 VLA 称为“大脑”，把负责快速运动跟踪与身体平衡的低层控制器称为“小脑”。</strong>分工的核心原因是时间尺度：身体受到扰动、脚底接触发生变化时，需要比一次完整视觉语言推理更及时的反馈修正。VLA 决定接下来做什么，小脑在两次 VLA 更新之间持续让身体稳定地执行。</p>
+          <p><strong>这里把负责理解任务、生成动作参考的 VLA 称为“大脑”，把负责快速运动跟踪与身体平衡的低层控制器称为“小脑”。</strong>两层分工同时涉及时间尺度、反馈信息、物理约束和学习目标。VLA 给出任务需要的运动参考；小脑结合实时身体状态，处理跟踪、接触和平衡。频率差解释了为什么要及时纠偏，而动力学、训练数据和运动先验解释了这个闭环还必须具备哪些能力。</p>
         </div>
 
         <h3 id="levels">1.1 大脑给出运动参考，小脑持续跟踪身体状态</h3>
@@ -90,12 +93,48 @@ const sources = {
         <p>快速视觉运动网络也可以达到很高频率。例如 Helix 02 的 S1 为 200 Hz，下面仍接 1000 Hz 的 S0。<strong>是否需要分层，取决于当前上层能否满足身体控制所需的反馈周期、延迟与稳定性要求。</strong>“VLA”这个名字本身并不规定它的速度上限。</p>
         <p class="source-line">来源：<a href={sources.helix}>Figure 对 S1 与 S0 的频率和功能说明</a>。</p>
 
-        <h3 id="why-cerebellum">1.3 为什么这个频率差会让小脑变得必要？</h3>
+        <h3 id="why-cerebellum">1.3 为什么需要小脑？从六个方面看这层分工</h3>
+        <p>下面把系统分工拆成六个相互关联的原因。这是用于分析架构的框架：具体控制器承担其中哪些职责、能做到什么程度，要看它的输入、算法、训练和实际部署。</p>
+
+        <h4 id="feedback-timescale">原因一：身体变化更快，需要在上层推理之间持续反馈</h4>
         <p>在官方 GR00T + SONIC 默认配置里，VLA 每隔约 400 ms 发起一轮推理，而 SONIC 每隔 20 ms 更新一次控制。也就是说，<strong>在两次上层推理请求之间，小脑可以进行约 20 次身体状态反馈与控制更新。</strong>这里的 2.5 Hz 是客户端调度频率，实际完成节奏还受推理与通信耗时影响。</p>
         <FlowFormula expression={"\\begin{aligned}\\Delta t_{\\mathrm{VLA}}&=\\frac{1}{2.5}\\ \\mathrm{s}=400\\ \\mathrm{ms},\\\\\\Delta t_{\\mathrm{WBC}}&=\\frac{1}{50}\\ \\mathrm{s}=20\\ \\mathrm{ms},\\\\N&=\\frac{f_{\\mathrm{WBC}}}{f_{\\mathrm{VLA}}}=\\frac{50}{2.5}=20\\end{aligned}"} caption="用同一套官方 GR00T + SONIC 配置说明时间尺度：一次上层更新间隔内，低层有约 20 次反馈控制机会。" />
         <p>假设大脑刚决定“前伸右手拿杯子”，机器人随后受到碰撞、脚底打滑，或手臂运动使身体状态偏离参考。若所有修正都等待下一轮视觉编码、语言条件处理和动作生成，偏差可能在等待期间继续扩大。小脑可以读取较新的关节和 IMU 状态，及时调整关节目标、姿态与运动跟踪。</p>
         <p>这类反馈通常只需要紧凑的身体状态和参考命令，适合用计算负担较小、更新节奏较稳定的控制程序或网络来处理。上层则把计算用于语义理解、场景判断和任务动作选择。需要的反馈速度还取决于动作快慢、接触情况、扰动和机器人本身的动力学。</p>
-        <div class="weekly-callout"><p><strong>为什么需要小脑：</strong>在上层推理尚未刷新时，身体仍然在运动，外部扰动也仍然会发生。低层控制器通过更快的真实状态反馈，持续维持平衡并执行任务参考。</p></div>
+        <p><strong>这一原因回答“什么时候修正”。</strong>接下来还要回答：修正时看什么状态、根据什么物理条件，以及这种修正能力从哪里学来。</p>
+
+        <h4 id="body-feedback">原因二：任务动作参考与身体反馈，包含不同的信息</h4>
+        <p>“下一步把膝关节弯到某个角度”表达的是运动参考。真正执行时，还要知道当前关节角速度、机身倾斜与角速度，以及系统能够估计的接触状态。同一个目标角度，在身体已经向前倒和身体正在向后回正时，可能需要不同的控制输出。</p>
+        <p>因此即使 VLA 和 WBC 都作用于同一组关节，它们也可能解决不同的映射：上层从任务观测生成参考，下层根据参考与最新身体状态计算执行量。VLA 也可以接收本体和触觉信息；要承担低层控制，它就必须及时处理这些信息，并学会相应的反馈规律。</p>
+        <FlowFormula expression={"\\begin{aligned}c_t&=\\pi_\\theta(O_{\\le t},s_t^{\\mathrm{VLA}},L),\\\\u_t&=K_\\psi(c_t,\\widehat s_t^{\\mathrm{body}},h_t)\\end{aligned}"} caption="c 是任务参考，u 是执行量。最新身体状态估计 ŝ 与控制历史 h 决定当下怎样执行。这里 K 合并表示 WBC 与必要的关节伺服，不规定每种 WBC 都直接输出力矩。" />
+        <p><strong>判断两层是否在做同一件事，要检查 action 的物理含义。</strong>关节位置目标、速度、力矩和运动 token 都可能叫 action，但单位、语义和执行入口不同；相同的张量维数也不意味着相同的控制任务。</p>
+        <p class="source-line">可核对 <a href={sources.unitreeLow}>G1 底层命令中的位置、速度、增益与力矩字段</a>。上式是对这些控制环节的抽象，实际接口区别在 <a href="#command-spaces">问题 2 的指令空间</a>中展开。</p>
+
+        <h4 id="physical-execution">原因三：任务要求必须通过身体动力学、接触和全身协调实现</h4>
+        <p>对人形机器人而言，“手到达杯子”还伴随手臂、躯干、腿与地面之间的受力变化。浮动基座的位置和姿态要通过关节运动与外部接触来改变。控制器需要在跟踪参考的同时，处理身体运动的耦合，而不能把每个关节都视为互不影响的独立输出。</p>
+        <p>例如地面的摩擦能力、电机的力矩上限都会限制当前能够实现的运动。一个语义正确、外形合理的姿态序列，仍可能要求脚底产生做不到的切向力，或要求某个关节瞬间提供过大的力矩。</p>
+        <FlowFormula expression={"\\|\\lambda_{\\mathrm{tan}}\\|_2\\leq\\mu\\lambda_n,\\qquad\\lambda_n\\geq0,\\qquad|\\tau_i|\\leq\\tau_{i,\\max}"} caption="理想单边接触下的库仑摩擦约束与关节力矩限幅示意：λtan、λn 是切向与法向接触力，μ 是摩擦系数。这些只是可执行性的部分条件；完整控制还需结合动力学、接触模式等。" />
+        <p>优化式 WBC 可以显式处理模型和约束；学习型小脑则可以通过物理仿真中的运动跟踪与强化学习获得协调能力。<strong>这些能力需要专门构建或训练。</strong>小脑也有可跟踪范围，无法把任意不合理参考都变成可执行动作；上层仍需生成与控制器能力匹配的命令。</p>
+        <p class="source-line">约束处理参照 <a href={sources.qp}>优化式动态行走控制</a>；学习式运动跟踪参照 <a href={sources.sonicPaper}>SONIC 论文</a>。上面的约束是通用简化表达；<a href="#wbc-data">问题 2</a>给出完整机器人动力学的示意。</p>
+
+        <h4 id="training-objectives">原因四：完成任务的数据，与学会稳住身体的数据，提供的监督不同</h4>
+        <p>一段遥操作示范能够告诉 VLA“看到这样的场景时，应给出怎样的任务命令”。如果采集时已经有 WBC 负责平衡，数据中的上层 action 往往只记录参考；控制器在两帧示范之间做出的高频修正，不一定包含在这些标签里。</p>
+        <p>设想两段都成功拿起杯子的演示：一段地面平稳，另一段中机器人受到轻微推扰。任务参考可以相近，而踝、膝、髋的瞬时修正可能不同。只用参考动作做模仿学习，不能据此推断模型已经学到了这些低层反馈。</p>
+        <p>学习型小脑可以利用运动捕捉或重定向轨迹作为跟踪目标，再在物理仿真中结合状态变化、接触、扰动和奖励训练。这样得到的是“身体怎样跟随参考”的能力。VLA 则可以把相机、语言和任务演示用于学习“当前该选择什么参考”。两类数据、目标和评估方式可以互补。</p>
+        <p class="source-line"><a href={sources.sonicPaper}>SONIC</a>以多样化运动跟踪建立控制能力；<a href={sources.helix}>Helix 02 的 S0</a>使用重定向人体运动与仿真强化学习。前两段是根据分层采集过程作出的数据分析，并非声称所有 VLA 都只能采用模仿学习。</p>
+
+        <h4 id="motor-prior">原因五：复用运动先验，让任务学习聚焦于“如何使用身体能力”</h4>
+        <p>如果已经有一个能够跟踪行走、转身、下蹲和伸手参考的小脑，学习“开柜门”或“搬箱子”时，上层可以利用这些身体能力，学习何时使用、怎样组合以及如何依据环境调整。它不必仅靠每个新任务的少量示范，同时重新建立全部运动协调规律。</p>
+        <p>这种分工有望减少任务学习需要探索的无效控制组合。它提供的结构可以是显式轨迹接口，也可以是学习到的运动 latent；<strong>学习难度降低与输出维数降低是两回事</strong>。一个有用的运动表示甚至可能比关节向量更长，价值在于它与稳定运动之间已经建立了可复用的映射。</p>
+        <p>复用也有边界：若任务要求的接触方式或运动超出小脑的能力范围，需要扩展或重新训练控制器，并检查上层接口能否表达该动作。换机器人或更换控制器版本后，原有映射也要重新验证。</p>
+        <p class="source-line"><a href={sources.sonicPaper}>SONIC 的运动表示同时连接遥操作与 VLA</a>是一个具体实例。关于学习难度和接口限制的说明是由这种分工推导的工程分析，不是所有分层方案都能获得相同收益的结论。</p>
+
+        <h4 id="execution-budget">原因六：把重计算与身体控制分开，更容易管理实时执行</h4>
+        <p>控制循环既要运行得快，还要尽量按预定时刻完成。即使平均推理速度足够，一次计算或通信的长延迟也可能让身体错过必要的反馈更新。视觉语言计算与身体控制分开后，可以分别安排计算资源、更新周期和通信接口，使低层反馈不必逐次等待上层完成。</p>
+        <p>这种组织方式也便于分别评估任务成功率、运动跟踪误差与控制延迟。它需要明确参考过期时的处理方式、通信超时和控制器能力边界；仅仅拆成两个进程，并不会自动获得确定性或稳定性。</p>
+        <p class="source-line">实时性与平均速度的区别见 <a href={sources.realtime}>ROS 2 实时系统设计说明</a>；分离部署的实例见 <a href={sources.sonicVla}>VLA 服务器与 SONIC 控制流程</a>。资源安排与分别评估是这里给出的工程推论。</p>
+
+        <div class="weekly-callout"><p><strong>小脑提供的是一套可实时调用的身体执行能力：</strong>它利用新鲜的身体反馈，把参考转成受物理条件约束的运动。这套能力可以由控制算法、学习模型或两者结合实现；高频是其中一个要求，状态反馈、运动知识和训练覆盖同样关键。</p></div>
 
         <h3 id="action-chunks">1.4 VLA 一次生成很多步动作，为什么仍需要小脑？</h3>
         <p>动作块解决了“两次推理之间执行什么”的问题。例如 VLA 以 2.5 Hz 更新动作块，执行端仍可以以 50 Hz 逐步取出其中的参考动作。这样可以让运动连续，但动作块里的参考主要依据生成时的观测；期间新发生的机身偏移仍需要低层反馈来处理。</p>
@@ -104,7 +143,19 @@ const sources = {
         <p><strong>因此需要分别记录三个频率：</strong>VLA 重新推理的频率、动作参考逐步发送的频率、WBC 根据身体反馈更新控制的频率。插值或播放动作块可以提高参考发送频率；新的身体反馈则来自低层控制循环。</p>
         <p class="source-line">官方客户端将 <code>--rate 2.5</code> 与 <code>--action-publish-rate 50</code> 分别配置，见 <a href={sources.sonicVla}>VLA 推理参数</a>；控制器频率见 <a href={sources.sonic}>SONIC 模型说明</a>。</p>
 
-        <h3 id="model-examples">1.5 不同模型怎样与低层控制器配合？</h3>
+        <h3 id="direct-control">1.5 既然都能控制关节，为什么不全部交给 VLA 学习？</h3>
+        <p><strong>可以研究由一个策略统一承担任务与低层控制。</strong>两层的区别首先来自输出语义与反馈责任：WBC 的输出通常更接近执行端，但它不需要比 VLA 多控制一组关节；VLA 也没有被定义为只能输出高层命令。</p>
+        <p>如果希望统一模型直接取代独立的小脑，就需要一并承担前面六项工作，而不能只把输出头改成关节数或力矩维数。具体要具备：</p>
+        <ul>
+          <li><strong>相应的信息：</strong>及时获得身体状态及必要的接触信息，处理传感器时间对齐、估计误差和控制历史。</li>
+          <li><strong>相应的训练：</strong>学习动力学中的反馈、运动协调与扰动响应；如果原数据只标注上层参考，还需补充与新输出接口匹配的训练信号。</li>
+          <li><strong>相应的执行能力：</strong>满足身体控制所需的更新周期和延迟要求，将输出接入匹配的执行器接口，并验证闭环跟踪与约束表现。</li>
+        </ul>
+        <p>统一架构可以采用共享表示、不同频率的输出分支、联合训练或蒸馏。独立 WBC 是一种实现选择；在单一系统里，小脑的功能也可以由内部子网络承担。架构图上少画一个模块，并不等于身体反馈与运动学习的工作已经完成。</p>
+        <p>Helix 02 给出一个直观例子：S1 已经生成全身关节目标，S0 仍负责跟踪、平衡与接触协调。两层可以作用于同一套身体，通过不同的输入、目标与更新周期合作。</p>
+        <p class="source-line">实例见 <a href={sources.helix}>Helix 02 的 S1 / S0 分工</a>；上面的统一方式是可研究的架构选择，并非声称该系统已经采用每一种方式。</p>
+
+        <h3 id="model-examples">1.6 不同模型怎样与低层控制器配合？</h3>
         <div class="weekly-table-wrap" tabindex="0" role="region" aria-label="模型与低层控制器的分工实例，可横向滚动">
           <table class="weekly-table">
             <thead><tr><th scope="col">模型 / 配置</th><th scope="col">上层承担什么</th><th scope="col">下层怎样配合</th></tr></thead>
@@ -116,8 +167,7 @@ const sources = {
             </tbody>
           </table>
         </div>
-        <p>大小脑可以作用于同一组关节：大脑学习任务需要的动作参考，小脑学习或求解怎样在当下身体状态下跟踪它们。分工并不要求小脑必须控制更多关节，而是让任务决策和快速反馈分别满足各自的时间尺度与控制要求。</p>
-        <p>如果一个策略能够直接达到所需控制频率、及时使用身体反馈，并经过相应的稳定性与运动能力训练，架构也可以进一步融合这些功能。对于计算较重的 VLA，保留独立的高频运动控制层，是让任务能力与可靠执行配合起来的一种实用方案。</p>
+        <p>比较这些架构时，可以依次检查：上层输出的 action 表示什么，身体协调发生在哪一层，低层读取哪些新状态，以及它的运动能力来自怎样的训练。这样才能判断一套系统为什么保留小脑，又有哪些功能适合进一步融合。</p>
       </section>
 
       <section class="weekly-question" id="wbc-data" aria-labelledby="question-two-title">
@@ -239,6 +289,7 @@ const sources = {
           <li><a href={sources.sonic}>SONIC 模型与版本</a> · <a href={sources.sonicVla}>VLA 推理</a> · <a href={sources.sonicTeleop}>全身遥操作</a> · <a href={sources.sonicData}>数据采集</a></li>
           <li><a href={sources.decoupled}>Decoupled WBC 的实际命令字段与执行</a> · <a href={sources.unitree}>Unitree 官方高层运动 SDK 示例</a></li>
           <li><a href={sources.qp}>优化式全身动态行走控制的原始论文</a> · <a href={sources.helix}>Helix 02 的多频率控制层级</a> · <a href={sources.unitreeLow}>Unitree G1 的 500 Hz 命令循环</a></li>
+          <li><a href={sources.sonicPaper}>SONIC：运动跟踪、运动先验与任务接口</a> · <a href={sources.realtime}>ROS 2：实时系统的时限与延迟要求</a></li>
         </ul>
       </section>
     </div>
