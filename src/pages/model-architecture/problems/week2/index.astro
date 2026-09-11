@@ -1,0 +1,257 @@
+---
+import WeeklyLayout from "../../../../layouts/WeeklyLayout.astro";
+import FlowFormula from "../../../../components/FlowFormula.astro";
+import "katex/dist/katex.min.css";
+
+const sources = {
+  groot: "https://huggingface.co/nvidia/GR00T-N1.7-3B",
+  grootSonic: "https://github.com/NVIDIA/Isaac-GR00T/blob/main/examples/GR00TWholeBodyControl/README.md",
+  dit: "https://github.com/Mondo-Robotics/DiT4DiT/blob/main/examples/Real_G1/README.md",
+  cosmos: "https://github.com/NVIDIA/cosmos#cosmos-3",
+  openhlm: "https://openhlm-project.github.io/",
+  openhlmCode: "https://github.com/OpenHLM-project/OpenHLM/blob/main/src/openpi4OpenHLM/examples/unitree_g1/sonic_g1_env.py",
+  openhlmTeleop: "https://github.com/OpenHLM-project/OpenHLM/blob/main/src/GR00T-WholeBodyControl4OpenHLM/robot_data_collection.md",
+  sonic: "https://github.com/NVlabs/GR00T-WholeBodyControl#model-card",
+  sonicVla: "https://github.com/NVlabs/GR00T-WholeBodyControl/blob/main/docs/source/tutorials/vla_inference.md",
+  sonicTeleop: "https://github.com/NVlabs/GR00T-WholeBodyControl/blob/main/docs/source/tutorials/vr_wholebody_teleop.md",
+  sonicData: "https://github.com/NVlabs/GR00T-WholeBodyControl/blob/main/docs/source/tutorials/data_collection.md",
+  decoupled: "https://github.com/NVlabs/GR00T-WholeBodyControl/blob/main/decoupled_wbc/control/policy/g1_decoupled_whole_body_policy.py",
+  unitree: "https://github.com/unitreerobotics/unitree_sdk2_python/blob/master/example/g1/high_level/g1_loco_client_example.py",
+  qp: "https://arxiv.org/abs/1311.1839",
+};
+---
+<WeeklyLayout title="Week 2 · 大小脑、WBC 与数据" description="区分 VLA 内部的语义与动作分工、VLA 与 WBC 的控制分层，理解控制器指令空间如何改变遥操作数据、动作标签与迁移方式。" section="problems" week={2}>
+  <p class="eyebrow">ARCHITECTURE GROUP · WEEK 2 QUESTIONS</p>
+  <h1>从“大小脑”到 WBC：<br />谁决策，谁执行？</h1>
+  <p class="intro">这一周沿着信息流继续往下看：模型输出的 action 交给谁？谁把参考动作变成真实运动？当底层控制器改变时，原来采集的数据还代表同一件事吗？</p>
+  <p class="weekly-meta">资料核对：2026-09-11 · 层级划分与公式是用于比较系统的分析框架；模型事实以对应的公开实现为准。</p>
+
+  <nav class="weekly-jumps" aria-label="本周两个问题">
+    <a href="#big-small"><span>问题 1</span><strong>具身智能的大小脑到底是什么？<br />常见的误区与纠错</strong></a>
+    <a href="#wbc-data"><span>问题 2</span><strong>底层 WBC 到底起到什么作用？<br />不同 WBC 系统空间对于数据的影响</strong></a>
+  </nav>
+
+  <div class="weekly-reading">
+    <aside class="weekly-toc" aria-label="本周问题目录">
+      <strong>阅读目录</strong>
+      <a href="#big-small">问题 1 · 大小脑</a>
+      <a href="#levels">把四个层级拆开</a>
+      <a href="#misconceptions">常见误区与纠错</a>
+      <a href="#model-examples">四个模型怎么判断</a>
+      <a href="#wbc-data">问题 2 · WBC</a>
+      <a href="#command-spaces">不同指令空间</a>
+      <a href="#teleoperation">遥操作与模型部署</a>
+      <a href="#data-impact">数据为什么会变</a>
+      <a href="#data-transfer">哪些数据能够复用</a>
+      <a href="#references">官方资料</a>
+    </aside>
+
+    <div class="weekly-article">
+      <section class="weekly-question" id="big-small" aria-labelledby="question-one-title">
+        <div class="question-number">QUESTION 01 · HIERARCHY & TERMINOLOGY</div>
+        <h2 id="question-one-title">具身智能的大小脑到底是什么？常见的误区与纠错</h2>
+        <div class="weekly-callout">
+          <p><strong>“大脑 / 小脑”是描述分工的比喻，没有一套跨论文通用的模块定义。</strong>看见这两个词时，先写出各模块的输入、输出和调用关系，再确定作者在哪两个层级之间划线。不能仅凭“一个模型大、一个模型小”给它们命名。</p>
+        </div>
+
+        <h3 id="levels">1.1 把语义、动作、全身控制和电机执行拆开</h3>
+        <p>以一个使用学习策略的人形机器人系统为例，可以区分下面四层。实际实现可能合并若干层，也可能额外加入任务规划器；这里的层级表示<strong>功能边界</strong>，不意味着必须安装四个独立网络。</p>
+        <div class="weekly-table-wrap" tabindex="0" role="region" aria-label="四个功能层级对比，可横向滚动">
+          <table class="weekly-table">
+            <caption>同一个“动作”，在不同层级有不同含义。</caption>
+            <thead><tr><th scope="col">层级</th><th scope="col">输入和输出</th><th scope="col">主要解决的问题</th></tr></thead>
+            <tbody>
+              <tr><td>语义理解 / 任务决策</td><td>图像、语言、历史信息 → 语义特征、子任务、目标或计划。</td><td>做什么、对哪个物体做、当前任务推进到哪一步。输出可以是隐特征，不一定是可读文字。</td></tr>
+              <tr><td>动作生成策略</td><td>视觉语义条件、本体状态 → 一段关节目标、末端目标、根部命令或运动 latent。</td><td>接下来如何运动以完成任务。VLA 的 action expert / action DiT 通常在这一层。</td></tr>
+              <tr><td>WBC / 运动跟踪控制器</td><td>上层参考、关节与机身状态、控制历史等 → 可执行的关节目标或力矩。</td><td>在当前身体状态下跟踪参考，处理平衡、接触和全身动力学；具体能力取决于控制器。</td></tr>
+              <tr><td>关节伺服 / 电机驱动</td><td>关节位置、速度、增益或力矩设定 → 电机力矩 / 电流与真实运动。</td><td>让执行器跟随低层命令。它仍有自己的反馈环路，不等于一个语言或动作生成模型。</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <p>因此，常见的“大小脑”至少有三种用法：</p>
+        <ol>
+          <li><strong>VLA 内部的语义—动作分工。</strong>VLM 提供视觉语言特征，动作专家生成连续动作。二者可以共同构成一个 VLA；这时所谓“小脑”通常还是动作生成网络，不能自动等同于维持站立的 WBC。</li>
+          <li><strong>机器人系统中的 VLA—WBC 分工。</strong>VLA 给出任务条件下的动作参考，WBC 根据真实机身状态执行。这时整个 VLA 都可能被称为“大脑”，下面的运动控制器被称为“小脑”。</li>
+          <li><strong>更高层的规划器—技能策略分工。</strong>高层先输出“走近桌子”“拿起杯子”等子任务，低层策略完成技能。技能策略之下仍然可以有 WBC；不能把它与前两种结构直接合并成同一张两框图。</li>
+        </ol>
+        <p class="source-line">模型内部的视觉语言编码与 flow-matching 动作网络可参照 <a href={sources.groot}>GR00T N1.7 模型卡</a>；外部 VLA 服务器、推理客户端和 SONIC 控制进程的边界可参照 <a href={sources.sonicVla}>官方 VLA 推理流程</a>。上面的三种用法是对不同系统的概念归纳。</p>
+
+        <FlowFormula expression={"h_t=E_{\\mathrm{VL}}(O_{\\le t},L),\\qquad c_{t:t+H}\\sim\\pi_\\theta(\\,\\cdot\\mid h_t,s_t)"} caption="VLA 内部：视觉语言表示 h 与本体状态 s 作为动作生成的条件。c 是给下游的参考命令，不预设它一定是关节角或运动 latent。" />
+        <FlowFormula expression={"\\begin{aligned}r_t&=C_\\psi(c_t,s_t^{\\mathrm{ctrl}},\\xi_t),\\\\u_t&=\\operatorname{Servo}(r_t,s_t),\\\\x_{t+1}&=F_{\\mathrm{phys}}(x_t,u_t)\\end{aligned}"} caption="系统外部：WBC C 根据参考命令、控制状态和内部历史 ξ 产生低层输出 r；执行器施加实际输入 u，物理世界状态 x 才随之改变。O 是相机等观测，L 是语言。若 WBC 直接输出力矩，Servo 在这里表示执行器接口及其实际响应。" />
+        <p><strong>关键在两个闭环：</strong>VLA 用更新的视觉和本体观测修正任务动作；WBC 用更及时的身体反馈跟踪参考、修正运动。两者频率和动作块执行方式由实现决定，“大脑慢、小脑快”只是常见安排，不能代替接口分析。</p>
+
+        <h3 id="misconceptions">1.2 常见误区与纠错</h3>
+        <div class="weekly-table-wrap" tabindex="0" role="region" aria-label="大小脑常见误区与纠错，可横向滚动">
+          <table class="weekly-table">
+            <thead><tr><th scope="col">容易产生的误解</th><th scope="col">更准确的理解</th></tr></thead>
+            <tbody>
+              <tr><td>VLM 是大脑，Action Expert 就是 WBC。</td><td>动作专家通常仍在生成任务动作；WBC 才负责把参考与机身状态结合起来执行。一个系统可以同时拥有 VLM、动作专家和 WBC。</td></tr>
+              <tr><td>双系统一定先生成一段文字推理，再生成动作。</td><td>两部分可能传递隐特征、视觉 token 或交叉注意力信息。只有实际推理流程解码并使用了文字计划，才应画出文字计划分支。</td></tr>
+              <tr><td>模型使用 Flow Matching / DiT，所以它就是“小脑控制器”。</td><td>这些是建模和生成方法。先看预测目标：预测视频、动作参考还是低层控制量，不能由网络名字判断控制层级。</td></tr>
+              <tr><td>VLA 直接输出全身关节，因此不需要 WBC。</td><td>预测出的关节轨迹仍可能只是参考。执行时还需要跟踪、平衡和接触协调；“显式输出”不意味着“直接向电机发力矩”。</td></tr>
+              <tr><td>统一 Whole-Body VLA 必须自己重新训练一个 WBC。</td><td>“统一”可以指上层联合决定手、臂、腰、腿的参考。下层可以复用已有控制器。是否联合输出、是否统一低层控制、是否从像素到力矩端到端训练，是三个不同判断。</td></tr>
+              <tr><td>只要用了 WBC，身体协调就全部发生在 WBC。</td><td>上层协调任务相关的动作目标与时序；下层协调可执行性、平衡和跟踪。两层都可能协调，只是协调对象不同。</td></tr>
+              <tr><td>用了人形硬件 / 演示中出现双腿，就证明模型掌握全身移动操作。</td><td>还要检查底座是否固定、腿部是否被高层控制、是否允许换接触和移动，以及任务是否真的要求这些能力。固定底座实验只能支持相应设置下的结论。</td></tr>
+              <tr><td>有 World Model，就已经解决了底层控制。</td><td>未来视觉或世界 latent 的预测不自动等于动力学可行的控制。世界预测、任务动作生成和低层跟踪可以是相互配合的不同模块。</td></tr>
+              <tr><td>大脑在云端、小脑在机器人上；参数多的一定是大脑。</td><td>运行位置和参数规模不是功能定义。应记录各模块观察什么、输出什么、多久更新，以及谁依赖谁。</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="source-line">下面的真实实现展示了这些区别，尤其是 <a href={sources.openhlm}>OpenHLM 的两层控制框架</a>、<a href={sources.dit}>DiT4DiT 的 G1 部署链</a>和 <a href={sources.grootSonic}>GR00T N1.7 + SONIC 的真机流程</a>。</p>
+
+        <h3 id="model-examples">1.3 用四个模型检查这条分界线</h3>
+        <div class="weekly-model">
+          <h4>DiT4DiT：视频—动作协同建模，下面仍有控制栈</h4>
+          <p>Video DiT 的中间去噪特征参与 Action DiT 的动作预测，这是<strong>模型内部如何利用世界动态信息</strong>的问题。官方 Real G1 工具链则明确包裹 NVIDIA GR00T Whole-Body Control，并把遥操作、数据导出、训练与闭环推理接在这套控制栈上。</p>
+          <p class="model-path"><strong>分析时分开记录：</strong>视频与动作模块之间传递什么特征；训练数据采用什么 action schema；推理客户端把动作块变换成什么 WBC 命令；最后由哪个控制循环驱动机器人。</p>
+          <p>Real G1 示例使用解耦 WBC 相关流程，因此不能仅凭“联合生成世界与动作”，就宣称该配置已经把腿部平衡直接训练进 Action DiT。其他仿真或硬件配置也需要单独检查。</p>
+          <p class="source-line">来源：<a href="https://arxiv.org/abs/2603.10448">DiT4DiT 论文</a>、<a href={sources.dit}>Real G1：遥操作、训练与部署</a>。</p>
+        </div>
+        <div class="weekly-model">
+          <h4>Cosmos 3：模型家族、策略权重与机器人配置要分开看</h4>
+          <p>Cosmos 3 的统一 MoT 架构包含理解 / 推理与多模态生成能力；公开的 Reasoner、Generator 和任务策略权重有不同用途。<strong>它们不能被直接对应成“大脑”和“维持双足平衡的小脑”。</strong></p>
+          <p>对于“底部固定，所以不算 full-body”的判断，应把结论限定到那个实验配置：固定底座操作并没有验证自主步行和接触切换。它既不能证明整个模型家族只能固定底座工作，也不能反过来证明该权重已经能够驱动 G1 全身移动。公开的 DROID 策略变体也不是 G1 的即用控制程序。</p>
+          <p class="source-line">来源：<a href={sources.cosmos}>官方架构、输入输出与策略变体说明</a>。这里对固定底座实验的判断是证据范围的分析，不为未核实的演示指定底层 WBC。</p>
+        </div>
+        <div class="weekly-model">
+          <h4>GR00T N1.7 + SONIC：VLA 内部两部分，外部再接运动控制器</h4>
+          <p>GR00T 的视觉语言条件与动作生成网络属于 VLA。对于官方 <code>unitree_g1_sonic</code> 接口，动作包括运动 token 和双手控制字段；SONIC 在下面根据机身观测执行运动。这里至少存在<strong>语义表示、任务动作生成、运动控制</strong>三个不同功能层级。</p>
+          <FlowFormula expression={"c_t=\\big[z_t^{\\mathrm{motion}},q_t^{\\mathrm{left\\ hand}},q_t^{\\mathrm{right\\ hand}}\\big]\\in\\mathbb R^{64+7+7}=\\mathbb R^{78}"} caption="78D 是这套官方 SONIC embodiment 的动作接口：64D 运动 latent 加双手各 7D。它不是 78 个物理关节，也不代表所有 GR00T 权重或夹爪配置都使用 78D。" />
+          <p>推理时的 VLA 可以直接预测这个 token，不必先输出一段人体动画再调用同一个编码入口。控制器的编码器、解码器、观测配置和 token 空间必须匹配；换一个 checkpoint，不能默认原 token 仍代表同一运动。</p>
+          <p class="source-line">来源：<a href={sources.grootSonic}>N1.7 + SONIC 真机实例</a>、<a href={sources.sonicVla}>78D 动作空间与 checkpoint 匹配要求</a>。</p>
+        </div>
+        <div class="weekly-model">
+          <h4>OpenHLM：显式全身参考与复用控制器可以同时成立</h4>
+          <p>OpenHLM 的 whole-body 重点在于上层能够表达关节级全身参考，使操作目标与身体姿态共同进入策略学习。公开仓库提供基于 GR00T / SONIC 的控制与遥操作实现，因此把它概括成“只有 Unitree 原厂 WBC”并不准确；也不能因为复用了控制器，就否定其上层动作接口的全身表达能力。</p>
+          <FlowFormula expression={"c_t=\\big[q_t^{\\mathrm{ref}},\\rho_t,g_t^L,g_t^R\\big],\\quad\\rho_t=(\\mathrm{roll},\\mathrm{pitch},\\dot{\\mathrm{yaw}}),\\quad\\dim c_t=29+3+2=34"} caption="按公开 SonicG1Env 的字段作语义分组：29D 关节参考、3D 根部描述和两个夹爪标量，共 34D。这里的展示顺序不是代码数组的存储顺序；不含夹爪的身体参考为 32D。" />
+          <p>适配器还要重排关节、处理 yaw 的时间积分、形成四元数并打包运动参考，之后才交给控制栈。<strong>34D 显式参考与 64D 运动 latent 处在不同接口位置</strong>，即使都使用 SONIC，也不能相互直接替换。</p>
+          <p class="source-line">来源：<a href={sources.openhlmCode}>SonicG1Env 的动作变换</a>、<a href={sources.openhlmTeleop}>OpenHLM 数据采集控制栈</a>。</p>
+        </div>
+        <div class="weekly-callout note"><p><strong>回看 Week 1：</strong>“显式动作”与“latent 动作”描述的是上层输出形式；“统一全身”与“解耦控制”还需要另外指出发生在哪一层。不能只凭二维谱系中的一个位置，推断整台机器人的全部控制机制。</p></div>
+      </section>
+
+      <section class="weekly-question" id="wbc-data" aria-labelledby="question-two-title">
+        <div class="question-number">QUESTION 02 · WHOLE-BODY CONTROL & DATA</div>
+        <h2 id="question-two-title">底层 WBC 到底起到什么作用，以及不同 WBC 系统空间对于数据的影响</h2>
+        <div class="weekly-callout"><p><strong>WBC 是上层意图与机器人动力学之间的控制接口。</strong>它既影响“机器人如何完成命令”，也影响“上层允许表达什么命令”。所以更换 WBC，可能同时改变 action 的语义、可完成的运动和采集到的数据分布。</p></div>
+
+        <h3>2.1 为什么有了关节目标，还需要低层控制？</h3>
+        <p>“弯腰拿起低处的杯子”不是把手腕移过去就结束。手臂前伸会改变整体运动与受力，腿和腰需要配合，脚与地面的接触也可能切换。高层给出的轨迹还会有延迟、误差或超出当前可达范围的部分。控制器要结合真实状态，把任务参考变成能够被身体跟踪的输出。</p>
+        <p>一个典型浮动基座机器人满足下面的动力学关系。机身在空间中的运动没有独立的“底座电机”直接驱动，它要通过关节运动和接触力实现；这也是全身协调不能只看上半身输出的原因。</p>
+        <FlowFormula expression={"M(q)\\dot v+h(q,v)=S^{\\mathsf T}\\tau+J_c(q)^{\\mathsf T}\\lambda"} caption="q 是构型，v 是广义速度；M 是惯性矩阵，h 包含重力等项；S 把驱动关节力矩 τ 映射到广义力，Jc 与 λ 表示接触雅可比和接触力。这是通用动力学表达，不代表每种学习控制器都在在线求解这条方程。" />
+        <p>WBC 不是某一种固定算法。<strong>模型驱动的优化控制器</strong>可以显式求解跟踪目标并满足动力学、摩擦和执行器约束；<strong>学习型运动控制器</strong>可以通过强化学习和运动跟踪训练，学会从状态与参考到控制量的映射；<strong>混合实现</strong>也可以把上身 IK、轨迹插值和下身 RL 组合起来。不能把“所有 WBC”都理解成 QP，也不能都理解成神经网络。</p>
+        <p class="source-line">优化式 WBC 参照 <a href={sources.qp}>Kuindersma 等的动态行走控制论文</a>；学习型运动跟踪参照 <a href={sources.sonic}>SONIC 模型说明</a>；上下身组合参照 <a href={sources.decoupled}>Decoupled WBC 实现</a>。</p>
+        <FlowFormula expression={"\\tau=K_p(q^{\\mathrm{target}}-q)+K_d(\\dot q^{\\mathrm{target}}-\\dot q)+\\tau_{\\mathrm{ff}}"} caption="一个常见的关节伺服示意。若 WBC 输出关节目标，下面还可能经过 PD 与前馈项变成力矩；它说明参考量与实际施加量的区别，并非规定所有控制器使用同一伺服律。" />
+        <p><strong>WBC 能稳定地跟踪，不代表它知道任务已经成功。</strong>杯子有没有抓稳、是否放进正确容器，通常仍需要上层视觉反馈与任务策略判断。反过来，语义上正确的动作计划也不保证当前控制器能实现。</p>
+
+        <h3 id="command-spaces">2.2 先区分三个“空间”</h3>
+        <ol>
+          <li><strong>物理状态 / 执行空间：</strong>真实机器人有哪些关节、关节实际到达哪里、机身姿态怎样、施加了什么力矩。这受硬件和物理条件约束。</li>
+          <li><strong>上层命令空间：</strong>WBC 接受的是速度、末端位姿、关节参考、人体运动，还是一个学习到的 token。这决定 VLA 或操作者能够直接指定什么。</li>
+          <li><strong>训练张量空间：</strong>上述字段如何排列、归一化、补齐维度、打包成动作块。把两个文件都转成 LeRobot 格式，只统一了容器，并没有自动统一动作含义。</li>
+        </ol>
+        <div class="weekly-table-wrap" tabindex="0" role="region" aria-label="不同控制器指令空间及数据含义，可横向滚动">
+          <table class="weekly-table">
+            <thead><tr><th scope="col">接口类型</th><th scope="col">上层实际给出的信息</th><th scope="col">对数据与能力的影响</th></tr></thead>
+            <tbody>
+              <tr><td>厂商高层运动 API</td><td>例如移动速度、站立模式等命令。实际字段随 SDK 与模式变化。</td><td>数据里的“前进速度”是送给某套内置控制行为的命令，不能当成腿部关节轨迹或其他控制器的 token。</td></tr>
+              <tr><td>解耦式接口</td><td>上身目标、底座平面速度 / 转向、根部高度等；IK 可先把手部目标变成上身关节参考。</td><td>腿部步态由下层产生。上层容易表达“走到那里并伸手”，却不一定能独立指定每只脚的任务动作。</td></tr>
+              <tr><td>显式全身运动参考</td><td>根部描述与全身关节目标 / 轨迹，加手或夹爪命令。</td><td>腿、腰、手的参考可被显式学习和检查；仍须由跟踪器处理可执行性。OpenHLM 的公开接口属于这一分析方向。</td></tr>
+              <tr><td>人体 / 稀疏运动输入</td><td>SMPL、重定向后的机器人运动，或头与手等稀疏追踪信息。</td><td>需要运动补全、重定向或编码模块。输入设备采到的姿态不自动等于训练 VLA 时最终使用的 action。</td></tr>
+              <tr><td>学习到的运动 latent</td><td>特定编码器 / 解码器定义的 token，另加必要的手部字段。</td><td>身体协调被压缩到控制器的运动表示中。标签与模型版本绑定；相同维数不保证相同含义。</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="source-line">具体接口可核对 <a href={sources.unitree}>Unitree LocoClient 示例</a>、<a href={sources.decoupled}>解耦 WBC 的 goal 字段</a>、<a href={sources.openhlmCode}>OpenHLM 显式参考</a>与 <a href={sources.sonicTeleop}>SONIC 运动输入模式</a>。表中能力差异是基于这些接口的分析，并非给所有同类控制器规定统一上限。</p>
+        <p>例如某个接口只有“向前走、转向、上身目标”，即使视觉里看见了踏板，上层也没有直接表达“右脚踩住踏板而左脚支撑”的字段。增加训练样本可以改善已有接口内的策略，却不一定补得出接口本身缺失的控制自由度。是否能通过间接命令实现，还要检查该控制器的可达行为集合。</p>
+
+        <h3 id="teleoperation">2.3 G1 默认用哪套 WBC？遥操作和 VLA 能共用吗？</h3>
+        <p><strong>Unitree G1 是硬件平台，不是 NVIDIA Decoupled WBC 的别名。</strong>厂商提供 SDK 与相应控制服务；NVIDIA 的 Decoupled WBC、SONIC 是另行提供并部署的控制栈。看到“使用 Unitree G1”或“通过 Unitree SDK 通信”，不能据此判断低层正在运行哪套策略。具体可选择什么，还取决于机器人配置、开放接口和实际启动的控制程序。</p>
+        <p><strong>遥操作和 VLA 可以使用同一套底层控制器。</strong>遥操作时，上层命令来自人和输入设备；自主运行时，上层命令来自学习策略。要共用下层，二者必须遵守同一个命令接口：字段语义、坐标系、时序、归一化、模式以及控制器版本都要对齐。</p>
+
+        <figure class="weekly-diagram" aria-label="遥操作与 VLA 共享控制器的信息流">
+          <div class="weekly-branches">
+            <div class="weekly-node"><strong>遥操作数据采集</strong><small>人体 / VR / 手柄<br />重定向、运动补全或参考编码</small></div>
+            <div class="weekly-node"><strong>自主策略运行</strong><small>图像、语言、本体观测<br />VLA 生成命令或运动 token</small></div>
+          </div>
+          <div class="weekly-arrow" aria-hidden="true">↓</div>
+          <div class="weekly-node"><strong>匹配的上层命令接口</strong><small>相同字段含义、坐标系、时序与控制器版本</small></div>
+          <div class="weekly-arrow" aria-hidden="true">↓</div>
+          <div class="weekly-node controller"><strong>同一套 WBC / SONIC</strong><small>参考命令 + 真实机身状态 + 控制历史<br />生成低层控制输出</small></div>
+          <div class="weekly-arrow" aria-hidden="true">↓</div>
+          <div class="weekly-node"><strong>执行器与真实机器人</strong><small>产生运动；反馈关节 / IMU 状态给控制器，反馈视觉与状态给上层</small></div>
+          <figcaption>两种上层来源可以在同一接口汇合。采集时应同时记录参考、真实状态和最终用于训练的 action，不能只保存操作者的原始输入。</figcaption>
+        </figure>
+
+        <p><strong>SONIC 可以用于遥操作，也可以用于采集 VLA 数据。</strong>官方流程提供 PICO 全身姿态输入与运动规划模式，并配套数据导出。因此“它不是上身 IK + 下身速度命令那种解耦接口，所以不能遥控”是错误推论。遥操作并不要求底层必须解耦，它要求人的输入能够转换为控制器接受的表示。</p>
+        <p>这里还要分清<strong>参考运动的未来片段</strong>与<strong>预测未来世界</strong>：跟踪器使用短时参考窗口，表示它被告知希望身体接下来怎样运动；这不意味着它已经预测出未来相机画面，更不意味着机器人能读取尚未发生的真实未来观测。在线遥操作的参考窗口需要由具体的缓冲、外推、规划或编码流程提供。</p>
+        <p class="source-line">来源：<a href={sources.sonicTeleop}>SONIC 全身遥操作模式</a>、<a href={sources.sonicData}>VLA 数据采集</a>、<a href={sources.sonic}>不同 checkpoint 的参考窗口与配置</a>。Unitree 与外部控制栈的区别可对照 <a href={sources.unitree}>厂商 SDK 示例</a>和 <a href={sources.dit}>外部 WBC 部署实例</a>。</p>
+
+        <h3 id="data-impact">2.4 为什么同一台 G1 的数据也可能不能直接混？</h3>
+        <p>设高层命令为 c、真实状态为 x。高层看到的“环境”实际上包含<strong>WBC、伺服和物理机器人</strong>。下面把这些低层环节合起来记作 K；切换控制器之后，即便硬件没变，同一高层命令导致的状态变化也可能改变。</p>
+        <FlowFormula expression={"P_{\\mathrm{eff}}^{K}(x'\\mid x,c)=\\int P_{\\mathrm{phys}}(x'\\mid x,u)\\,P_K(u\\mid x,c)\\,du"} caption="这是用于解释数据分布的抽象：有效环境转移由低层执行映射与物理动力学共同决定。写成马尔可夫形式时，x 应包含必要的控制器历史与内部状态；如果数据只记录了一部分观测，还会存在部分可观测性。" />
+        <p>因此存在四类变化：</p>
+        <ol>
+          <li><strong>标签语义变化。</strong>一份 action 是速度与上身参考，另一份是运动 token；同一列名、相同浮点类型甚至相同总维数，都不保证它们监督同一个输出。</li>
+          <li><strong>执行映射变化。</strong>即使都输出关节参考，控制器的跟踪误差、平衡策略、延迟和增益不同，也会改变动作的实际结果。</li>
+          <li><strong>可达行为变化。</strong>一个控制器可以蹲下、单脚交互，另一个配置可能只能稳定走路并操作上身。缺失行为不是简单改一层投影就能补齐。</li>
+          <li><strong>观测分布变化。</strong>不同步态和姿态会改变相机视角、抖动、接触过程以及任务完成时序，视觉数据也不一定同分布。</li>
+        </ol>
+
+        <h4>先区分数据里容易混叫成 action 的四种量</h4>
+        <div class="weekly-table-wrap" tabindex="0" role="region" aria-label="数据中不同动作量的含义，可横向滚动">
+          <table class="weekly-table">
+            <thead><tr><th scope="col">记录量</th><th scope="col">它回答什么</th><th scope="col">能否互相替代</th></tr></thead>
+            <tbody>
+              <tr><td>操作者原始输入</td><td>人动了哪个手柄、身体做了什么姿态？</td><td>需要经过输入设备标定、重定向或编码，才可能成为机器人命令。</td></tr>
+              <tr><td>上层参考命令 c</td><td>人或策略希望机器人怎样动？</td><td>这是许多 VLA 的监督目标；必须保存 schema 与控制器身份。</td></tr>
+              <tr><td>WBC / 伺服输出 r、u</td><td>控制器最终发了什么关节目标、增益或力矩？</td><td>与上层参考不同；不能把执行器层输出直接塞回高层命令入口。</td></tr>
+              <tr><td>实测运动 x、下一帧状态</td><td>机器人最终真的做到了什么？</td><td>含跟踪误差、扰动、接触与延迟；可以用于构造参考或监督，但并不等于原始意图。</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>例如人给出“向前移动”的命令，但机器人被桌腿阻挡，实际位移很小。记录“命令”与记录“实际下一帧姿态”得到的是两种不同标签。用后者重新构造轨迹时，需要明确是在学习实际运动，还是试图恢复原始控制意图。</p>
+        <p class="source-line">这一区分是由控制闭环推导出的数据分析框架；实际字段可对照 <a href={sources.sonicData}>SONIC 数据导出流程</a>及 <a href={sources.openhlmCode}>OpenHLM 的实测状态、参考动作与发送消息</a>。</p>
+
+        <h3 id="data-transfer">2.5 不同 WBC 数据怎样复用？</h3>
+        <div class="weekly-table-wrap" tabindex="0" role="region" aria-label="跨控制器数据复用方式，可横向滚动">
+          <table class="weekly-table">
+            <thead><tr><th scope="col">手上有什么数据</th><th scope="col">可能的复用方式</th><th scope="col">需要解决的差异</th></tr></thead>
+            <tbody>
+              <tr><td>图像、语言、任务标注</td><td>用于语义、视觉表示、任务理解或相应辅助训练。</td><td>对齐视角、时间和标签质量；这不会自动生成新控制器所需的动作监督。</td></tr>
+              <tr><td>完整机器人运动轨迹</td><td>转换为目标控制器接受的运动参考，或经过目标编码器生成标签。</td><td>关节顺序、坐标系、根部运动、速度、采样率、参考窗口与可跟踪性。</td></tr>
+              <tr><td>只有旧 WBC 的速度 / 模式命令</td><td>先在原控制链回放或结合已记录状态恢复实际轨迹，再研究参考重建。</td><td>原命令不足以唯一确定各关节运动；缺失的接触和状态无法只靠改格式恢复。</td></tr>
+              <tr><td>只有旧版本的运动 token</td><td>若仍有匹配的解码器和必要状态，可研究回放、轨迹重建，再用新编码器处理。</td><td>token 不具备跨 checkpoint 的固定物理语义；不能默认做线性重排或直接拷贝。</td></tr>
+              <tr><td>多控制器的混合数据</td><td>保留控制器标识，使用有语义的共享表示或不同输出头，再做目标控制器适配。</td><td>分别处理动作字段与归一化；最终仍需在目标控制链上验证闭环行为。</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>对于目标控制器 B，如果原数据能提供它需要的完整运动参考 R，可以考虑用 B 的编码器重新建立标签：</p>
+        <FlowFormula expression={"z_t^{B}=E_B(R_{t:t+K},s_t^{B}),\\qquad r_t^{B}=D_B(z_t^{B},s_t^{B})"} caption="这是有条件的数据转换方案：参考 R、状态定义和编码器输入必须齐全。重新编码后的低层跟踪结果也可能改变，不能只验证张量形状。某些编码器不使用这里显式写出的状态项，应按具体接口调整。" />
+        <p>如果选择显式条件化的混合训练，可以让模型知道当前使用哪套控制接口：</p>
+        <FlowFormula expression={"c_{t:t+H}\\sim\\pi_\\theta\\!\\left(\\,\\cdot\\mid O_{\\le t},s_t,L,\\mathrm{controller\\_id}\\right)"} caption="一种可研究的建模方式，不是声称上述模型都已经这样实现。controller_id 可以帮助区分数据来源，但不能凭空消除语义冲突，也不能补回没有记录的动作信息。" />
+        <div class="weekly-callout note">
+          <p><strong>不能靠补零、裁剪或统一成 78D 解决控制器差异。</strong>这些操作只能改变形状。要让两个标签可交换，必须证明它们在对应状态下表达相同参考，并且通过目标控制链后具有可接受的行为一致性。</p>
+          <p>“跨控制器不能直接混 action”也不等于“这些数据全部没用”。感知与语义信息、运动参考、实际状态和原始命令，分别有不同的复用路径。</p>
+        </div>
+
+        <h4>对一条数据，至少能追溯这些信息</h4>
+        <p>记录机器人配置、控制器名称与 checkpoint、命令字段定义、关节顺序、坐标系和单位、参考 / 实测量的区别、采集与控制频率、时间戳与延迟、归一化方式，以及必要的输入模式和校准信息。这样才能判断差异来自模型，还是来自数据与控制接口。</p>
+        <p><strong>本周比较模型时的落点：</strong>先写“模型向下输出什么”，再写“下层控制器如何解释它”，最后写“训练数据里的 action 究竟记录了哪个环节”。这三项对齐后，大小脑的分工、全身协调的位置与数据是否兼容才有清晰答案。</p>
+      </section>
+
+      <section id="references" class="weekly-sources" aria-labelledby="sources-title">
+        <h2 id="sources-title">官方资料与实现入口</h2>
+        <ul>
+          <li><a href={sources.groot}>GR00T N1.7 模型结构</a> · <a href={sources.grootSonic}>N1.7 + SONIC 真机评测与部署</a></li>
+          <li><a href={sources.dit}>DiT4DiT Real G1 工具链</a> · <a href={sources.cosmos}>Cosmos 3 架构与策略变体</a></li>
+          <li><a href={sources.openhlm}>OpenHLM：接口设计与遥操作比较</a> · <a href={sources.openhlmCode}>34D 动作变换代码</a> · <a href={sources.openhlmTeleop}>采集控制栈</a></li>
+          <li><a href={sources.sonic}>SONIC 模型与版本</a> · <a href={sources.sonicVla}>VLA 推理</a> · <a href={sources.sonicTeleop}>全身遥操作</a> · <a href={sources.sonicData}>数据采集</a></li>
+          <li><a href={sources.decoupled}>Decoupled WBC 的实际命令字段与执行</a> · <a href={sources.unitree}>Unitree 官方高层运动 SDK 示例</a></li>
+          <li><a href={sources.qp}>优化式全身动态行走控制的原始论文</a></li>
+        </ul>
+      </section>
+    </div>
+  </div>
+</WeeklyLayout>
