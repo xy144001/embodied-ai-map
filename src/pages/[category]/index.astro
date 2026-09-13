@@ -3,20 +3,25 @@ import { getCollection } from "astro:content";
 import BaseLayout from "../../layouts/BaseLayout.astro";
 
 export function getStaticPaths() {
-  return ["evaluation", "macro-thinking"].map((category) => ({ params: { category } }));
+  return ["datasets", "evaluation", "macro-thinking"].map((category) => ({ params: { category } }));
 }
 const labels = { datasets: "数据集", evaluation: "评测", "macro-thinking": "宏观思想" } as const;
 const category = Astro.params.category as keyof typeof labels;
 const items = (await getCollection("dossier", ({ data }) => data.category === category && !data.draft));
 ---
 <BaseLayout title={`${labels[category]}｜具身机器人技术地图`}>
+  {category === "datasets" ? <>
+    <meta http-equiv="refresh" content="0; url=./index.html" />
+    <script is:inline>{`window.location.replace("./index.html");`}</script>
+  </> : <>
   <main>
-    <a class="back" href={import.meta.env.BASE_URL}>← 返回首页</a>
+    <a class="back" href="../">← 返回首页</a>
     <header class="section-head"><p class="eyebrow">SECTION</p><h1>{labels[category]}</h1></header>
     {items.length === 0 ? <p class="empty">该分区已就绪，等待负责人提交第一篇内容。</p> : (
       <section class="list">
-        {items.map((item) => <article class="item"><span>{item.data.kind}</span><h2>{item.data.title}</h2><p>{item.data.summary}</p></article>)}
+        {items.map((item) => <article class="item"><span>{item.data.kind}</span><h2><a href={`${item.id.split("/").slice(1).join("/")}/`}>{item.data.title}</a></h2><p>{item.data.summary}</p></article>)}
       </section>
     )}
   </main>
+  </>}
 </BaseLayout>

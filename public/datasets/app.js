@@ -7,6 +7,7 @@ const legacyByName = new Map(legacyDatasets.map((item) => [item.name.toLowerCase
 const datasets = masterDatasets.length
   ? masterDatasets.map((item) => ({ ...(legacyByName.get(item.name.toLowerCase()) || {}), ...item }))
   : legacyDatasets;
+const openDataDisplayItems = new Map();
 
 const collectionSystems = [
   {
@@ -53,13 +54,14 @@ const collectionSystems = [
   },
   {
     name: "TWIST", type: "MoCap + RL/BC", priority: 3, focus: "Full-body优先", copy: "用动作捕捉采集腿、躯干和双臂协同的全身运动。", tradeoff: "全身精度高 · 场地成本高",
-    image: "./images/collection/twist.png", imageAlt: "TWIST全身模仿系统官方横幅", imageCredit: "TWIST官方仓库",
+    image: "./images/collection/twist-teaser.png", imageAlt: "TWIST 官方 teaser：人体示范驱动 humanoid 全身操作", imageCredit: "TWIST 官方项目页 teaser",
     contains: "公开内容包括MoCap人体动作、训练用运动数据、模型和代码，覆盖全身操作、腿部操作、locomotion与表达动作；它不是一个统一的多任务机器人数据集。",
     use: "通过MoCap采集目标运动，retarget到humanoid，再用强化学习或行为克隆训练跟踪策略；需保留接触、根部姿态和原始/转换后动作以检查误差。",
     links: [{ label: "TWIST项目", url: "https://yanjieze.com/projects/TWIST/" }, { label: "TWIST代码", url: "https://github.com/YanjieZe/TWIST" }],
   },
   {
     name: "Open-TeleVision / AnyTeleop", type: "沉浸式视觉遥操作", priority: 4, focus: "Full-body扩展", copy: "用头显、手部跟踪和主动视觉控制humanoid上身、双臂与灵巧手。", tradeoff: "跨平台强 · 需重定向",
+    image: "./images/collection/open-television.jpg", imageAlt: "Open-TeleVision 官方仓库中的 Apple Vision Pro 遥操作展示图", imageCredit: "Open-TeleVision 官方仓库 img/television.jpg",
     contains: "Open-TeleVision侧重沉浸式主动视觉和humanoid上身/双臂；AnyTeleop覆盖多机械臂与灵巧手。两者通常产出视觉、本体状态、手/臂动作和相机位姿，但下游轨迹分散在各项目中，不构成单一数据集。",
     use: "先标定头显、相机和机器人坐标系，再将人体手臂/手部动作重定向为机器人命令。若扩展到真正Full-body，还需另接腿部运动、平衡与安全控制器。",
     links: [{ label: "Open-TeleVision", url: "https://robot-tv.github.io/" }, { label: "AnyTeleop", url: "https://yzqin.github.io/anyteleop/" }],
@@ -90,7 +92,7 @@ const datasetSupplements = {
     contentSummary: "子集覆盖单臂、双臂、移动操作、导航及少量四足平台，采集方式、控制频率、相机数量和动作空间各不相同。Open X的作用是把它们转换为RLDS并提供统一入口，不是重新采集一套同质数据。",
     episodeSizeSummary: "67项同时披露episode数和下载体积：加权平均约3.80 MB/episode；按数据集分别计算的中位数约11.36 MB；第1—第3四分位约3.05—27.45 MB；范围约0.19—197.62 MB。",
     caveat: "这是下载体积除以episode数的粗估，不是训练时的固定内存大小。时长、相机数量、分辨率、深度、音频、力觉和压缩方式都会让不同子集相差数百倍。",
-    missingDownloads: "未注册的3项：QUT Dynamic Grasping（812 episodes）、MPI Muscular Proprioception（256 episodes）、ALOHA（451 episodes）。",
+    missingDownloads: "未纳入主表的3项（入口未确认）：QUT Dynamic Grasping、MPI Muscular Proprioception、ALOHA；它们仅作为 Open X 清单中的缺口备注，不计入可获取资源统计。",
     links: [
       { label: "查看72项审计CSV", url: "./downloads/open_x_72_subdatasets_audit.csv", download: true },
       { label: "下载可筛选工作簿", url: "./downloads/open_x_72_subdatasets_audit.xlsx", download: true },
@@ -129,6 +131,18 @@ const $ = (selector) => document.querySelector(selector);
 const text = (value, fallback = "未统一披露") => value && value.trim() ? value.trim() : fallback;
 const unique = (values) => [...new Set(values.filter(Boolean))].sort((a, b) => a.localeCompare(b, "zh-CN"));
 const escapeHtml = (value = "") => value.replace(/[&<>'"]/g, (char) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;" })[char]);
+
+const resourceClassOrder = ["可直接下载数据", "申请/注册后可获取", "部分开放", "采集系统", "仿真/Benchmark", "代码或论文入口"];
+function resourceClass(item) {
+  if (item.resource_type === "独立数据集") {
+    if (item.access_bucket === "可直接下载") return "可直接下载数据";
+    if (item.access_bucket === "需申请/注册") return "申请/注册后可获取";
+    if (item.access_bucket === "部分开放/分散获取") return "部分开放";
+  }
+  if (item.resource_type === "采集系统") return "采集系统";
+  if (item.resource_type === "Benchmark/任务库" || item.resource_type === "数据生成器") return "仿真/Benchmark";
+  return "代码或论文入口";
+}
 
 function sourceGroup(item) {
   const haystack = `${item.category} ${item.origin} ${item.full_body_tier}`;
@@ -240,6 +254,8 @@ function openCollectionDetail(index) {
 }
 
 function populateFilters() {
+  const resourceClassFilter = $("#resourceClassFilter");
+  if (resourceClassFilter) resourceClassOrder.forEach((value) => resourceClassFilter.insertAdjacentHTML("beforeend", `<option value="${escapeHtml(value)}">${escapeHtml(value)}</option>`));
   const type = $("#typeFilter");
   unique(datasets.map((item) => item.resource_type)).forEach((value) => type.insertAdjacentHTML("beforeend", `<option value="${escapeHtml(value)}">${escapeHtml(value)}</option>`));
   const tier = $("#tierFilter");
@@ -263,7 +279,7 @@ function cardTemplate(item) {
       <span class="card-top"><span class="dataset-id">${escapeHtml(item.id)} · ${escapeHtml(item.year)}</span><span class="evidence ${item.evidence_level === "B" ? "b" : "evidence-a"}" title="${escapeHtml(evidenceTitle)}">${escapeHtml(evidenceLabel)}</span></span>
       <h3>${escapeHtml(item.name)}</h3>
       <p class="dataset-subtitle">${escapeHtml(item.embodiment || item.robot_platform || item.category)}</p>
-      <div class="badges">${supplementFor(item) ? '<span class="badge aggregate">聚合条目</span>' : ""}<span class="badge">${escapeHtml(item.full_body_tier)}</span><span class="badge task-badge">${escapeHtml(taskGroup(item))}</span><span class="badge">${escapeHtml(sourceGroup(item))}</span>${item.resource_type === "采集系统" ? `<span class="badge system-role">${escapeHtml(systemRole(item))}</span>` : ""}<span class="badge">${escapeHtml(item.access_bucket || item.access_status || "状态未核验")}</span>${item.influence_tier ? `<span class="badge influence">${escapeHtml(item.influence_tier)}</span>` : ""}</div>
+      <div class="badges"><span class="badge resource-class">${escapeHtml(resourceClass(item))}</span>${supplementFor(item) ? '<span class="badge aggregate">聚合条目</span>' : ""}<span class="badge">${escapeHtml(item.full_body_tier)}</span><span class="badge task-badge">${escapeHtml(taskGroup(item))}</span><span class="badge">${escapeHtml(sourceGroup(item))}</span>${item.resource_type === "采集系统" ? `<span class="badge system-role">${escapeHtml(systemRole(item))}</span>` : ""}<span class="badge">${escapeHtml(item.access_bucket || item.access_status || "状态未核验")}</span>${item.influence_tier ? `<span class="badge influence">${escapeHtml(item.influence_tier)}</span>` : ""}</div>
       <dl class="dataset-facts">
         <div><dt>影响</dt><dd>${Number(item.citation_count || 0).toLocaleString("zh-CN")} 次论文引用${item.citation_count ? "" : "（新近或未形成引用）"}</dd></div>
         <div><dt>规模</dt><dd>${escapeHtml(compactScale(item))}</dd></div>
@@ -276,6 +292,7 @@ function cardTemplate(item) {
 function compareResourcePriority(a, b) {
   const accessPriority = { "可直接下载": 0, "需申请/注册": 1, "部分开放/分散获取": 2, "仅代码/论文": 3, "未发现公开入口": 4, "未公开/内部": 5, "开放状态待核验": 6 };
   return (tierPriority[a.full_body_tier] ?? 99) - (tierPriority[b.full_body_tier] ?? 99)
+    || resourceClassOrder.indexOf(resourceClass(a)) - resourceClassOrder.indexOf(resourceClass(b))
     || (accessPriority[a.access_bucket] ?? 9) - (accessPriority[b.access_bucket] ?? 9)
     || Number(b.impact_score || 0) - Number(a.impact_score || 0)
     || Number(b.citation_count || 0) - Number(a.citation_count || 0)
@@ -291,11 +308,13 @@ function filteredDatasets(ignoreTask = false) {
   const access = $("#accessFilter").value;
   const task = $("#taskFilter").value;
   const evidence = $("#evidenceFilter").value;
+  const resourceClassValue = $("#resourceClassFilter")?.value || "all";
   return datasets.filter((item) => {
     const corpus = Object.values(item).join(" ").toLowerCase();
     return (!query || corpus.includes(query))
       && (scope === "all" || item.time_scope === scope)
       && (type === "all" || item.resource_type === type)
+      && (resourceClassValue === "all" || resourceClass(item) === resourceClassValue)
       && (tier === "all" || item.full_body_tier === tier)
       && (origin === "all" || sourceGroup(item) === origin)
       && (access === "all" || item.access_bucket === access)
@@ -365,16 +384,36 @@ function renderFullbodyCatalog() {
   document.querySelectorAll("#fullbodyCatalogGrid .dataset-card").forEach((card) => card.addEventListener("click", () => openDetail(card.dataset.id)));
 }
 
+function renderOpenData() {
+  const ids = new Set(["R0293", "R0294", "R0295", "R0296", "R0297", "R0081", "R0011", "R0092", "R0136"]);
+  const result = datasets.filter((item) => ids.has(item.id));
+  const agibot = datasets.find((item) => item.id === "R0077");
+  if (agibot) {
+    result.push(
+      { ...agibot, id: "OD-AGI-ALPHA", name: "AgiBot World Alpha", trajectories: "92,214", primary_url: "https://huggingface.co/datasets/agibot-world/AgiBotWorld-Alpha", limitations: "AgiBot World Beta 的精选子集；Alpha/Beta 在主目录中作为同一谱系合并计数。" },
+      { ...agibot, id: "OD-AGI-BETA", name: "AgiBot World Beta", trajectories: "1,003,672", primary_url: "https://huggingface.co/datasets/agibot-world/AgiBotWorld-Beta", limitations: "完整 Beta 数据；存储规模约 43.8T，主目录与 Alpha 按同一谱系合并计数。" },
+    );
+  }
+  const container = $("#openDataGrid");
+  if (!container) return;
+  openDataDisplayItems.clear();
+  result.forEach((item) => openDataDisplayItems.set(item.id, item));
+  result.sort(compareResourcePriority);
+  container.innerHTML = result.map(cardTemplate).join("");
+  container.querySelectorAll(".dataset-card").forEach((card) => card.addEventListener("click", () => openDetail(card.dataset.id)));
+}
+
 function detailCell(label, value) {
   return `<div><dt>${escapeHtml(label)}</dt><dd>${escapeHtml(text(value))}</dd></div>`;
 }
 
 function openDetail(id) {
-  const item = datasets.find((entry) => entry.id === id);
+  const item = datasets.find((entry) => entry.id === id) || openDataDisplayItems.get(id);
   if (!item) return;
   const supplement = supplementFor(item);
+  const primaryLabel = /arxiv\.org|openreview\.net/i.test(item.primary_url || "") ? "论文（非下载入口）" : "官方项目说明";
   const links = [
-    item.primary_url ? `<a href="${escapeHtml(item.primary_url)}" target="_blank" rel="noreferrer">主要来源 ↗</a>` : "",
+    item.primary_url ? `<a href="${escapeHtml(item.primary_url)}" target="_blank" rel="noreferrer">${primaryLabel} ↗</a>` : "",
     item.project_url && item.project_url !== item.primary_url ? `<a href="${escapeHtml(item.project_url)}" target="_blank" rel="noreferrer">官方项目/数据入口 ↗</a>` : "",
     item.semantic_scholar_url ? `<a href="${escapeHtml(item.semantic_scholar_url)}" target="_blank" rel="noreferrer">引用记录 ↗</a>` : "",
     item.secondary_url ? `<a href="${escapeHtml(item.secondary_url)}" target="_blank" rel="noreferrer">补充来源 ↗</a>` : "",
@@ -430,12 +469,13 @@ function openDetail(id) {
 }
 
 function bindEvents() {
-  ["#searchInput", "#scopeFilter", "#typeFilter", "#tierFilter", "#originFilter", "#accessFilter", "#taskFilter", "#evidenceFilter"].forEach((selector) => {
+  ["#searchInput", "#scopeFilter", "#resourceClassFilter", "#typeFilter", "#tierFilter", "#originFilter", "#accessFilter", "#taskFilter", "#evidenceFilter"].forEach((selector) => {
     $(selector).addEventListener(selector === "#searchInput" ? "input" : "change", renderCatalog);
   });
   $("#resetFilters").addEventListener("click", () => {
     $("#searchInput").value = "";
     $("#scopeFilter").value = "2022—2026主窗口";
+    $("#resourceClassFilter").value = "all";
     $("#typeFilter").value = "all";
     $("#tierFilter").value = "all";
     $("#originFilter").value = "all";
@@ -447,6 +487,7 @@ function bindEvents() {
   $("#showAllCollectionSystems").addEventListener("click", () => {
     $("#searchInput").value = "";
     $("#scopeFilter").value = "2022—2026主窗口";
+    $("#resourceClassFilter").value = "采集系统";
     $("#typeFilter").value = "采集系统";
     $("#tierFilter").value = "all";
     $("#originFilter").value = "all";
@@ -466,5 +507,6 @@ renderRecentResources();
 renderCollectionSystems();
 populateFilters();
 bindEvents();
+renderOpenData();
 renderFullbodyCatalog();
 renderCatalog();
