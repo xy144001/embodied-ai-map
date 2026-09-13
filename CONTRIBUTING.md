@@ -4,7 +4,7 @@
 
 | 分区 | 目录 | 负责人 |
 |---|---|---|
-| 数据集 | `src/content/datasets/` | `@starrysky77` |
+| 数据集 | `src/content/datasets/`、`public/datasets/` | `@starrysky77` |
 | 模型架构 | `src/content/model-architecture/`、`public/model-architecture/` | `@xy144001` |
 | 评测 | `src/content/evaluation/` | `@SyouSanGin` |
 | 宏观思想·翟老师 | `src/content/macro-thinking/xiaoyazhai/` | `@xiaoyazhai` |
