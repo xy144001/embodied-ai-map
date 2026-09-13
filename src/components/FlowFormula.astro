@@ -1,0 +1,7 @@
+---
+import katex from "katex";
+interface Props { expression: string; caption?: string }
+const { expression, caption } = Astro.props;
+const html = katex.renderToString(expression, { displayMode: true, throwOnError: true, strict: "error", trust: false, output: "htmlAndMathml" });
+---
+<figure class="flow-formula"><div class="formula-scroll" tabindex="0" role="region" aria-label={caption || "数学公式，可横向滚动"} set:html={html} />{caption && <figcaption>{caption}</figcaption>}</figure>

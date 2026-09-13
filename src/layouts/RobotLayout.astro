@@ -1,0 +1,34 @@
+---
+interface Props { title: string; description: string; detail?: boolean }
+const { title, description, detail = false } = Astro.props;
+const base = import.meta.env.BASE_URL.replace(/\/$/, "");
+const root = `${base}/model-architecture`;
+---
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content={description} />
+    <title>{title} · 具身机器人技术地图</title>
+    <link rel="stylesheet" href={`${root}/module-sections.css`} />
+    <link rel="stylesheet" href={`${root}/robots/robots.css`} />
+  </head>
+  <body class="subpage robot-page">
+    <a class="skip-link" href="#main">跳转到正文</a>
+    <header class="top">
+      <div class="brand">MODEL<b>/</b>ATLAS</div>
+      <a class="home-link" href={detail ? `${root}/robots/` : `${base}/`}>{detail ? "← 返回机器人" : "← 返回技术地图"}</a>
+      <div class="status">@xy144001 · 机器人</div>
+    </header>
+    <nav class="module-tabs" aria-label="模型架构组版块">
+      <a href={`${root}/`}>架构</a>
+      <a href={`${root}/problems/`}>问题</a>
+      <a href={`${root}/tasks/`}>任务</a>
+      <a href={`${root}/robots/`} class="active" aria-current={detail ? undefined : "page"}>机器人</a>
+      <a href={`${root}/breakdown/`} class="breakdown-tab">拆解模型</a>
+    </nav>
+    <slot />
+    <footer class="robot-footer">机器人本体调研 · @xy144001 · <a href={`${root}/`}>返回模型架构</a></footer>
+  </body>
+</html>

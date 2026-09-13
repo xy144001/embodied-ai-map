@@ -1,0 +1,32 @@
+---
+import { getCollection, render } from "astro:content";
+import BaseLayout from "../../layouts/BaseLayout.astro";
+
+export async function getStaticPaths() {
+  const items = await getCollection("dossier", ({ data }) => !data.draft);
+  return items.map((item) => ({
+    params: { category: item.data.category, slug: item.id.split("/").slice(1).join("/") },
+    props: { item },
+  }));
+}
+
+const { item } = Astro.props;
+const { Content } = await render(item);
+---
+<BaseLayout title={`${item.data.title}｜具身机器人技术地图`}>
+  <main>
+    <a class="back" href={`${import.meta.env.BASE_URL}/${item.data.category}/`}>← 返回{item.data.category}</a>
+    <article class="article">
+      <p class="eyebrow">{item.data.kind.toUpperCase()}</p>
+      <h1>{item.data.title}</h1>
+      <p class="summary">{item.data.summary}</p>
+      <dl class="meta">
+        {item.data.organization && <div><dt>机构</dt><dd>{item.data.organization}</dd></div>}
+        {item.data.releaseDate && <div><dt>发布/论文日期</dt><dd>{item.data.releaseDate.toISOString().slice(0, 10)}</dd></div>}
+        {item.data.tags.length > 0 && <div><dt>标签</dt><dd>{item.data.tags.join(" · ")}</dd></div>}
+      </dl>
+      <Content />
+      {item.data.references.length > 0 && <section class="references"><h2>官方链接与参考资料</h2><ul>{item.data.references.map((reference) => <li><a href={reference.url} target="_blank" rel="noreferrer">{reference.title} ↗</a></li>)}</ul></section>}
+    </article>
+  </main>
+</BaseLayout>

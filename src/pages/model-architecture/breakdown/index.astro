@@ -1,0 +1,21 @@
+---
+import BreakdownLayout from "../../../layouts/BreakdownLayout.astro";
+---
+<BreakdownLayout title="信息流总览" description="从输入信息的处理与输出信息的作用两个角度拆解具身模型，先研究输入侧的语义模块。">
+  <main class="breakdown-main" id="main">
+    <header class="breakdown-heading"><p class="breakdown-eyebrow">INFORMATION FLOW / 拆解模型</p><h1>沿着信息流，拆解模型。</h1><p>输入了什么信息，经过了怎样的处理，形成了什么表示，又由哪个模块使用？</p></header>
+    <div class="information-halves">
+      <section class="information-half" aria-labelledby="input-heading">
+        <div class="half-label"><span>01 / INPUT</span><span>输入信息</span></div>
+        <h2 id="input-heading">不同模型如何处理不同类型的信息？</h2>
+        <article class="semantic-entry"><p class="breakdown-eyebrow">输入信息 · 第一部分</p><h3><a href="./semantics/">语义模块</a></h3><p>从指令与任务含义出发，比较语义编码、多模态融合、显式子任务、具身推理、空间落地与训练监督。</p><a class="reading-link" href="./semantics/">阅读详细拆解 <span aria-hidden="true">→</span></a></article>
+        <div class="reserved-input"><h3>其他输入信息</h3><p>待补充</p></div>
+      </section>
+      <section class="information-half output-half" aria-labelledby="output-heading">
+        <div class="half-label"><span>02 / OUTPUT</span><span>输出信息</span></div>
+        <h2 id="output-heading">需要哪些输出信息？这些信息如何发挥作用？</h2>
+        <div class="reserved-output"><p>待补充</p></div>
+      </section>
+    </div>
+  </main>
+</BreakdownLayout>

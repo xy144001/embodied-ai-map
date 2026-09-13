@@ -1,0 +1,134 @@
+---
+import BreakdownLayout from "../../../../layouts/BreakdownLayout.astro";
+import FlowFormula from "../../../../components/FlowFormula.astro";
+import { semanticPathways, semanticSources as sources } from "../../../../data/semantic-pathways";
+import "katex/dist/katex.min.css";
+const chapters = [
+  { id: "boundary", label: "01 语义模块的边界" }, { id: "pathways", label: "02 六种信息流用法" },
+  { id: "interfaces", label: "03 信息怎样进入下游" }, { id: "models", label: "04 代表模型对照" },
+  { id: "dit-cosmos", label: "05 DiT4DiT 与 Cosmos 3" }, { id: "training", label: "06 训练与推理" },
+  { id: "example", label: "07 同一任务的不同走法" }, { id: "experiments", label: "08 怎样比较语义模块" },
+  { id: "references", label: "09 参考资料" },
+];
+const modelRows = [
+  ["X-VLA", "主视角 + 指令进入 Florence2 encoder；附加视角走视觉编码。", "融合特征 + 附加视觉特征，交给动作 Transformer。", "查看 encoder 输出与 action head 接口；Soft Prompt 是本体 / 数据域条件，不是生成的子任务。", sources.xvlaCode],
+  ["π₀.₅", "论文系统既利用多模态主干，也进行高层文本与低层动作的层级推理。", "上下文特征或显式子任务，取决于实际调用阶段。", "论文完整系统与公开 sample_actions 路径要分开检查，不能默认每次都先生成计划。", sources.pi05],
+  ["LingBot-VLA 2.0", "Qwen3-VL 处理视觉语言上下文；双查询带有额外监督。", "视觉语言表示与查询表示，供动作专家利用。", "Future Query 不是自然语言 CoT；教师监督和当前部署条件需要分开标注。", sources.lingbot],
+  ["DiT4DiT", "Cosmos-Reason1 多层语言嵌入条件化视频 DiT。", "视频去噪中的动态特征再传入动作 DiT。", "区分文本编码、动态特征形成和动作条件消费；不能省略中间的视频分支。", sources.dit4dit],
+  ["Cosmos 3", "统一 MoT 支持 Reasoner 与 Generator 两类运行接口。", "可为推理文本，也可为供生成使用的条件，需按入口核对。", "模型家族具有推理能力，不代表当前 Policy 流程一定生成并使用了显式推理。", sources.cosmos],
+  ["ECoT · 补充对照", "根据任务和观测生成含空间信息的具身推理链。", "任务、阶段、定位、运动等中间序列，再预测动作。", "检查推理监督、字段准确性与刷新频率。", sources.ecot],
+  ["VoxPoser · 补充对照", "LLM/VLM 将语言知识与当前场景联系起来。", "3D 价值图与约束，供规划器生成轨迹。", "语义结果可作用于规划目标，不必全部交给动作 Transformer。", sources.voxposer],
+] as const;
+---
+<BreakdownLayout title="语义模块的信息流" description="详细比较具身模型如何使用语义输入：条件编码、多模态融合、子任务规划、具身推理、空间落地与训练监督。" detail>
+  <main class="breakdown-main semantic-main" id="main">
+    <header class="semantic-heading"><p class="breakdown-eyebrow">拆解模型 / 输入信息 / 01 语义模块</p><h1>语义信息，如何进入模型并影响行为？</h1><p class="semantic-lead">从“用了哪个 VLM”，走向“输入了什么、形成了什么表示、谁来读取、什么时候更新”。沿着这条链，比较不同模型的语义处理方式。</p><p class="semantic-meta">资料核对：2026-09-09 · 公式使用统一教学记号 · 研究建议与论文事实分别说明</p></header>
+    <div class="semantic-layout">
+      <nav class="semantic-toc" aria-label="语义模块目录"><h2>本节目录</h2><ol>{chapters.map(chapter => <li><a href={`#${chapter.id}`}>{chapter.label}</a></li>)}</ol></nav>
+      <article class="semantic-content">
+        <section class="semantic-section" id="boundary">
+          <p class="breakdown-eyebrow">01 / 确定研究对象</p><h2>先把“语义模块”定义成一个信息接口</h2>
+          <p>这里研究的是：模型如何理解<strong>要做什么、操作谁、满足什么关系、遵守哪些限制</strong>，并把这些信息交给后续计算。任务语义通常从语言指令进入，但也需要图像、历史或交互反馈才能确定具体指代。</p>
+          <div class="semantic-table-wrap" tabindex="0" role="region" aria-label="语义信息类型对照表，可横向滚动"><table class="semantic-table"><thead><tr><th scope="col">信息类型</th><th scope="col">示例</th><th scope="col">模型需要解决的问题</th></tr></thead><tbody>
+            <tr><td>目标与意图</td><td>把桌面收拾好</td><td>把宽泛要求联系到当前可执行任务。</td></tr>
+            <tr><td>对象、属性与指代</td><td>左边那只红杯</td><td>在当前观测中识别具体目标，避免只记住物体类别。</td></tr>
+            <tr><td>关系与约束</td><td>放进抽屉；不要碰蓝杯</td><td>表示目的地、相对关系与禁止事项。</td></tr>
+            <tr><td>阶段与完成条件</td><td>先打开，再放入，最后关好</td><td>判断当前步骤及其切换条件。</td></tr>
+            <tr><td>纠正与历史</td><td>不是这只；继续刚才的任务</td><td>把新指令与已有任务状态对应，而非独立解释每句话。</td></tr>
+          </tbody></table></div>
+          <FlowFormula expression={String.raw`C_t=(L,O_t,s_t,\mathcal H_t),\qquad Z_t^{sem}=S_\phi(C_t),\qquad A_t\sim\pi_\theta(\,\cdot\mid O_t,s_t,Z_t^{sem})`} caption="L：指令；Oₜ：观测；sₜ：本体状态；ℋₜ：历史；Zˢᵉᵐ：语义中间表示；Aₜ：动作块。这是接口示意，各模型并不一定把所有条件送进 S。" />
+          <p><strong>本节所说的模块“输出”，是输入信息经过处理后形成的中间表示。</strong>它仍属于输入侧的拆解；“系统最终需要哪些输出、如何发挥作用”留在另一大块，暂未展开。</p>
+          <div class="semantic-callout"><p>“encoder 还是完整 VLM”描述计算结构；“隐藏条件还是显式计划”描述信息接口。两个维度需要分别记录：完整 VLM 可以只提供特征，encoder 也可以承担图像与语言的深度融合。</p></div>
+          <p>因此，不能把“连续特征 → 完整 VLM → CoT”当作必然越来越强的等级。比较要看任务需要什么信息、信息是否抵达动作端，以及多出的数据和计算是否真正改善闭环行为。</p>
+        </section>
+        <section class="semantic-section" id="pathways">
+          <p class="breakdown-eyebrow">02 / 可组合的用法</p><h2>六种语义信息流</h2><p>下面按<strong>信息经过什么变换、交给谁</strong>分类。这些用法可以共存：同一模型既输出密集特征，也产生子任务，还可能在训练时接受语义监督。</p>
+          {semanticPathways.map(route => <section class="semantic-route" id={route.id}>
+            <p class="route-kicker">{route.tag}</p><h3>{route.title}</h3><p>{route.lead}</p>
+            <dl class="route-interface"><div><dt>输入</dt><dd>{route.input}</dd></div><div><dt>中间表示</dt><dd>{route.representation}</dd></div><div><dt>谁来使用</dt><dd>{route.consumer}</dd></div></dl>
+            <FlowFormula expression={route.expression} caption={route.caption} />
+            <h4>计算过程</h4><ol>{route.steps.map(step => <li>{step}</li>)}</ol><h4>训练时</h4><p>{route.training}</p><h4>推理时</h4><p>{route.inference}</p><h4>具体理解</h4><p>{route.example}</p><h4>收益与代价</h4><p>{route.tradeoff}</p>
+            <p class="semantic-source">资料：{route.sources.map(source => <a href={source.url} target="_blank" rel="noreferrer">{source.label} ↗</a>)}</p>
+          </section>)}
+        </section>
+        <section class="semantic-section" id="interfaces">
+          <p class="breakdown-eyebrow">03 / 从表示到作用</p><h2>语义特征怎样被下游真正读取？</h2>
+          <p>有一个语义表示还不够，必须追到<strong>消费它的计算位置</strong>。相同的语言表示，通过不同接入方式，给动作网络留下的信息通道也不同。</p>
+          <div class="semantic-table-wrap" tabindex="0" role="region" aria-label="语义信息的下游接入方式，可横向滚动"><table class="semantic-table"><thead><tr><th scope="col">接入方式</th><th scope="col">实际作用</th><th scope="col">需要检查</th></tr></thead><tbody>
+            <tr><td>拼接 token / 前缀</td><td>动作 token 与语义 token 在允许的注意力连接中交换信息。</td><td>掩码允许谁看谁；状态、图像、文本是否进入同一个前缀。</td></tr>
+            <tr><td>Cross-attention</td><td>动作隐藏状态作为 query，选择读取语义 K/V 中的内容。</td><td>投影维度、层间位置、token 是否被截断或压缩。</td></tr>
+            <tr><td>条件调制</td><td>语义向量产生通道缩放、偏移或门控，改变下游块的计算。</td><td>是否只用了池化向量；调制出现在哪些层。</td></tr>
+            <tr><td>文本子任务 / 推理前缀</td><td>先生成中间文本，再作为动作预测的条件。</td><td>动作调用是否实际接收文本；是否保留原始观测。</td></tr>
+            <tr><td>目标 / 约束接口</td><td>改变规划器的目标、代价或可行区域。</td><td>坐标系、约束执行位置，以及不可达目标如何处理。</td></tr>
+          </tbody></table></div>
+          <FlowFormula expression={String.raw`Q=H^aW_Q,\quad K=Z^{sem}W_K,\quad V=Z^{sem}W_V,\qquad H^{a\prime}=H^a+\operatorname{softmax}\!\left(\frac{QK^\top}{\sqrt{d_k}}+M\right)VW_O`} caption="一个 cross-attention 残差块的简化写法，省略多头拆分、归一化与其他子层。M 是注意力掩码；语义主要通过 K/V 被动作 query 读取。" />
+          <p>若采用 joint attention，需要从实现中读出各类 token 的掩码；不能把“同一次 attention”直接等同为所有 token 无限制双向可见。若下游读取的条件在本次去噪中不变，K/V 可能缓存；新观测到来后，依赖图像的语义上下文应重新计算。</p>
+          <div class="semantic-callout"><p>学到的 query、soft prompt 与 latent 不是天然的“思考步骤”。要称作多步潜空间推理，需要看到明确的迭代机制、停止规则或相应实验；仅仅存在可学习向量不足以证明这一点。</p></div>
+          <h3>一个维度例子</h3><p>假设两路图像各 256 个视觉 token、指令 32 个 token，融合上下文共有 544 个 token、隐藏维 2048。投影后供动作端读取的序列仍可保留 544 个位置，也可压缩到较少槽位。<strong>这些数字仅作教学示例，不是某个模型的真实配置。</strong>压缩是否损失任务相关信息，需要用定位、语言跟随与任务表现验证，不能只凭 token 数判断。</p>
+          <p class="semantic-source">代码对照：<a href={sources.openpi.url} target="_blank" rel="noreferrer">OpenPI 的 embed_prefix / sample_actions ↗</a><a href={sources.xvlaCode.url} target="_blank" rel="noreferrer">X-VLA 的编码与下游接口 ↗</a></p>
+        </section>
+        <section class="semantic-section" id="models">
+          <p class="breakdown-eyebrow">04 / 用同一组问题比较</p><h2>代表模型的信息接口对照</h2><p>先选能够体现不同路径的模型做细读；没有为其余模型预先填写未经核对的结论。ECoT 与 VoxPoser 是补充方法案例。</p>
+          <div class="semantic-table-wrap" tabindex="0" role="region" aria-label="代表模型语义信息流对照，可横向滚动"><table class="semantic-table"><thead><tr><th scope="col">模型</th><th scope="col">语义如何处理</th><th scope="col">传递什么</th><th scope="col">拆解重点</th></tr></thead><tbody>{modelRows.map(row => <tr><td><a href={row[4].url} target="_blank" rel="noreferrer">{row[0]} ↗</a></td><td>{row[1]}</td><td>{row[2]}</td><td>{row[3]}</td></tr>)}</tbody></table></div>
+          <div class="semantic-callout caution"><p>论文系统、开源仓库和某个预训练检查点是三个不同的核对对象。论文描述了高层规划，不能直接推出你下载的动作权重和推理脚本已经包含同一条规划链。</p></div>
+        </section>
+        <section class="semantic-section" id="dit-cosmos">
+          <p class="breakdown-eyebrow">05 / 当前重点模型</p><h2>DiT4DiT 与 Cosmos 3：同有语言输入，路径仍然不同</h2>
+          <section class="semantic-case"><h3>DiT4DiT：语义先条件化动态，再传给动作</h3><p>论文 §4.2 指出，语言指令使用 <strong>Cosmos-Reason1 的多层嵌入</strong>为视频 DiT 提供条件；视觉观测通过视频 VAE 进入视频潜空间。动作 DiT 再读取视频去噪过程中的特征。语言信息因而可以先参与形成任务相关的动态表示，再影响动作。</p>
+            <figure class="flow-chart"><figcaption>DiT4DiT 中与语义有关的主要通路</figcaption><div class="flow-branches"><div class="flow-lane"><div class="flow-node"><b>任务指令 L</b><small>任务目标与语言描述</small></div><div class="flow-arrow" aria-hidden="true">↓</div><div class="flow-node"><b>Cosmos-Reason1 特征</b><small>多层语言嵌入</small></div></div><div class="flow-lane"><div class="flow-node"><b>当前视觉观测 Oₜ</b><small>可见场景</small></div><div class="flow-arrow" aria-hidden="true">↓</div><div class="flow-node"><b>视频 VAE 潜变量</b><small>视觉内容表示</small></div></div></div><div class="flow-arrow" aria-hidden="true">↓</div><div class="flow-node flow-result"><b>Video DiT</b><small>语言条件参与未来动态建模</small></div><div class="flow-arrow" aria-hidden="true">↓</div><div class="flow-node flow-result"><b>中间动态特征 → Action DiT</b><small>动作端消费经过动态建模的条件</small></div><p class="flow-note">仅突出语义通路；噪声、时间、本体状态和其他连接省略，完整架构见原模型页面。</p></figure>
+            <p>论文训练设置冻结文本编码器和视觉 VAE、联合更新两个 DiT。<strong>条件编码器叫 Reason1，不等于这里正在生成一段自然语言 CoT。</strong>判断是否有显式规划，仍应寻找被生成、传递并实际使用的计划变量。</p><p class="semantic-source"><a href={sources.dit4dit.url} target="_blank" rel="noreferrer">论文：条件路径与冻结范围 ↗</a><a href={sources.ditCode.url} target="_blank" rel="noreferrer">官方实现 ↗</a></p>
+          </section>
+          <section class="semantic-case"><h3>Cosmos 3：先确认你调用的是哪一种接口</h3><p>官方代码将运行接口分为 <strong>Reasoner</strong> 与 <strong>Generator</strong>：前者主要根据文本和视觉输入产生文本，后者支持条件化的多模态生成，包括动作相关任务。它们属于同一模型家族的设计，但实际输入、输出和调用过程需要分别检查。</p>
+            <div class="reading-pair"><div><h3>Reasoner 路径</h3><p>可读入场景与问题，产生解释、任务规划或空间描述。官方示例包含文字推理与图像平面的末端轨迹；要影响动作，还需有下游读取这些结果。</p></div><div><h3>Generator / Policy 路径</h3><p>读取条件并生成相应模态。运行某个机器人 Policy 时，要看流程是否额外调用了 Reasoner；生成动作本身不能证明先做过文本规划。</p></div></div>
+            <p>针对你正在运行的 <code>Cosmos3-Nano-Policy-DROID</code>，拆解时记录：输入指令如何编码、视觉上下文如何加入、有没有额外生成的推理文本、动作生成是否消费该文本。<strong>这个页面没有把尚未检查的本地调用过程写成已验证事实。</strong></p><p class="semantic-source"><a href={sources.cosmos.url} target="_blank" rel="noreferrer">官方模式与样例接口 ↗</a><a href={sources.cosmosDemo.url} target="_blank" rel="noreferrer">官方交互示例 ↗</a></p>
+          </section>
+          <p>这两个模型的比较可以落在一个具体问题上：<strong>任务语义是以原始隐藏特征、任务条件化的动态特征，还是显式推理结果到达动作端？</strong>它比单独比较“有没有 VLM”更能指导后续实验。</p>
+        </section>
+        <section class="semantic-section" id="training">
+          <p class="breakdown-eyebrow">06 / 时间与监督</p><h2>把训练信息、部署条件和反馈更新分开画</h2>
+          <div class="semantic-table-wrap" tabindex="0" role="region" aria-label="训练与部署的信息差异，可横向滚动"><table class="semantic-table"><thead><tr><th scope="col">检查点</th><th scope="col">训练时</th><th scope="col">部署时</th></tr></thead><tbody>
+            <tr><td>语言条件</td><td>人工标注指令、子任务或生成的描述。</td><td>真实用户指令或高层预测；需检查与训练格式的差异。</td></tr>
+            <tr><td>中间计划</td><td>可能使用真实阶段标签或教师计划。</td><td>模型自己预测，错误可能传递到低层。</td></tr>
+            <tr><td>教师特征</td><td>可参与蒸馏或辅助学习。</td><td>是否保留教师，必须由推理代码确认。</td></tr>
+            <tr><td>未来信息</td><td>未来真值可作为监督目标。</td><td>当前部署条件只能包含已获得的信息及模型自身预测。</td></tr>
+            <tr><td>梯度与缓存</td><td>冻结、解冻或停止梯度决定知识怎样进入参数。</td><td>缓存取决于条件是否改变，不能代替实时观测刷新。</td></tr>
+          </tbody></table></div>
+          <p>如果训练时给了正确子任务，部署时却让模型自行猜测，失败可能来自高层分布差异；如果高层一直沿用旧计划，失败也可能来自更新规则。它们都不应被笼统归因于“语义主干不够强”。</p>
+          <p>同样，模型学过未来教师特征并不意味着部署时看到真实未来。检查是否发生信息泄漏，要追踪部署输入有没有不应出现的真值，而不是只看训练图上画了未来帧。</p>
+        </section>
+        <section class="semantic-section" id="example">
+          <p class="breakdown-eyebrow">07 / 教学算例</p><h2>同一句指令，可以沿不同通路发挥作用</h2>
+          <div class="semantic-callout"><p>教学场景：桌上有红杯和蓝杯，左侧抽屉关闭。指令是：“把红杯放进左侧抽屉，最后关好，不要碰蓝杯。”以下是接口示意，不是某个模型的实测输出。</p></div>
+          <ol>
+            <li><strong>文本条件：</strong>整句指令编码为特征，动作网络根据画面与这些特征选择行为；阶段顺序可以隐含在策略中。</li>
+            <li><strong>视觉语言融合：</strong>把“红杯”“左侧抽屉”“蓝杯”的指代与当前画面对应，形成任务相关 token，动作端选择读取。</li>
+            <li><strong>子任务接口：</strong>先产生“打开左侧抽屉”，完成后再产生“抓红杯”等新子任务。低层每一步仍处理实际观测。</li>
+            <li><strong>具身推理接口：</strong>在子任务之外，记录目标位置、当前夹爪位置和下一步运动意图，形成与场景对应的中间序列。</li>
+            <li><strong>空间接口：</strong>把抽屉内部设为放置目标、蓝杯周围设为避让区域，再交给消费这些信息的规划或控制模块。</li>
+            <li><strong>训练监督：</strong>这些语义关系可以在训练时作为标签或辅助信号；部署时则由学到的表示支持判断。</li>
+          </ol>
+          <p>每种做法都可能失败。红杯认错属于目标理解或定位问题；子任务顺序错属于阶段组织问题；目标和计划正确却打滑，可能是控制、接触或数据覆盖问题。拆解的价值，就是把失败定位到具体信息接口。</p>
+        </section>
+        <section class="semantic-section" id="experiments">
+          <p class="breakdown-eyebrow">08 / 研究建议</p><h2>怎样验证哪种语义模块更有效？</h2>
+          <p>以下是基于信息流框架提出的实验建议，不是论文已经证明的排名。先在固定机器人、固定动作表示与同一闭环任务上建立基线，再改变一个语义接口；跨模型总分会混入数据、动作头、训练量和控制器差异。</p>
+          <div class="semantic-table-wrap" tabindex="0" role="region" aria-label="语义模块消融建议，可横向滚动"><table class="semantic-table"><thead><tr><th scope="col">实验</th><th scope="col">保持 / 改变什么</th><th scope="col">回答什么问题</th></tr></thead><tbody>
+            <tr><td>语义敏感性</td><td>固定观测与采样条件，更换目标、空间关系或否定约束；另做同义改写。</td><td>模型会遵循有意义的语义变化，同时保持对等价表达的稳定吗？</td></tr>
+            <tr><td>条件使用</td><td>去除或打乱语言条件，与原条件比较。</td><td>动作端是否在使用语言？这只能作依赖诊断，不能独立证明语言理解质量。</td></tr>
+            <tr><td>子任务上限</td><td>比较整体指令、预测子任务和人工正确子任务，保持低层接口一致。</td><td>瓶颈在阶段选择，还是低层完成该阶段的能力？</td></tr>
+            <tr><td>表示 / 接口替换</td><td>固定动作骨干、数据与预算，为不同语义表示训练相应适配层。</td><td>效果来自表示质量，还是更多参数、token、数据和训练量？</td></tr>
+            <tr><td>训练监督</td><td>比较相同基线有无语义辅助任务或教师监督，注明额外数据与计算。</td><td>语义监督改善了什么类型的泛化，代价是什么？</td></tr>
+            <tr><td>更新机制</td><td>比较一次性计划、阶段重规划和观测变化后重规划。</td><td>问题来自表示本身，还是语义状态已经过时？</td></tr>
+          </tbody></table></div>
+          <h3>不要只记录总成功率</h3><ul><li><strong>语言跟随：</strong>选对物体、位置、关系与约束的比例。</li><li><strong>阶段组织：</strong>子任务正确率、阶段切换错误和失败后的恢复。</li><li><strong>完整闭环：</strong>任务成功、约束违反和失败原因；使用多次 rollout 并报告不确定性。</li><li><strong>运行成本：</strong>语义模块与完整闭环的时延，显存、token 数和重规划次数。</li></ul>
+          <div class="semantic-callout caution"><p>把更强的语义特征直接塞进一个没有为它训练过的动作头，失败可能只是接口分布不匹配。冻结原动作头的替换实验与允许适配训练的比较实验，应分别报告。</p></div>
+          <h3>每个模型填写同一张信息流记录</h3><p>记录<strong>输入来源、分词 / 编码方式、token 形状、融合位置、中间表示、消费模块、注意力掩码、训练监督、冻结范围、刷新频率和公开代码入口</strong>。论文里暂时查不到的项留为“未核实”，不要用模型名称推断。</p>
+        </section>
+        <section class="semantic-section" id="references">
+          <p class="breakdown-eyebrow">09 / 可追溯资料</p><h2>原始资料与代码入口</h2><p class="semantic-small">上述分类、统一公式、教学算例和实验对照属于本页的分析框架；模型具体事实以链接中的论文、官方说明和所使用版本的代码为准。</p><ol class="source-list">{Object.values(sources).map(source => <li><a href={source.url} target="_blank" rel="noreferrer">{source.label} ↗</a></li>)}</ol>
+        </section>
+        <a class="semantic-return" href="../">← 返回拆解模型</a>
+      </article>
+    </div>
+  </main>
+</BreakdownLayout>

@@ -7,6 +7,7 @@ const dossier = defineCollection({
     title: z.string(),
     category: z.enum(["datasets", "model-architecture", "evaluation", "macro-thinking"]),
     kind: z.enum(["model", "dataset", "benchmark", "evaluation", "theory", "guidance", "roadmap"]),
+    author: z.enum(["xiaoyazhai", "youchengcai"]).optional(),
     organization: z.string().optional(),
     releaseDate: z.coerce.date().optional(),
     summary: z.string(),

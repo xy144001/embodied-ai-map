@@ -1,0 +1,267 @@
+---
+import FlowFormula from "./FlowFormula.astro";
+
+const controllers = [
+  {
+    id: "decoupled",
+    name: "NVIDIA Decoupled WBC",
+    kind: "分离式 learned + IK",
+    robot: "G1 为主",
+    support: "官方提供 G1 控制栈",
+    input: "末端 / 手臂目标、导航速度、机身高度等",
+    balance: "上肢 IK 与下肢 RL 协作",
+    stars: 4,
+    access: "已有 GR00T 接入实例",
+    position: "优先理解的解耦基线",
+    mechanism: "把上身操作与下身运动分开组织：上肢侧处理目标姿态与运动学，下肢侧根据导航命令、身体状态和上身运动更新控制。它适合用来观察手臂任务、步态与平衡分别放在哪一层。",
+    interface: "官方组合策略的目标字段包括 target_upper_body_pose、navigate_cmd、base_height_command 及时间信息。上游可以先把末端目标变换为所需的上身参考；最终组合输出进入 G1 的关节控制链。",
+    connection: "VLA 需要输出或转换成这套接口接受的字段。只会输出双臂关节目标的策略，还要安排导航与机身参考的来源；若要让脚直接执行任务，需要检查接口能否表达相应动作。",
+    release: "官方仓库把它列为 GR00T N1.5 / N1.6 使用的控制器，并提供独立文档。学习重点是解耦位置、共享机身命令与两路输出如何合并。",
+    links: [
+      { title: "官方仓库与定位", url: "https://github.com/NVlabs/GR00T-WholeBodyControl#decoupled-wbc" },
+      { title: "G1 目标字段与组合策略", url: "https://github.com/NVlabs/GR00T-WholeBodyControl/blob/main/decoupled_wbc/control/policy/g1_decoupled_whole_body_policy.py" },
+    ],
+  },
+  {
+    id: "sonic",
+    name: "GEAR-SONIC",
+    kind: "学习型运动基础模型",
+    robot: "G1",
+    support: "官方权重、训练与部署流程",
+    input: "64D 运动 latent；编码端支持多种运动参考",
+    balance: "统一神经运动跟踪控制器",
+    stars: 5,
+    access: "已有官方 VLA 闭环接口",
+    position: "本组重点研究的统一运动后端",
+    mechanism: "通过大规模运动跟踪学习身体协调。运动编码器把指定形式的参考变成 latent；运动解码器结合 latent 与真实身体状态产生低层输出，让同一个运动控制器服务于遥操作或自主策略。",
+    interface: "当前列出的 SONIC 通用 token 控制器使用 64D latent、50 Hz 控制更新，并支持 SMPL、G1 运动参考及遥操作输入。64D 表示身体运动接口，手部字段在相应 VLA 配置里另行组织。",
+    connection: "可让 VLA 学习匹配版本的运动 token，再接入 SONIC。已有官方 GR00T 推理与采集流程；编码器、解码器、状态归一化、参考窗口和动作标签必须保持对应。",
+    release: "官方区分默认版、低延迟版与 v1.1，提供匹配的权重和配置。研究时应固定具体版本；latent 不是脱离控制器仍具有固定物理语义的通用坐标。",
+    links: [
+      { title: "模型版本、64D 与 50 Hz", url: "https://github.com/NVlabs/GR00T-WholeBodyControl#model-card" },
+      { title: "官方 VLA 接入", url: "https://github.com/NVlabs/GR00T-WholeBodyControl/blob/main/docs/source/tutorials/vla_inference.md" },
+      { title: "运动跟踪论文", url: "https://arxiv.org/abs/2511.07820" },
+    ],
+  },
+  {
+    id: "unitree",
+    name: "Unitree 原生 Sport / Balance",
+    kind: "厂商运动服务与控制栈",
+    robot: "G1 / H1 / H2",
+    support: "各型号有对应接口，不能直接互换",
+    input: "移动速度、转向、站立 / 蹲起、模式等",
+    balance: "由机上厂商运动服务完成",
+    stars: 3,
+    access: "适合高层命令接入",
+    position: "工程接入起点；内部研究自由度有限",
+    mechanism: "这里用 Sport / Balance 泛指厂商提供的运动与平衡能力，并非所有机型共用一个同名网络。以 G1 为例，公开 SDK 通过 LocoClient 调用机上运动服务；SDK 接口可读，不等于底层控制算法与训练权重都已开放。",
+    interface: "G1 的官方示例包含平面移动、转向、站立高度相关动作、蹲起与状态切换。G1、H1、H2 在 SDK 中有各自的示例目录；可用字段和行为还要与具体型号、固件及模式对应。",
+    connection: "VLA 可以通过适配层产生高层运动命令，手臂也有相应接口，但需要确认与当前运动模式的组合方式。高层速度命令通常不会逐项指定每只脚的轨迹，不能把它当成任意全身关节向量的入口。",
+    release: "适合先验证通信、基础移动与状态反馈。学习重点是厂商服务对外承诺了哪些命令，以及数据里的 action 记录的是高层请求还是底层执行结果；这里不作跨控制器的稳定性排名。",
+    links: [
+      { title: "G1 LocoClient 示例", url: "https://github.com/unitreerobotics/unitree_sdk2_python/blob/master/example/g1/high_level/g1_loco_client_example.py" },
+      { title: "G1 / H1 / H2 官方示例目录", url: "https://github.com/unitreerobotics/unitree_sdk2/tree/main/example" },
+    ],
+  },
+  {
+    id: "hover",
+    name: "HOVER",
+    kind: "多模式神经 WBC",
+    robot: "官方例程以 H1 为主",
+    support: "G1 需核对配置并做适配",
+    input: "位置、关节、根部参考与命令 mask",
+    balance: "运动跟踪教师 + 多模式蒸馏",
+    stars: 4,
+    access: "接口表达灵活；需接入任务策略",
+    position: "研究多种控制空间的代表基线",
+    mechanism: "先用全身运动模仿建立控制能力，再通过命令遮罩与多模式蒸馏，让一个策略处理不同控制需求。例如只指定部分手部目标、全身姿态或根部运动时，控制器接收的有效命令子集不同。",
+    interface: "部署接口包含运动学位置、局部关节和根部跟踪信息，并用 mask 指明哪些命令有效。策略同时读取本体反馈。这里的 mask 用来描述控制模式，不能与 VLA 的注意力 mask 混为一类。",
+    connection: "VLA 可研究输出对应模式的参考与 mask，剩余身体运动由控制策略处理。是否能接入某个已有 VLA checkpoint，需要检查训练标签、模式定义和低层观测；多模式控制本身不等于已适配所有 VLA。",
+    release: "官方 NVlabs/HOVER 提供 Isaac Lab 训练、教师与学生流程及仿真验证说明，例程以 H1 为主。本文未核实可直接使用的官方 G1 权重，因此将它列为方法与接口研究基线。",
+    links: [
+      { title: "官方方法与命令空间", url: "https://hover-versatile-humanoid.github.io/" },
+      { title: "官方训练代码", url: "https://github.com/NVlabs/HOVER" },
+    ],
+  },
+  {
+    id: "h2o",
+    name: "OmniH2O / H2O",
+    kind: "RL 全身跟踪与遥操作",
+    robot: "H1 等；官方例程以 H1 为主",
+    support: "G1 需重定向与控制适配",
+    input: "人体运动参考、VR / RGB 估计的姿态或稀疏目标",
+    balance: "仿真运动跟踪与教师—学生训练",
+    stars: 3,
+    access: "OmniH2O 有上层自主策略示例",
+    position: "理解全身遥操作与数据采集的基础路线",
+    mechanism: "H2O 从人体姿态估计、运动重定向与可行运动筛选出发，训练能在真机跟踪的运动策略。OmniH2O 在此基础上，把运动学姿态作为统一接口，并通过特权教师训练和蒸馏支持稀疏传感输入。",
+    interface: "人的 RGB / VR 输入需要先转换成控制器接受的姿态或跟踪目标，再与机器人本体状态共同进入策略。不同模型与配置使用的跟踪点、历史窗口和输入维数并不统一。",
+    connection: "OmniH2O 展示了遥操作示范学习、Diffusion Policy 与语言模型上层的自主使用方式。接入 VLA 时，可研究让上层生成相同语义的运动目标；这仍需要任务数据与动作接口对齐。",
+    release: "两项工作的官方实现合并在 LeCAR-Lab/human2humanoid，包含训练与部署相关代码，主要例程是 H1。适合追踪“人的输入如何变成机器人参考，以及参考怎样成为策略监督”这条数据链。",
+    links: [
+      { title: "H2O 项目", url: "https://human2humanoid.com/" },
+      { title: "OmniH2O 项目与自主策略", url: "https://omni.human2humanoid.com/" },
+      { title: "官方实现", url: "https://github.com/LeCAR-Lab/human2humanoid" },
+    ],
+  },
+  {
+    id: "gmt",
+    name: "GMT",
+    kind: "General Motion Tracking",
+    robot: "G1",
+    support: "公开包提供 MuJoCo 演示与预训练权重",
+    input: "全身运动参考与机器人状态",
+    balance: "统一 RL 跟踪；自适应采样 + Motion MoE",
+    stars: 4,
+    access: "可研究作为运动后端；需补上层接口",
+    position: "G1 运动跟踪的轻量学习入口",
+    mechanism: "GMT 训练一个策略跟踪多种全身运动。论文的两个关键设计是自适应采样和 Motion Mixture-of-Experts：前者调整不同难度运动的训练机会，后者提升对不同运动区域的表示与跟踪能力。",
+    interface: "当前公开演示读取 G1 运动参考并在 MuJoCo 中执行预训练策略。输入首先是希望机器人跟踪的运动，而不是自然语言或图像；参考的坐标、关节顺序和时间定义需要与实现一致。",
+    connection: "若要接 VLA，需要设计上层输出到运动参考的适配，以及持续接收新参考的执行流程。拥有运动跟踪权重，并不自动提供完整的 VLA 数据采集、训练和真机部署链。",
+    release: "这里的 GMT 特指 Chen 等人的工作及 zixuan417/humanoid-general-motion-tracking。官方 README 将现有包定位为轻量的 MuJoCo 演示，附预训练权重和样例运动；论文中的真机结果与公开包的交付范围分别看待。",
+    links: [
+      { title: "论文：自适应采样与 Motion MoE", url: "https://arxiv.org/abs/2506.14770" },
+      { title: "官方预训练演示", url: "https://github.com/zixuan417/humanoid-general-motion-tracking" },
+    ],
+  },
+  {
+    id: "twist",
+    name: "TWIST",
+    kind: "遥操作 + 学习型运动跟踪",
+    robot: "G1",
+    support: "官方提供训练、权重与 sim2real 流程",
+    input: "人体运动经重定向形成的机器人参考",
+    balance: "RL 教师与 RL + BC 学生控制器",
+    stars: 4,
+    access: "适合采集与运动接口研究",
+    position: "重点学习全身遥操作与数据采集",
+    mechanism: "先把人体运动转成机器人参考，再训练具有反馈能力的运动跟踪器。官方训练流程区分 RL 教师和结合 RL + BC 的学生；部署时，上层运动发送进程与下层 G1 控制进程分开运行。",
+    interface: "上层可以发送离线运动，也可以接入实时姿态采集和重定向。下层根据参考与真实身体反馈生成控制。VLA 接在这一链上时，需要明确自己代替的是运动目标来源，而不是原始动捕设备本身。",
+    connection: "可用于采集全身示范，并研究让自主策略输出匹配的运动参考。应同时记录图像、本体状态、参考与执行时间，避免把动捕原始数据直接当成 VLA 的机器人动作标签。",
+    release: "TWIST 官方仓库已经公开训练数据入口、教师 / 学生训练、checkpoint、sim2sim 与 G1 sim2real 脚本。后续 TWIST2 进一步整理 PICO 遥操作和数据采集；两代系统要分别检查配置与控制器版本。",
+    links: [
+      { title: "TWIST 论文", url: "https://arxiv.org/abs/2505.02833" },
+      { title: "TWIST 官方实现", url: "https://github.com/YanjieZe/TWIST" },
+      { title: "后续 TWIST2 采集系统", url: "https://github.com/amazon-far/TWIST2" },
+    ],
+  },
+  {
+    id: "tsid",
+    name: "TSID / QP WBC",
+    kind: "经典优化式全身控制",
+    robot: "通用机器人控制方法 / 库",
+    support: "G1 需要建模与控制栈集成",
+    input: "末端、质心、姿态、接触等任务参考",
+    balance: "显式动力学与接触 / 执行器约束",
+    stars: 3,
+    access: "参考语义清晰；集成工作较多",
+    position: "学习可解释控制与约束的传统基线",
+    mechanism: "根据机器人动力学与当前状态，将多个跟踪任务写成优化目标，并结合接触与执行器约束求解控制量。TSID 是建立在 Pinocchio 上的任务空间逆动力学库；QP WBC 是更宽泛的方法类别。",
+    interface: "上层可以给出末端位姿、质心轨迹、姿态等目标。控制器还需要机器人模型、状态估计、接触设置和任务权重；通常不能仅凭一个任意维数的 latent 就解释任务意图。",
+    connection: "VLA 可以输出物理含义明确的任务参考，由适配层连接优化控制器。还要解决接触 / 步态规划、可行性和执行时序；显式列出约束并不意味着任意目标或任意状态下都能稳定执行。",
+    release: "TSID 提供 C++ 与 Python 接口及多类机器人示例，属于可集成的控制工具，不是一套即插即用的 G1 预训练模型。适合用来对照学习型 WBC 把哪些物理关系显式求解、把哪些能力交给训练。",
+    links: [
+      { title: "TSID 官方库", url: "https://github.com/stack-of-tasks/tsid" },
+      { title: "优化式动态行走原始论文", url: "https://arxiv.org/abs/1311.1839" },
+    ],
+  },
+];
+---
+
+<section class="weekly-question wbc-catalog" id="wbc-catalog" aria-labelledby="wbc-catalog-title">
+  <div class="question-number">APPENDIX · WHOLE-BODY CONTROLLERS</div>
+  <h2 id="wbc-catalog-title">目前主流的 WBC：面向 VLA、全身与 G1 的八条主线</h2>
+  <p>沿着前面的大小脑与控制接口讨论，这里集中整理<strong>能连接任务策略、能研究 humanoid full-body，并优先考虑 Unitree G1</strong>的八类控制体系。资料核对截至 <strong>2026 年 9 月 11 日</strong>。</p>
+  <p class="source-line">星级沿用本组的选型参考，结合接口表达、现有接入流程与学习成本理解，不是统一 Benchmark 得分。具体技术事实和公开范围见各项官方资料；“可适配”与“已有完整接入实例”分别标明。</p>
+
+  <div class="weekly-table-wrap" tabindex="0" role="region" aria-label="八类 WBC 对比表，可横向滚动">
+    <table class="weekly-table wbc-table">
+      <caption>横向比较八条路线；下方可逐项展开输入输出、平衡机制与 VLA 接入说明。</caption>
+      <thead>
+        <tr>
+          <th scope="col">WBC / 控制体系</th>
+          <th scope="col">类型与平衡方式</th>
+          <th scope="col">机器人与 G1 支持</th>
+          <th scope="col">核心输入 / 接口</th>
+          <th scope="col">VLA 接入参考</th>
+          <th scope="col">本组学习定位</th>
+        </tr>
+      </thead>
+      <tbody>
+        {controllers.map((controller) => (
+          <tr>
+            <th scope="row"><a href={"#wbc-" + controller.id}>{controller.name}</a></th>
+            <td>{controller.kind}<small>{controller.balance}</small></td>
+            <td>{controller.robot}<small>{controller.support}</small></td>
+            <td>{controller.input}</td>
+            <td><span class="wbc-rating" aria-label={controller.stars + " 星，共 5 星"}>{"★".repeat(controller.stars) + "☆".repeat(5 - controller.stars)}</span><small>{controller.access}</small></td>
+            <td>{controller.position}</td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+
+  <h3>逐项展开：输入怎样成为身体运动</h3>
+  <p>点击名称展开说明。每项都分别列出控制机制、实际接口、VLA 接入方式与公开实现范围。</p>
+  <div class="wbc-entries">
+    {controllers.map((controller, index) => (
+      <details class="wbc-entry" id={"wbc-" + controller.id} name="wbc-controller">
+        <summary>
+          <strong><span class="wbc-number">{String(index + 1).padStart(2, "0")}</span>{controller.name}</strong>
+          <span class="wbc-summary-note">{controller.position}</span>
+        </summary>
+        <div class="wbc-entry-body">
+          <h4>控制机制与平衡</h4>
+          <p>{controller.mechanism}</p>
+          <h4>输入、输出与接口含义</h4>
+          <p>{controller.interface}</p>
+          <h4>怎样连接 VLA</h4>
+          <p>{controller.connection}</p>
+          <h4>公开实现与学习重点</h4>
+          <p>{controller.release}</p>
+          <p class="source-line">官方资料：
+            {controller.links.map((link, linkIndex) => (
+              <>{linkIndex > 0 && " · "}<a href={link.url}>{link.title}</a></>
+            ))}
+          </p>
+        </div>
+      </details>
+    ))}
+  </div>
+
+  <h3 id="wbc-interface-summary">把这些路线放回同一条信息流</h3>
+  <FlowFormula expression={"\\begin{aligned}c_t&=\\operatorname{Adapt}_K\\!\\left(\\pi_\\theta(O_{\\le t},s_t,L)\\right),\\\\r_t&=K(c_t,s_t^{\\mathrm{ctrl}},h_t)\\end{aligned}"} caption="这是比较接口的抽象：VLA 产生任务参考，AdaptK 将其转成控制器 K 的命令，K 结合当前身体状态与历史产生低层输出 r。适配层有时只是坐标与字段转换，有时需要重新设计标签并训练策略。" />
+  <p>解耦控制、厂商 API、多模式跟踪、显式运动参考和 learned latent 的主要差异，都可以从这里的 <strong>c 表达什么</strong>、<strong>K 学会或求解了什么</strong>来比较。对于 TSID / QP，K 可能包含在线优化；对于 SONIC、HOVER、GMT、TWIST 等学习型控制器，K 中包含训练得到的状态反馈策略。</p>
+  <div class="weekly-callout">
+    <p><strong>本组的阅读顺序：</strong>先用 Decoupled WBC 理清“任务参考—身体执行”的接口，再重点研究 SONIC 的统一运动表示；做遥操作和采集时重点对照 TWIST，快速观察 G1 运动跟踪可从 GMT 演示入手。HOVER / OmniH2O 用于研究多模式与稀疏参考，TSID / QP 用于理解显式约束。</p>
+    <p>最终选择时，把“机器人型号、命令语义、观测定义、控制频率和 checkpoint”写在一起。相同硬件与相同 action 维数，都不足以单独证明两套控制链可以互换。</p>
+  </div>
+  <p class="source-line">各条目中的接入建议和上述阅读顺序，是结合本组目标作出的工程判断；已公开的训练、演示与部署能力以链接资料为准。</p>
+</section>
+
+<style>
+  .wbc-catalog { margin-top: 38px; }
+  .wbc-table { min-width: 1120px; }
+  .wbc-table th:first-child { width: 16%; }
+  .wbc-table tbody th { background: #111c2c; font-size: 16px; }
+  .wbc-table small { display: block; margin-top: 8px; font-size: 14px; line-height: 1.8; color: #a2b7d2; }
+  .wbc-rating { color: #f0c478; white-space: nowrap; letter-spacing: .08em; }
+  .wbc-entries { display: grid; gap: 12px; margin: 24px 0; }
+  .wbc-entry { border: 1px solid #3a4d66; border-radius: 6px; background: #101c2c; scroll-margin-top: 100px; }
+  .wbc-entry:target { border-color: #9ec4ff; box-shadow: 0 0 0 1px #9ec4ff; }
+  .wbc-entry summary { cursor: pointer; padding: 18px 20px; color: #e7f0ff; }
+  .wbc-entry summary::marker { color: #9ec4ff; }
+  .wbc-entry summary strong { font-size: 18px; }
+  .wbc-entry summary:hover { background: #1a2b43; }
+  .wbc-entry summary:focus-visible { outline: 3px solid #c4ddff; outline-offset: 4px; }
+  .wbc-number { margin-right: 12px; color: #9eb9df; font: 600 14px/1.6 ui-monospace, monospace; }
+  .wbc-summary-note { display: block; margin: 7px 0 0 30px; color: #a2b7d2; font-size: 14px; line-height: 1.8; }
+  .wbc-entry[open] summary { border-bottom: 1px solid #334962; }
+  .wbc-entry-body { padding: 0 22px 20px; }
+  @media (max-width: 650px) {
+    .wbc-entry summary { padding: 16px; }
+    .wbc-entry summary strong { font-size: 17px; }
+    .wbc-entry-body { padding: 0 16px 16px; }
+  }
+</style>

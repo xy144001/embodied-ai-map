@@ -7,7 +7,7 @@
 - 数据集：`@starrysky77`
 - 模型架构：`@xy144001`
 - 评测：`@SyouSanGin`
-- 宏观思想：`@xiaoyazhai`
+- 宏观思想：翟老师 `@xiaoyazhai`、蔡老师 `@youchengcai`
 
 数据集版块当前收录 64 个数据集、benchmark、采集系统与数据管线，支持按 Full-body 层级、数据来源和证据等级筛选，并包含采集系统、数据格式与任务覆盖专题。
 

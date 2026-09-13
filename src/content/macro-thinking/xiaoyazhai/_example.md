@@ -2,8 +2,9 @@
 title: 宏观思想条目模板
 category: macro-thinking
 kind: guidance
+author: xiaoyazhai
 organization: USTC
-summary: 复制此文件并去掉 draft，用于编写具身智能宏观路线、研究范式与方向判断。
+summary: 翟老师复制此文件并去掉 draft，用于编写具身智能宏观路线、研究范式与方向判断。
 tags: [roadmap, research-strategy, embodied-ai]
 draft: true
 references: []

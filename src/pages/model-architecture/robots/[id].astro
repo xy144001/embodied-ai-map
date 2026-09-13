@@ -1,0 +1,44 @@
+---
+import RobotLayout from "../../../layouts/RobotLayout.astro";
+import dossiers from "../../../data/robot-dossiers.json";
+export function getStaticPaths() { return dossiers.robots.map(robot => ({ params: { id: robot.id }, props: { robot } })); }
+const { robot } = Astro.props;
+const { checkedAt, fx } = dossiers;
+const price = robot.prices[robot.reference];
+const money = (amount: number | null, currency: string) => amount === null ? "需询价" : `${currency === "CNY" ? "¥" : "US$"}${amount.toLocaleString("en-US", { maximumFractionDigits: 2 })}`;
+const sections = [{ id: "hardware", label: "硬件与配置" }, { id: "prices", label: "价格与采购地" }, { id: "compatibility", label: "模型兼容性" }, { id: "tradeoffs", label: "优势与限制" }, { id: "workflow", label: "建议实验路径" }];
+---
+<RobotLayout title={robot.name} description={robot.summary} detail>
+  <main class="robot-main robot-detail" id="main">
+    <header class="robot-detail-heading"><p class="robot-eyebrow">{robot.category} · {robot.focus}</p><h1>{robot.name}</h1><p class="detail-organization">{robot.organization} · 核对于 <time datetime={checkedAt}>{checkedAt}</time></p><p class="detail-summary">{robot.summary}</p><p class="robot-status">{robot.status}</p></header>
+    <nav class="detail-toc" aria-label="本文目录">{sections.map(section => <a href={`#${section.id}`}>{section.label}</a>)}</nav>
+    <section class="robot-section" id="hardware">
+      <p class="robot-eyebrow">01 / HARDWARE</p><h2>硬件与配置</h2><p class="configuration-note">{robot.configuration}</p>
+      <dl class="robot-facts">{robot.facts.map(([key, value]) => <div><dt>{key}</dt><dd>{value}</dd></div>)}</dl>
+      <p class="robot-note">自由度、关节电机数、独立执行器数和策略 action 维度不是同一个指标；涉及手部、夹爪、底盘或主从臂时需先统一统计口径。</p>
+      <div class="source-links" aria-label="硬件资料来源">{robot.hardwareSources.map(source => <a href={source.url} target="_blank" rel="noreferrer">{source.label} ↗</a>)}</div>
+    </section>
+    <section class="robot-section" id="prices">
+      <p class="robot-eyebrow">02 / PRICE & PROCUREMENT</p><h2>参考价格与采购地</h2>
+      <div class="detail-price"><div><span>{price.type}</span><strong>{money(price.amount, price.currency)}</strong><p>{price.market} · {price.config}</p></div><p>{robot.priceHint}</p></div>
+      <div class="table-scroll" tabindex="0" role="region" aria-label="机器人报价对照表，可横向滚动"><table class="price-table"><caption>按地区、配置和时间逐项比较</caption><thead><tr><th scope="col">地区 / 证据</th><th scope="col">价格</th><th scope="col">对应配置</th><th scope="col">日期与来源</th></tr></thead><tbody>{robot.prices.map(offer => <tr><td><strong>{offer.market}</strong><span class="price-type">{offer.type}</span></td><td class="price-cell"><strong>{money(offer.amount, offer.currency)}</strong>{offer.amount !== null && offer.currency === "USD" && <small>约 ¥{Math.round(offer.amount * fx.usdCny).toLocaleString("en-US")}</small>}</td><td><p>{offer.config}</p><small>{offer.note}</small></td><td><time datetime={offer.date}>{offer.date}</time><a href={offer.url} target="_blank" rel="noreferrer">{offer.source} ↗</a></td></tr>)}</tbody></table></div>
+      <p class="robot-note">公开现价的日期为查询日期；历史价的日期为报道或发布日。折算按 <a href={fx.url} target="_blank" rel="noreferrer">{fx.date} 中间价 1 USD = {fx.usdCny} CNY</a>，不是付款汇率。除来源明确说明外，不默认含税、运费或开发附件。</p>
+      <div class="comparison-note"><h3>哪里更值得询价？</h3><p>{robot.comparison}</p></div>
+      <h3 class="subheading">报价单应写清的内容</h3><ul class="robot-list">{robot.procurement.map(item => <li>{item}</li>)}</ul>
+      {robot.extraSources && <div class="source-links">{robot.extraSources.map(source => <a href={source.url} target="_blank" rel="noreferrer">{source.label} ↗</a>)}</div>}
+    </section>
+    <section class="robot-section" id="compatibility">
+      <p class="robot-eyebrow">03 / MODEL COMPATIBILITY</p><h2>模型兼容性，证据到哪一步？</h2>
+      <div class="compatibility-list">{robot.compatibility.map(item => <article><span class="evidence-badge">{item.level}</span><h3>{item.model}</h3><p>{item.evidence}</p><p class="compatibility-limit">{item.limit}</p><a class="evidence-link" href={item.url} target="_blank" rel="noreferrer">查阅对应代码或资料 ↗</a></article>)}</div>
+    </section>
+    <section class="robot-section" id="tradeoffs">
+      <p class="robot-eyebrow">04 / RESEARCH FIT</p><h2>优势与限制</h2><p class="robot-note">以下是根据上述硬件与生态资料作出的选型分析，不是厂商性能排名。</p>
+      <div class="tradeoff-grid"><article><h3>适合发挥的优势</h3><ul class="robot-list">{robot.strengths.map(item => <li>{item}</li>)}</ul></article><article><h3>实验中要面对的限制</h3><ul class="robot-list">{robot.limits.map(item => <li>{item}</li>)}</ul></article></div>
+    </section>
+    <section class="robot-section" id="workflow">
+      <p class="robot-eyebrow">05 / EXPERIMENT PATH</p><h2>建议从这里开始</h2><p class="robot-note">面向课题组的实施建议；具体命令和参数以交付硬件及目标仓库版本为准。</p>
+      <ol class="robot-workflow">{robot.workflow.map((step, index) => <li><span>{String(index + 1).padStart(2, "0")}</span><div><h3>{step.title}</h3><p>{step.detail}</p></div></li>)}</ol>
+    </section>
+    <a class="back-to-robots" href="../">← 返回机器人列表</a>
+  </main>
+</RobotLayout>

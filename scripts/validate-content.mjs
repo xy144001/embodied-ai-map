@@ -4,6 +4,7 @@ import { fileURLToPath } from "node:url";
 
 const root = fileURLToPath(new URL("../src/content/", import.meta.url));
 const categories = new Set(["datasets", "model-architecture", "evaluation", "macro-thinking"]);
+const macroAuthors = new Set(["xiaoyazhai", "youchengcai"]);
 const ids = new Set();
 let checked = 0;
 
@@ -17,7 +18,12 @@ async function walk(directory) {
     if (!frontmatter) throw new Error(`${path}: missing frontmatter`);
     const category = frontmatter[1].match(/^category:\s*(.+)$/m)?.[1]?.trim();
     if (!categories.has(category)) throw new Error(`${path}: invalid category`);
-    const id = path.replace(root, "");
+    const id = path.replace(root, "").replaceAll("\\", "/");
+    if (category === "macro-thinking") {
+      const author = frontmatter[1].match(/^author:\s*(.+)$/m)?.[1]?.trim();
+      if (!macroAuthors.has(author)) throw new Error(`${path}: invalid or missing macro-thinking author`);
+      if (!id.startsWith(`macro-thinking/${author}/`)) throw new Error(`${path}: author must match its directory`);
+    }
     if (ids.has(id)) throw new Error(`${path}: duplicate id`);
     ids.add(id);
     checked += 1;
