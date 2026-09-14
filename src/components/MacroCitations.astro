@@ -1,0 +1,8 @@
+---
+import data from "../data/macro-routes.json";
+interface Props { refs: string[] }
+const { refs } = Astro.props;
+const sources = data.sources as Record<string, {title: string; url: string; kind: string; date: string}>;
+for (const id of refs) if (!sources[id]) throw new Error(`Unknown macro-route source: ${id}`);
+---
+<p class="mr-citations"><span>依据</span>{refs.map(id => <a href={sources[id].url}>{sources[id].title}</a>)}</p>

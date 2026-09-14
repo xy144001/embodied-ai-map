@@ -2,7 +2,7 @@
 .module-tabs a{border:1px solid #26303c;background:#0e131a;color:#8490a0;padding:14px 18px;text-decoration:none;text-align:center;font:600 14px ui-monospace;transition:.18s}
 .module-tabs a:hover{color:#eef2f7;border-color:#526276}
 .module-tabs a.active{color:#fff;border-color:#79a8ff;background:#101827;box-shadow:inset 0 -3px #79a8ff}
-.module-tabs .breakdown-tab{grid-column:1/-1}
+.module-tabs .breakdown-tab,.module-tabs .macro-tab{grid-column:span 2}
 .lineage-hero{max-width:1440px;margin:42px auto 34px;padding:0 clamp(20px,4vw,64px)}
 .lineage-hero img{display:block;width:100%;height:auto;border:1px solid #303b48;background:#fff;box-shadow:0 24px 70px #0007}
 .subpage{min-height:100vh;margin:0;color:#eef2f7;background:radial-gradient(circle at 80% 0,#172033 0,transparent 30rem),linear-gradient(#ffffff06 1px,transparent 1px),linear-gradient(90deg,#ffffff06 1px,transparent 1px),#080b10;background-size:auto,40px 40px,40px 40px;font-family:Inter,"Noto Sans SC",system-ui,sans-serif}
@@ -51,3 +51,5 @@
 @media(max-width:800px){.three-levels,.four-levels,.route-grid{grid-template-columns:1fr}.lineage-hero{margin-top:26px;padding-inline:14px;overflow-x:auto}.lineage-hero img{min-width:780px}.example-figure figcaption{padding:20px}.example-figure{overflow-x:auto}.example-figure img{min-width:760px}}
 @media(max-width:700px){.module-tabs{margin-top:16px}.subpage .status{display:none}.section-main{padding-top:52px}.task-meta{flex-direction:column}.task-card,.empty-card{padding:24px}}
 @media(max-width:520px){.module-tabs{grid-template-columns:repeat(2,minmax(0,1fr))}}
+
+@media(max-width:520px){.module-tabs .breakdown-tab,.module-tabs .macro-tab{grid-column:span 1}}

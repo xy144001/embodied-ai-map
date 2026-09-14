@@ -1,0 +1,43 @@
+---
+import MacroRouteLayout from "../../../layouts/MacroRouteLayout.astro";
+import data from "../../../data/macro-routes.json";
+const base = import.meta.env.BASE_URL.replace(/\/$/, "");
+const root = `${base}/model-architecture`;
+---
+<MacroRouteLayout title="具身智能的九条发展路线" description="Levine、Jim Fan、Fei-Fei、LeCun、DeepMind、Tedrake、Brooks、Sutton / Silver 与 Daniela Rus 如何看具身智能的未来：观点、证据、分歧与可验证的问题。">
+  <main id="main" class="mr-main">
+    <header class="mr-hero">
+      <div><p class="mr-eyebrow">FUTURE DIRECTIONS / 09</p><h1>宏观路线<span>具身智能，走向哪里？</span></h1><p class="mr-intro">从前沿研究者的判断出发，理解他们认为下一步该解决什么、靠什么持续进步，以及这些选择怎样落到模型与机器人上。</p></div>
+      <p class="mr-date">资料核对<time datetime={data.updated}>{data.updated}</time><span>本人文章 · 官方访谈 · 原始论文</span></p>
+    </header>
+    <div class="mr-reading"><p>点击一条路线，进入独立详情页。每页包含核心主张、发展路径、代表证据、开放问题与研究启发。</p><p>路线名称和对照由本站归纳，代表不同关注重点；“发展路径”和“研究启发”为分析，不是人物原话或各方承诺的时间表。</p></div>
+    <section aria-labelledby="routes-heading">
+      <div class="mr-section-heading"><h2 id="routes-heading">选择一条路线</h2><span>09 条路线 · 独立阅读</span></div>
+      <div class="mr-card-grid">
+        {data.routes.map((route, index) => <a class="mr-card" href={`${root}/routes/${route.id}/`} aria-label={`${route.person}：${route.title}，查看路线`}>
+          <div class="mr-card-top"><span>{String(index + 1).padStart(2,"0")} / ROUTE</span><span aria-hidden="true">↗</span></div>
+          <h3>{route.person}</h3><p class="mr-card-title">{route.title}</p><p class="mr-card-thesis">{route.thesis}</p>
+          <ul class="mr-tags" aria-label="路线关键词">{route.tags.map(tag=><li>{tag}</li>)}</ul><span class="mr-card-action">查看路线 <span aria-hidden="true">→</span></span>
+        </a>)}
+      </div>
+    </section>
+    <section class="mr-index-section" aria-labelledby="comparison-heading">
+      <div class="mr-section-heading"><h2 id="comparison-heading">他们在押注什么？</h2><span>横向对照 · 本站归纳</span></div>
+      <p class="mr-muted">这张表比较研究重心，不构成优劣排名。证据和适用边界见各路线详情。</p>
+      <div class="mr-table-wrap" tabindex="0" role="region" aria-label="九条路线对照表，小屏可横向滚动">
+        <table class="mr-table"><caption>经验如何增长，世界模型做什么，身体如何参与，进展怎样验证。</caption><thead><tr><th scope="col">路线</th><th scope="col">主要增长来源</th><th scope="col">世界模型的角色</th><th scope="col">怎样看待本体</th><th scope="col">关键检验</th></tr></thead>
+          <tbody>{data.routes.map(route=><tr><th scope="row"><a href={`${root}/routes/${route.id}/`}>{route.person}</a></th><td>{route.comparison.scale}</td><td>{route.comparison.world}</td><td>{route.comparison.body}</td><td>{route.comparison.gate}</td></tr>)}</tbody>
+        </table>
+      </div>
+    </section>
+    <section class="mr-index-section" aria-labelledby="debates-heading">
+      <div class="mr-section-heading"><h2 id="debates-heading">带着三个问题读</h2><span>把路线分歧变成实验</span></div>
+      <div class="mr-debates">
+        <article><span>01 / 经验从哪里来</span><h3>什么信息还没有被学到？</h3><p>是真机数据不够、仿真覆盖不足，还是缺少触觉和力觉？先判断信息缺口，再决定增加模型、数据或传感器。</p></article>
+        <article><span>02 / 世界模型做什么</span><h3>它为哪一步提供帮助？</h3><p>区分生成场景、模拟物理、预测潜状态和辅助动作规划；然后检查是否改善真实任务，而不只改善画面或预测分数。</p></article>
+        <article><span>03 / 怎样判断进步</span><h3>一次成功之后，还要看什么？</h3><p>新任务数据成本、跨环境迁移、失败恢复和连续运行，都能帮助判断能力是否真正扩大。</p></article>
+      </div>
+    </section>
+    <aside class="mr-bridge"><div><p class="mr-eyebrow">从路线回到架构</p><h2>把未来判断放进模型的信息流。</h2><p>观察、表示、记忆、世界模型、动作策略和 WBC：每条路线的选择，最终都要接到可执行的系统上。</p></div><div class="mr-bridge-links"><a href={`${root}/`}>查看模型架构 →</a><a href={`${root}/breakdown/`}>进入拆解模型 →</a><a href={`${root}/robots/`}>对照机器人本体 →</a></div></aside>
+  </main>
+</MacroRouteLayout>
