@@ -1,0 +1,181 @@
+---
+import BreakdownLayout from "../../../../layouts/BreakdownLayout.astro";
+import FlowFormula from "../../../../components/FlowFormula.astro";
+import data from "../../../../data/vision-pathways.json";
+import "katex/dist/katex.min.css";
+const sources = data.sources as Record<string, {label:string;url:string;kind:string}>;
+const links = (ids: string[]) => ids.map(id => sources[id]);
+const formulas = {"patch":"N=\\frac{H}{p}\\frac{W}{p},\\qquad H^V\\in\\mathbb R^{B\\times N\\times D}","attention":"Q=H^aW_Q,\\quad K=H^VW_K,\\quad V=H^VW_V,\\qquad H^{a\\prime}=H^a+\\operatorname{softmax}\\!\\left(\\frac{QK^\\top}{\\sqrt{d_k}}+M\\right)VW_O","distance":"d_{\\rm rel}(H,H')=\\frac{\\|H-H'\\|_F}{\\|H\\|_F+\\varepsilon}"};
+---
+<BreakdownLayout title="图像模块的信息流" description="沿着像素、视觉编码、空间与时间表示、多模态融合和动作接口，拆解具身模型的图像处理方式，并比较颜色变化、定位与视觉鲁棒性。" detail>
+  <main class="breakdown-main semantic-main" id="main">
+    <header class="semantic-heading">
+      <p class="breakdown-eyebrow">拆解模型 / 输入信息 / 02 图像模块</p>
+      <h1>图像信息，怎样变成机器人能用的动作依据？</h1>
+      <p class="semantic-lead">从相机送进来的像素开始，追踪它怎样被编码、保留了哪些细节、如何与指令结合，最后由谁读取。重点比较信息经过的通路，而不只比较视觉编码器的名字。</p>
+      <p class="semantic-meta">资料核对：{data.updated} · 公式与算例为教学示意 · 模型事实附原始资料与固定版本代码</p>
+      <nav class="vision-siblings" aria-label="输入模块切换"><a href="../semantics/">01 语义模块</a><a href="./" aria-current="page">02 图像模块</a><a href="../">信息流总览</a></nav>
+    </header>
+    <div class="semantic-layout">
+      <nav class="semantic-toc" aria-label="图像模块目录"><h2>本节目录</h2><ol>{data.chapters.map(c => <li><a href={"#"+c.id}>{c.label}</a></li>)}</ol></nav>
+      <article class="semantic-content">
+        <section class="semantic-section" id="boundary">
+          <p class="breakdown-eyebrow">01 / 研究对象</p><h2>图像模块不只是一台视觉编码器</h2>
+          <p>本节研究<strong>机器人看到了什么，怎样把画面变成可计算的信息，又怎样把这些信息传给动作端</strong>。范围包括输入预处理、视觉特征、目标定位、几何和时序表示，以及图像与语言交互的位置。</p>
+          <div class="reading-pair"><div><h3>与语义模块的分工</h3><p>语义侧关心“要做什么、操作谁”；图像侧关心“眼前有什么、在哪里、正在怎样变化”。“左边那只杯子”需要两者共同确定，边界可以交叠。</p></div><div><h3>与动作和控制的分工</h3><p>视觉特征、目标 mask 和点云都是中间信息。它们还需要动作网络或规划器，才能变成运动目标；身体协调与高频控制也不会由一个图像编码器自动完成。</p></div></div>
+          <ol class="vision-overview" aria-label="图像信息的典型处理阶段"><li><b>01 接收画面</b><span>相机、时间、尺寸与颜色</span></li><li><b>02 编码与定位</b><span>视觉 token、区域或几何</span></li><li><b>03 组织上下文</b><span>结合语言、多视角和时间</span></li><li><b>04 交给动作端</b><span>隐藏条件、目标或预测特征</span></li></ol>
+          <p class="semantic-small">这是一条阅读顺序，各模型可以合并其中的步骤，也可以从某种中间表示直接进入动作端。下面六种处理方式能够组合使用。</p>
+          <div class="semantic-table-wrap" tabindex="0" role="region" aria-label="视觉信息的不同层次，可横向滚动"><table class="semantic-table"><thead><tr><th scope="col">信息层次</th><th scope="col">拿杯子时的例子</th><th scope="col">不能自动推出什么</th></tr></thead><tbody>
+            <tr><td>外观与类别</td><td>看到杯身、颜色和杯柄</td><td>认得杯子，不代表分清两只同类杯子的身份。</td></tr>
+            <tr><td>实例与二维位置</td><td>目标 mask、杯柄像素坐标</td><td>像素位置不直接给出米制距离或机器人坐标。</td></tr>
+            <tr><td>三维结构</td><td>深度、表面点、相对位姿</td><td>有形状，不代表已知摩擦、重量和接触力。</td></tr>
+            <tr><td>运动与任务进展</td><td>杯子在移动、夹爪正靠近</td><td>画面发生变化，不一定是机器人的动作造成。</td></tr>
+            <tr><td>行动相关信息</td><td>目标接触区域、障碍、预测变化</td><td>表示中有这些信息，不保证动作端确实使用了它们。</td></tr>
+          </tbody></table></div>
+        </section>
+        <section class="semantic-section" id="pixels">
+          <p class="breakdown-eyebrow">02 / 从数据到 token</p><h2>先查预处理，再讨论视觉能力</h2>
+          <p>相机原图与模型输入经常不是同一张图：缩放可能让小物体只剩几个像素，中心裁剪可能切掉手或目标，补边会改变图中位置。RGB / BGR、数值范围和归一化不一致，也可能让正确的权重收到错误的输入。</p>
+          <div class="semantic-table-wrap" tabindex="0" role="region" aria-label="图像输入检查表，可横向滚动"><table class="semantic-table"><thead><tr><th scope="col">要记录的项</th><th scope="col">为什么影响动作</th><th scope="col">具体检查</th></tr></thead><tbody>
+            <tr><td>图像来源与相机顺序</td><td>腕部与外部视角覆盖不同区域。</td><td>相机名称、顺序、缺失视角掩码；缺失图像怎样补齐。</td></tr>
+            <tr><td>尺寸、裁剪和补边</td><td>改变目标大小、可见范围和像素坐标。</td><td>保存预处理前后图像；定位标签和相机内参是否一起变换。</td></tr>
+            <tr><td>通道、范围与归一化</td><td>不同视觉主干对输入格式有各自约定。</td><td>RGB / BGR、整数或浮点、均值与标准差。</td></tr>
+            <tr><td>时间与延迟</td><td>动作使用的可能是几十毫秒前的场景。</td><td>拍摄时间、采样间隔、传输与编码耗时；是否对齐状态记录。</td></tr>
+          </tbody></table></div>
+          <h3>图像 token 是什么？</h3><p>在常见 ViT 中，图像被切成 patch，再投影成向量并加入位置。它们通常是<strong>连续特征</strong>，无需像文字一样先选择一个离散词表编号。视频 VAE 潜变量、离散图像码、视觉主干隐藏状态，也应分别命名。</p>
+          <FlowFormula expression={formulas.patch} caption="无重叠方形 patch 的示例，假设 H、W 可被 patch 边长 p 整除，且暂不计特殊 token、动态切图或 token 合并。B 为批量大小，N 为位置数，D 为每个位置的隐藏维。" />
+          <div class="semantic-callout"><p><strong>教学算例：</strong>224 × 224 的图像，以 14 × 14 划块，得到 16 × 16 = 256 个位置。三路相机、每路两帧、逐帧编码并直接拼接时，共 1,536 个视觉位置；若之后合并或压缩，数量会改变。这组数字不代表所有模型的默认配置。</p></div>
+          <p>token 更多可能保留细节，也增加计算。只对完整稠密自注意力中的两两交互部分而言，开销随序列长度约按平方增长；窗口注意力、压缩和缓存会改变实际成本。比较时同时记录分辨率、token 数、延迟和任务表现。</p>
+          <p class="semantic-source">资料：{links(["vit","siglip","openvlaCode"]).map(s=><a href={s.url} target="_blank" rel="noreferrer">{s.label} ↗</a>)}</p>
+        </section>
+        <section class="semantic-section" id="pathways">
+          <p class="breakdown-eyebrow">03 / 可组合的用法</p><h2>六种图像信息处理方式</h2>
+          <p>这些不是互斥的六类模型：同一系统可以先提取 patch 特征，再与语言融合，同时使用视频教师训练。需要比较的是每一步新增、保留或压缩了什么信息。</p>
+          {data.pathways.map(route=><section class="semantic-route" id={route.id}>
+            <p class="route-kicker">{route.tag}</p><h3>{route.title}</h3><p>{route.lead}</p>
+            <dl class="route-interface"><div><dt>输入</dt><dd>{route.input}</dd></div><div><dt>中间表示</dt><dd>{route.representation}</dd></div><div><dt>谁来使用</dt><dd>{route.consumer}</dd></div></dl>
+            <FlowFormula expression={route.expression} caption={route.caption}/>
+            <h4>处理过程</h4><ol>{route.steps.map(step=><li>{step}</li>)}</ol>
+            <h4>训练时</h4><p>{route.training}</p><h4>推理时</h4><p>{route.inference}</p>
+            <h4>具体理解</h4><p>{route.example}</p><h4>收益与代价</h4><p>{route.tradeoff}</p>
+            <p class="semantic-source">资料：{links(route.refs).map(s=><a href={s.url} target="_blank" rel="noreferrer">{s.label} ↗</a>)}</p>
+          </section>)}
+        </section>
+        <section class="semantic-section" id="space-time">
+          <p class="breakdown-eyebrow">04 / 组织空间与时间</p><h2>多视角、多帧和三维信息，要分开记录</h2>
+          <div class="semantic-table-wrap" tabindex="0" role="region" aria-label="多视角和时间处理方式，可横向滚动"><table class="semantic-table"><thead><tr><th scope="col">设计选择</th><th scope="col">保留了什么</th><th scope="col">需要核对什么</th></tr></thead><tbody>
+            <tr><td>各相机独立编码，再拼接</td><td>保留每个视角的局部证据。</td><td>视角身份由顺序、标记还是专门嵌入表达；跨视角信息在哪一层相遇。</td></tr>
+            <tr><td>主视角融合语言，其他视角晚些加入</td><td>全局任务理解与局部视觉分工。</td><td>附加视角是否也能及时受语言条件影响；不能默认主视角可以互换。</td></tr>
+            <tr><td>逐帧编码，再聚合历史</td><td>多个时刻的外观与上下文。</td><td>是否有顺序、时间间隔和对应关系；单纯平均会损失部分时间结构。</td></tr>
+            <tr><td>视频编码或视频潜空间建模</td><td>在时间维上联合处理或压缩信息。</td><td>时间压缩率、因果性、帧间隔，以及新观测到来后的更新方式。</td></tr>
+            <tr><td>深度 / 多视角几何重建</td><td>可转换坐标的三维结构。</td><td>标定、尺度、同步与遮挡；多张 RGB 的拼接不等于已完成三维重建。</td></tr>
+          </tbody></table></div>
+          <div class="semantic-callout"><p><strong>位置编码不是三维测量。</strong>把 token 的行、列和时间编码进去，可以帮助模型区分“哪里、何时”；这些索引本身不提供物体距离、相机外参或米制坐标。看到 3D-RoPE / mRoPE 时，先确认它编码的是哪些轴。</p></div>
+          <p>X-VLA 提供了“主视角与附加视角分路”的代码实例；Cosmos 3 官方说明使用跨模态的空间与时间位置表示。具体到某个检查点，还要核对观测格式、位置构造和实际注意力连接。</p>
+          <p class="semantic-source">资料：{links(["xvla","cosmos"]).map(s=><a href={s.url} target="_blank" rel="noreferrer">{s.label} ↗</a>)}</p>
+        </section>
+        <section class="semantic-section" id="interfaces">
+          <p class="breakdown-eyebrow">05 / 追到动作端</p><h2>图像信息怎样真正影响动作？</h2>
+          <div class="semantic-table-wrap" tabindex="0" role="region" aria-label="视觉信息接入动作的接口，可横向滚动"><table class="semantic-table"><thead><tr><th scope="col">接口</th><th scope="col">怎样使用视觉</th><th scope="col">要追踪的细节</th></tr></thead><tbody>
+            <tr><td>前缀 / 联合注意力</td><td>把视觉与文本放进上下文，动作读取允许访问的位置。</td><td>注意力掩码、token 顺序、前缀状态与缓存更新。</td></tr>
+            <tr><td>Cross-attention</td><td>动作隐藏状态查询视觉 K/V，选择有用内容。</td><td>读取哪层视觉特征、何时投影、保留多少位置。</td></tr>
+            <tr><td>全局向量 / 条件调制</td><td>压缩场景，再通过拼接、门控或缩放改变动作计算。</td><td>压缩后是否仍保留小物体、方位和接触附近信息。</td></tr>
+            <tr><td>目标区域 / 几何接口</td><td>把定位结果转为规划目标、候选抓取点或空间限制。</td><td>单位、坐标系、实例身份和随时间的更新。</td></tr>
+            <tr><td>经动态预测中转</td><td>动作读取已经过时间建模的视觉特征。</td><td>额外条件、预测层、噪声和生成时间；误差在哪一步放大。</td></tr>
+          </tbody></table></div>
+          <FlowFormula expression={formulas.attention} caption="简化的视觉 cross-attention 残差块。Hᵃ 为动作隐藏状态，Hᵛ 为视觉特征，M 为掩码；省略多头拆分和归一化。理解它的关键是动作 query 在读取视觉信息。" />
+          <p>Projector 通常用于对齐隐藏维；pooling、resampler 或 token merger 还可能改变序列长度。<strong>维度接得上，只说明计算可以运行。</strong>换一个视觉编码器后，特征分布和含义可能已经变化，应区分无需训练的插拔诊断与训练适配层后的公平比较。</p>
+          <p>视觉条件在一次动作去噪中保持不变时，某些实现可以缓存；新画面到来后，应重新计算依赖它的特征和缓存。图像模块、动作预测与底层控制的频率也应分别测量，不能由相机帧率推断整个系统的控制频率。</p>
+          <p class="semantic-source">代码与论文对照：{links(["openpi","dit"]).map(s=><a href={s.url} target="_blank" rel="noreferrer">{s.label} ↗</a>)}</p>
+        </section>
+        <section class="semantic-section" id="models">
+          <p class="breakdown-eyebrow">06 / 同一套问题</p><h2>代表模型的图像通路对照</h2>
+          <p>这里选取六个已有模型或模型家族，并加入 DP3 作为几何方法对照。结论对应注明的论文或代码入口，不能直接外推到同名模型的所有变体。</p>
+          <div class="semantic-table-wrap" tabindex="0" role="region" aria-label="代表模型的图像通路对照，可横向滚动"><table class="semantic-table"><thead><tr><th scope="col">模型与输入</th><th scope="col">图像怎样处理</th><th scope="col">交给动作端什么</th><th scope="col">拆解重点</th></tr></thead><tbody>{data.models.map(model=><tr>
+            <td><strong>{model.name}</strong><small>{model.input}</small></td><td>{model.encoding}</td><td>{model.output}</td><td>{model.check}<small>{links(model.refs).map(s=><a href={s.url} target="_blank" rel="noreferrer">{s.label} ↗ </a>)}</small></td>
+          </tr>)}</tbody></table></div>
+          <p>下游动作形式、训练数据和控制器同时不同的两个模型，不能仅凭总成功率判断视觉编码谁更好。先用表格确定差异在哪里，再设计有控制条件的比较。</p>
+        </section>
+        <section class="semantic-section" id="dit-cosmos">
+          <p class="breakdown-eyebrow">07 / 当前重点模型</p><h2>DiT4DiT 与 Cosmos 3：分别追踪视觉信息的入口和去向</h2>
+          <section class="semantic-case"><h3>DiT4DiT：从视觉压缩到动态中间特征</h3>
+            <p>论文中的视觉入口是因果视频 VAE；视频 DiT 在观测和语言条件下计算动态，动作 DiT 读取其中的隐藏特征。<strong>VAE 输出、视频 DiT 特征、生成后的 RGB</strong>应分别记录。</p>
+            <figure class="flow-chart"><figcaption>DiT4DiT：视觉信息如何经过动态建模到达动作端</figcaption>
+              <div class="flow-branches"><div class="flow-lane"><div class="flow-node"><b>已观测图像</b><small>条件帧，不含部署时未知的未来真值</small></div><div class="flow-arrow" aria-hidden="true">↓</div><div class="flow-node"><b>视频 VAE</b><small>压缩后的视觉潜变量</small></div></div>
+              <div class="flow-lane"><div class="flow-node"><b>任务指令</b><small>描述要执行的工作</small></div><div class="flow-arrow" aria-hidden="true">↓</div><div class="flow-node"><b>语言特征</b><small>Cosmos-Reason1 多层嵌入</small></div></div></div>
+              <div class="flow-arrow" aria-hidden="true">↓</div><div class="flow-node flow-result"><b>视频 DiT</b><small>结合预测噪声与生成时间，形成动态隐藏特征</small></div>
+              <div class="flow-arrow" aria-hidden="true">↓</div><div class="flow-node flow-result"><b>动作 DiT</b><small>读取动态特征，结合状态等条件生成动作</small></div>
+              <p class="flow-note">仅展示视觉与语言的主要通路；动作噪声、时间嵌入等细节省略。此图没有要求先解码一段完整 RGB 视频，再从视频识别动作。</p>
+            </figure>
+            <p>用于诊断时，可以在三个位置分别保存特征：VAE 输出、选定层的视频隐藏状态、动作端实际读取的条件。提取时固定层和生成时间，才便于比较两次输入造成的变化。</p>
+            <p class="semantic-source">{links(["dit","ditProject"]).map(s=><a href={s.url} target="_blank" rel="noreferrer">{s.label} ↗</a>)}</p>
+          </section>
+          <section class="semantic-case"><h3>Cosmos 3：先确定调用的是理解还是生成接口</h3>
+            <p>官方把运行入口区分为 Reasoner 和 Generator，并在统一 MoT 架构中处理多种模态。读视觉通路时，要把<strong>视觉理解 token</strong>与<strong>生成分支的图像 / 视频表示</strong>分开追踪，不能把整个家族画成只有一个通用 Image Encoder。</p>
+            <div class="reading-pair"><div><h3>Reasoner</h3><p>根据文本和视觉输入产生文本，用于理解、定位和推理。若这些结果要影响动作，需要有实际下游读取它们。</p></div><div><h3>Generator / Policy</h3><p>处理条件并生成指定模态。机器人 Policy 究竟使用哪些图像、视觉编码和融合路径，要查看当前检查点与推理入口。</p></div></div>
+            <p>针对 Cosmos3-Nano-Policy-DROID，可记录一张调用表：预处理后的图像形状、视觉编码输出、进入哪个模态分支、动作读取哪一层，以及是否额外调用 Reasoner。本页没有把尚未检查的本地调用链写成已确认配置。</p>
+            <p class="semantic-source">{links(["cosmos"]).map(s=><a href={s.url} target="_blank" rel="noreferrer">{s.label} ↗</a>)}</p>
+          </section>
+        </section>
+        <section class="semantic-section" id="training">
+          <p class="breakdown-eyebrow">08 / 监督与运行条件</p><h2>图像来自哪里，与什么参数被更新，是两回事</h2>
+          <div class="semantic-table-wrap" tabindex="0" role="region" aria-label="图像模块训练与部署对照，可横向滚动"><table class="semantic-table"><thead><tr><th scope="col">项目</th><th scope="col">训练时</th><th scope="col">部署时</th></tr></thead><tbody>
+            <tr><td>图像增强</td><td>改变颜色、裁剪或背景，但需保持监督含义正确。</td><td>通常按指定的确定性流程预处理；检查训练与部署差异。</td></tr>
+            <tr><td>冻结视觉主干</td><td>可能只更新 projector 或动作网络，也可能联合更新视觉。</td><td>eval 模式只改变部分层行为；是否冻结参数需看梯度设置。</td></tr>
+            <tr><td>mask / 深度 / 点云</td><td>可能来自传感器、标注或教师。</td><td>如果动作需要它们，就必须有可用的生成路径；离线真值不能被默认为在线输入。</td></tr>
+            <tr><td>未来视觉</td><td>可作为监督目标，或按生成训练规则加噪。</td><td>未知未来只能预测；核对数据加载和缓存没有混入未来真值。</td></tr>
+            <tr><td>教师模型</td><td>提供辅助目标，影响学生参数。</td><td>是否仍运行教师，需由具体推理代码确定。</td></tr>
+            <tr><td>缓存与时间窗口</td><td>窗口和掩码定义了模型允许看到什么。</td><td>观测更新后刷新依赖它的缓存，保证与状态和动作时间对齐。</td></tr>
+          </tbody></table></div>
+          <p>“图像编码器冻结”仍允许下游学习如何读取它的输出；“执行时没有深度教师”也不意味着学生没有从几何监督中受益。分析时同时记录输入、监督、冻结范围和部署计算。</p>
+          <p class="semantic-source">训练接口实例：{links(["lingbot","lingbotCode","openpi"]).map(s=><a href={s.url} target="_blank" rel="noreferrer">{s.label} ↗</a>)}</p>
+        </section>
+        <section class="semantic-section" id="experiments">
+          <p class="breakdown-eyebrow">09 / 从疑问变成实验</p><h2>换个颜色就失败，问题可能发生在哪里？</h2>
+          <p>下面是研究建议，不是已经完成的实验结论。先区分两类变化：<strong>任务含义未变时，行为应保持适当稳定；目标、位置或限制改变时，行为应随之改变。</strong>不能把所有视觉变化都当成应该忽略的噪声。</p>
+          <div class="reading-pair"><div><h3>颜色与任务无关</h3><p>指令是“拿左边的杯子”。如果只改变杯身颜色，保持身份、位置、形状、物理属性和目标不变，目标选择应保持一致。</p></div><div><h3>颜色用于指定目标</h3><p>指令是“拿红色杯子”。互换两只杯子的颜色后，正确目标应改变。若动作完全不变，可能说明模型没有正确使用颜色信息。</p></div></div>
+          <div class="semantic-table-wrap" tabindex="0" role="region" aria-label="视觉鲁棒性实验设计，可横向滚动"><table class="semantic-table"><thead><tr><th scope="col">实验</th><th scope="col">控制条件与干预</th><th scope="col">主要观察</th></tr></thead><tbody>
+            <tr><td>外观稳定性</td><td>在仿真中只改任务无关的颜色、纹理或背景；保持对象身份、几何与物理参数。</td><td>目标选择、特征变化、动作变化与成功率。</td></tr>
+            <tr><td>视觉指代跟随</td><td>改变任务相关颜色或对象关系，并重新确定正确目标。</td><td>是否跟随目标变化；不能要求动作继续相同。</td></tr>
+            <tr><td>视角与几何变化</td><td>改变相机或物体位姿；同步更新标定和正确目标。</td><td>定位误差、接触点与任务表现；比较对应坐标中的行为。</td></tr>
+            <tr><td>定位与动作分开诊断</td><td>有空间接口时，比较预测目标与人工正确目标；其余流程一致。</td><td>定位正确后是否仍失败；人工目标属于诊断条件。</td></tr>
+            <tr><td>历史信息与更新</td><td>比较单帧、历史窗口，以及不同视觉刷新间隔。</td><td>遮挡、移动目标和失败恢复；记录额外计算成本。</td></tr>
+            <tr><td>表示替换与压缩</td><td>控制数据、动作头与预算，比较冻结插拔和允许适配训练的设置。</td><td>特征质量、接口不匹配和 token 压缩各带来多少影响。</td></tr>
+          </tbody></table></div>
+          <h3>在已有 DiT4DiT 实验上，逐层寻找变化</h3>
+          <p>从同一初始仿真状态成对渲染两组画面，固定指令、状态输入、动作采样噪声、视频噪声和特征提取设置。多视角应反映同一次场景修改。优先在一个固定观测步比较，随后再做完整任务测试。</p>
+          <ol><li><strong>预处理后图像：</strong>核对真正改变的范围，排除裁剪、曝光和相机顺序错误。</li><li><strong>视觉 / VAE 表示：</strong>看扰动首先如何进入视觉通路；记录目标区域和全图两个范围。</li><li><strong>融合或视频动态特征：</strong>看变化是否在与语言结合、预测未来时继续增大。</li><li><strong>动作端条件与输出：</strong>检查动作是否变化、是否仍选择正确对象，再追踪任务结果。</li></ol>
+          <FlowFormula expression={formulas.distance} caption="同一模型、同一层、对齐 token 后的相对变化量示例。F 是 Frobenius 范数，ε 防止分母为零；也可报告余弦距离。它不是语义正确性的直接度量。" />
+          <p>不要把不同维度、不同层或不同模型的原始距离直接比较。物体移动或相机变化后，token 位置也可能变化，应先做空间对应；动作里的位置、旋转和夹爪分量应分别统计或按明确尺度归一化。</p>
+          <div class="semantic-callout"><p><strong>现象与原因要分开。</strong>“视觉变化大 → 动态变化大 → 动作变化大”可以帮助选择下一步检查的位置，但不能单凭距离证明颜色把物体语义“拉歪”了。可继续用局部干预、目标定位诊断或适配训练检验；注意力热图也只是线索。</p></div>
+          <details class="vision-lab"><summary>如果想尝试“图像定位 + 动作语义”分路</summary><div>
+            <p>可以让图像与语言一起确定对象 mask 或位置，另一条分支描述操作意图，再由动作端结合状态执行。这是一种可测试的设计，不能预先假定 mask 已经包含操作需要的全部信息。</p>
+            <ul><li>保留实例身份、目标区域和必要的周围场景；检查是否丢失障碍、杯柄或接触信息。</li><li>区分二维定位、三维坐标和操作区域，明确转换路径。</li><li>同时测“选对对象”和“对正确对象完成操作”，避免把两类失败合成一个分数。</li><li>若部署时没有标注 mask，训练和评测都要说明使用的是预测结果还是人工真值。</li></ul>
+            <p>先用这条显式接口做诊断，再判断它是否值得作为正式架构；与连续视觉特征的对照应使用相同任务和训练预算。</p>
+          </div></details>
+          <h3>最后记录完整结果</h3>
+          <p>报告目标选择、定位误差、分量化动作差异、成功与失败类型、视觉和整套系统延迟。固定随机种子便于配对；多次任务运行及其不确定性，才能说明效果是否稳定。完整执行后，动作差异会改变后续观测，因此要把单步诊断与闭环结果分别报告。</p>
+          <div class="semantic-callout"><p><strong>每个模型填写同一张记录：</strong>相机与帧数 → 预处理 → 编码器与读取层 → token 形状 → 位置 / 时间编码 → 融合与压缩 → 动作消费位置 → 监督与冻结 → 刷新与延迟 → 对应代码版本。</p></div>
+        </section>
+        <section class="semantic-section" id="references">
+          <p class="breakdown-eyebrow">10 / 可追溯资料</p><h2>原始资料与代码入口</h2>
+          <p class="semantic-small">分类、统一公式、算例和实验设计为本站的教学与研究框架。模型事实对应下列原始材料；代码链接固定到本次核对的版本，实际运行仍需记录检查点与配置。</p>
+          <ol class="source-list">{Object.values(sources).map(s=><li><a href={s.url} target="_blank" rel="noreferrer">{s.label} ↗</a><span> · {s.kind}</span></li>)}</ol>
+        </section>
+        <nav class="vision-siblings" aria-label="继续阅读"><a href="../">← 返回拆解模型</a><a href="../semantics/">对照语义模块 →</a></nav>
+      </article>
+    </div>
+  </main>
+</BreakdownLayout>
+<style>
+  .vision-siblings{display:flex;flex-wrap:wrap;gap:12px;margin:22px 0}
+  .vision-siblings a{display:inline-flex;align-items:center;padding:10px 16px;min-height:44px;border:1px solid #466487;background:#132139;text-decoration:none;font-size:14px}
+  .vision-siblings a[aria-current="page"]{background:#193b3b;border-color:#79b7ad;color:#daf5ee}
+  .vision-overview{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;list-style:none;padding:0!important;margin:24px 0}
+  .vision-overview li{margin:0!important;padding:18px!important;border:1px solid #3d587b;background:#102138}
+  .vision-overview b,.vision-overview span{display:block}.vision-overview b{color:#d8eaff}.vision-overview span{font-size:14px;margin-top:5px}
+  .vision-lab{border:1px solid #4c6f86;background:#10202e;margin:24px 0}
+  .vision-lab summary{padding:18px 22px;cursor:pointer;color:#d7ebff;font-weight:600}
+  .vision-lab>div{padding:0 22px 18px}.vision-lab summary:hover{background:#192c40}
+  @media(max-width:520px){.vision-overview{grid-template-columns:1fr}.vision-siblings a{flex:1 1 auto;justify-content:center}}
+</style>
