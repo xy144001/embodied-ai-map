@@ -1,0 +1,328 @@
+{
+  "updated": "2026-09-14",
+  "sources": {
+    "vit": {
+      "label": "ViT：图像 patch 与位置编码",
+      "url": "https://arxiv.org/abs/2010.11929",
+      "kind": "原始论文"
+    },
+    "openvla": {
+      "label": "OpenVLA：模型结构",
+      "url": "https://openvla.github.io/",
+      "kind": "作者项目页"
+    },
+    "openvlaCode": {
+      "label": "OpenVLA：DINOv2 / SigLIP 特征拼接",
+      "url": "https://github.com/openvla/openvla/blob/c8f03f48af692657d3060c19588038c7220e9af9/prismatic/models/backbones/vision/dinosiglip_vit.py",
+      "kind": "官方代码 · 固定版本"
+    },
+    "openpi": {
+      "label": "OpenPI：图像前缀与动作采样",
+      "url": "https://github.com/Physical-Intelligence/openpi/blob/215abfb217dbac7d5f1273282331b9b1866c0479/src/openpi/models/pi0.py",
+      "kind": "官方代码 · 固定版本"
+    },
+    "siglip": {
+      "label": "OpenPI：视觉 patch、位置编码与池化",
+      "url": "https://github.com/Physical-Intelligence/openpi/blob/215abfb217dbac7d5f1273282331b9b1866c0479/src/openpi/models/siglip.py",
+      "kind": "官方代码 · 固定版本"
+    },
+    "xvla": {
+      "label": "X-VLA：主视角融合与附加视觉特征",
+      "url": "https://github.com/2toinf/X-VLA/blob/6bc2513f5f1cbec715cc668b414392a6cae5c671/models/modeling_xvla.py",
+      "kind": "官方代码 · 固定版本"
+    },
+    "lingbot": {
+      "label": "LingBot-VLA 2.0：双查询与视觉教师",
+      "url": "https://arxiv.org/html/2607.06403v1",
+      "kind": "原始论文 §4.2"
+    },
+    "lingbotCode": {
+      "label": "LingBot-VLA 2.0：训练与推理说明",
+      "url": "https://github.com/Robbyant/lingbot-vla-v2/blob/bc643d74a0127fab8788da993b261d4d64101138/README.md",
+      "kind": "官方说明 · 固定版本"
+    },
+    "dit": {
+      "label": "DiT4DiT：视觉压缩、动态特征与动作接口",
+      "url": "https://arxiv.org/html/2603.10448v1",
+      "kind": "原始论文 §4.2–4.4"
+    },
+    "ditProject": {
+      "label": "DiT4DiT：架构与实验说明",
+      "url": "https://dit4dit.github.io/",
+      "kind": "作者项目页"
+    },
+    "cosmos": {
+      "label": "Cosmos 3：Reasoner / Generator 与位置编码",
+      "url": "https://github.com/NVIDIA/cosmos/blob/5a68d9d4d34c9ca2bdcb0a1d9bbbb3a2d1b8d497/README.md",
+      "kind": "官方说明 · 固定版本"
+    },
+    "dp3": {
+      "label": "DP3：点云作为动作条件",
+      "url": "https://3d-diffusion-policy.github.io/",
+      "kind": "作者项目页 · 补充方法"
+    }
+  },
+  "chapters": [
+    {
+      "id": "boundary",
+      "label": "01 图像模块的边界"
+    },
+    {
+      "id": "pixels",
+      "label": "02 从像素到视觉 token"
+    },
+    {
+      "id": "pathways",
+      "label": "03 六种可组合的处理方式"
+    },
+    {
+      "id": "space-time",
+      "label": "04 多视角、时间与三维"
+    },
+    {
+      "id": "interfaces",
+      "label": "05 信息如何抵达动作端"
+    },
+    {
+      "id": "models",
+      "label": "06 代表模型对照"
+    },
+    {
+      "id": "dit-cosmos",
+      "label": "07 DiT4DiT 与 Cosmos 3"
+    },
+    {
+      "id": "training",
+      "label": "08 训练与部署"
+    },
+    {
+      "id": "experiments",
+      "label": "09 颜色、定位与鲁棒性"
+    },
+    {
+      "id": "references",
+      "label": "10 参考资料"
+    }
+  ],
+  "pathways": [
+    {
+      "id": "patch-features",
+      "tag": "像素 → 保留空间位置的特征",
+      "title": "01 · 把图像变成视觉 token",
+      "lead": "先把画面划成小块，再让这些位置交换信息，形成能表达物体、纹理、边缘和空间关系的特征。一个 token 对应的是计算位置，经过注意力融合后可以包含其他区域的信息，并不等于一个物体。",
+      "input": "RGB 图像；可逐相机、逐帧编码",
+      "representation": "特征网格或序列 Hᵛ，常见形状为 B × N × D",
+      "consumer": "多模态主干、动作网络或后续压缩模块",
+      "expression": "H^V=E_V\\!\\left(\\operatorname{Patchify}(I)W+P\\right)",
+      "caption": "教学示意：Patchify 划分图块，W 投影到隐藏维，P 提供位置。实际实现也可以用卷积提取图块；并非所有视觉模型都采用同一种结构。",
+      "steps": [
+        "先核对缩放、裁剪、补边、颜色通道和归一化，再看网络。预处理已经丢掉的杯柄或抽屉边缘，后续只能依赖剩余信息推断。",
+        "保留局部 token，或把整幅图压成全局向量。前者更便于读取局部细节，后者节省计算，但两者都需要按任务验证。",
+        "检查输出层、位置编码和投影层。名称同为 ViT 或 SigLIP，读取不同层、使用不同池化方式，也会形成不同接口。"
+      ],
+      "training": "预训练决定视觉特征的起点；动作训练是否继续更新编码器，要看冻结设置和梯度路径。",
+      "inference": "当前观测刷新后通常需要重新编码；同一次动作采样中，不变的视觉条件才可能复用。",
+      "example": "OpenPI 的 pi0.py 使用 SigLIP So400m/14，设置 pool_type=\"none\"，保留视觉序列；具体 token 数仍取决于输入尺寸和处理配置。",
+      "tradeoff": "保留密集视觉信息，但不会自动输出物体 mask、三维坐标或接触力。能否从特征读出这些信息，需要额外验证。",
+      "refs": [
+        "vit",
+        "openpi",
+        "siglip"
+      ]
+    },
+    {
+      "id": "feature-fusion",
+      "tag": "同一画面 → 多套视觉特征",
+      "title": "02 · 合并不同视觉编码器的特征",
+      "lead": "同一张图可以交给不同编码器，结合它们学到的特征。这里的“两路”指编码器不同，与两台相机拍摄同一场景是两个独立维度。",
+      "input": "同一观测，经各编码器要求的预处理",
+      "representation": "按位置对齐后拼接或融合的视觉特征",
+      "consumer": "投影层与视觉语言主干",
+      "expression": "H^V=P_{\\rm proj}\\!\\left(\\operatorname{concat}_{D}(E_1(I),E_2(I))\\right)",
+      "caption": "OpenVLA 风格的示意：沿特征维 D 拼接，N 个位置可保持不变；不是把相机数或 token 数自动翻倍。",
+      "steps": [
+        "为每个编码器准备匹配的输入尺寸和归一化。要核对两路特征的位置是否对应同一片图像区域。",
+        "把多套特征沿通道维拼接，或通过其他融合模块对齐；记录 token 数与隐藏维分别怎样变化。",
+        "用 projector 将融合结果接到下游。这个投影对齐了计算维度，其语义是否适合动作仍依赖训练。"
+      ],
+      "training": "新增编码器或更换融合方式后，适配层和动作端通常需要相应训练，不能只因维度匹配就视为兼容。",
+      "inference": "OpenVLA 的官方实现分别计算 DINOv2 与 SigLIP patch 特征，再沿 dim=2 拼接。",
+      "example": "原始 OpenVLA 将融合视觉特征投影到语言模型的输入空间，再与指令一起用于动作预测。",
+      "tradeoff": "可以利用不同预训练经验，但增加视觉计算。不能把 DINOv2 简化成只懂几何、SigLIP 简化成只懂语义，也不能由拼接本身推出更强的控制能力。",
+      "refs": [
+        "openvla",
+        "openvlaCode"
+      ]
+    },
+    {
+      "id": "language-fusion",
+      "tag": "视觉特征 + 指令 → 当前任务相关的视觉理解",
+      "title": "03 · 让图像与语言在主干中融合",
+      "lead": "同一个画面中，指令会决定哪些物体和关系值得关注。原始视觉特征进入多模态主干后，可以被语言重新组织；因此，研究图像模块时要区分融合之前和之后的表示。",
+      "input": "视觉 token + 语言 token，可包含其他上下文",
+      "representation": "与指令共同计算后的多模态隐藏状态",
+      "consumer": "动作专家或共享生成主干",
+      "expression": "H^{VL}=F(H^V,E_L(L);M),\\qquad A\\sim\\pi(\\,\\cdot\\mid H^{VL},s)",
+      "caption": "M 表示注意力连接规则。这里把图像编码和图文融合分开记，方便定位问题；不要求它们是两个独立部署的模型。",
+      "steps": [
+        "先观察纯视觉编码器的输出，再观察融合后的隐藏状态。相同图像换指令，后者变化是正常的任务条件化现象。",
+        "核对每个相机进入哪里。所有视角可以一起融合，也可以只有主视角与语言融合、其他视角单独进入动作端。",
+        "追踪动作端实际读取的表示，不能在视觉语言主干输出处就结束分析。"
+      ],
+      "training": "图文预训练和动作微调会共同影响表示；冻结某一部分，并不意味着后续动作层只能忽略它。",
+      "inference": "OpenPI 的图像与文本形成前缀；X-VLA 则让第一视角与文本进入 Florence2 encoder，附加视角保留为额外视觉特征。",
+      "example": "“拿杯子”和“打开抽屉”面对同一图像，可以得到不同的任务相关上下文，而纯图像编码仍可能完全相同。",
+      "tradeoff": "能结合任务筛选视觉信息，但信息纠缠后较难解释。看到注意力集中在目标上，也不能单独证明动作确实依赖该区域。",
+      "refs": [
+        "openpi",
+        "xvla"
+      ]
+    },
+    {
+      "id": "geometry",
+      "tag": "图像 / 深度 → 可定位、可测量的空间信息",
+      "title": "04 · 显式提取目标区域、关键点或三维结构",
+      "lead": "除了连续特征，也可以提取物体区域、关键点、深度或点云，让动作网络或规划器利用更明确的空间信息。二维 mask 说明“图上哪些像素属于目标”，要得到可靠的三维位置，还需要深度或其他几何约束。",
+      "input": "RGB，可结合深度、相机参数和语言指代",
+      "representation": "mask、像素关键点、深度图、点云或物体位姿",
+      "consumer": "几何编码器、动作网络或运动规划器",
+      "expression": "p_{\\rm cam}=d(u,v)K^{-1}[u,v,1]^\\top,\\qquad p_{\\rm robot}=Rp_{\\rm cam}+t",
+      "caption": "针孔相机示例：d 是相机光轴方向的深度，K 是内参，R、t 把相机坐标变到机器人坐标。图像裁剪或缩放后要相应更新 K；此式不适用于未经校正的任意镜头模型。",
+      "steps": [
+        "先确定目标属于哪个实例，再提取区域、点或几何。只有类别名，无法区分桌上的两只同类杯子。",
+        "需要三维时，检查深度来源、尺度、内外参和遮挡。单目预测的深度是否有可靠米制尺度，要按方法核实。",
+        "把空间结果交给下游，同时考虑保留场景背景、障碍和接触附近的细节，避免只保留目标 mask 后丢掉操作所需信息。"
+      ],
+      "training": "检测、分割、几何模型可独立训练，也可加入动作训练。额外标签和传感器投入应与动作数据一起统计。",
+      "inference": "DP3 是补充对照：把稀疏点云编码成紧凑的三维特征，再结合机器人状态生成动作；这不是给 RGB 特征加上位置编码就能直接得到的接口。",
+      "example": "“抓杯柄”可以同时使用杯子实例 mask、杯柄附近的点和场景点云；这些是教学设计示意，不是本站所有 VLA 都已采用的路径。",
+      "tradeoff": "目标和坐标更容易检查，但分割遗漏、深度误差、标定偏差也会向动作传递。只保留几何时，可能丢失颜色或材质等任务信息。",
+      "refs": [
+        "dp3"
+      ]
+    },
+    {
+      "id": "video-dynamics",
+      "tag": "当前与历史画面 → 时间特征 / 预测动态",
+      "title": "05 · 用视频表示和动态预测组织视觉信息",
+      "lead": "单帧给出当前外观，历史能帮助判断运动与遮挡，预测则进一步估计接下来可能发生的变化。这三类信息应分开标注，尤其不能把训练中的真实未来帧当成部署输入。",
+      "input": "已观测画面；预测分支另加指令、时间或噪声等条件",
+      "representation": "视频潜变量、时序隐藏状态或预测过程的动态特征",
+      "consumer": "动作生成器，或先经预测模块再进入动作端",
+      "expression": "Z_{\\le t}=E_{\\rm video}(I_{\\le t}),\\quad H^{dyn}=F(Z_{\\le t},L,\\epsilon,\\tau),\\quad A\\sim\\pi(\\,\\cdot\\mid H^{dyn},s_t)",
+      "caption": "统一教学接口；ε 是预测所需噪声，τ 是生成过程中的时间参数，与真实时刻 t 不同。无生成过程的方法不需要这两个变量。",
+      "steps": [
+        "查清当前帧、历史帧、预测帧分别来自哪里，实际覆盖多少秒。相同帧数不代表相同时间范围。",
+        "VAE 可先在空间和时间上压缩视频；视频主干再计算动态。VAE 潜变量、主干隐藏状态和最后生成的 RGB 是三种不同表示。",
+        "确认动作端读的是哪一层、哪一生成时刻的特征，以及是否需要先还原完整视频。"
+      ],
+      "training": "未来帧可以作为预测目标，也可用于教师监督；部署时应由当前条件生成相应预测。",
+      "inference": "DiT4DiT 以视觉 VAE 潜变量为条件，在视频 DiT 中提取中间特征，供动作 DiT 的 cross-attention 读取。",
+      "example": "机器人可以利用“物体正向右移动”的时序证据来行动；模型预测的未来仍可能错误，需要新观测纠正。",
+      "tradeoff": "有机会利用时间变化，但增加计算、压缩误差和预测误差。生成视频看起来合理，不等于接触细节足以支持控制。",
+      "refs": [
+        "dit",
+        "ditProject"
+      ]
+    },
+    {
+      "id": "visual-supervision",
+      "tag": "训练期教师 → 更有用的部署表示",
+      "title": "06 · 用几何与未来视觉监督塑造表示",
+      "lead": "有些视觉能力来自训练期的额外监督，部署时未必保留同一个教师。理解这一路径，要画出监督施加在哪一层，而不只数推理图里有多少编码器。",
+      "input": "训练期的深度、分割或视频教师目标；学生读可用观测",
+      "representation": "被辅助目标训练过的视觉或查询特征",
+      "consumer": "训练损失与学生参数；部署由学生参与动作预测",
+      "expression": "\\mathcal L=\\mathcal L_{\\rm act}+\\lambda_g\\mathcal L_{\\rm geom}+\\lambda_f\\left\\|P(Q_{t+\\Delta})-\\operatorname{sg}(T_{t+\\Delta})\\right\\|^2",
+      "caption": "教学公式，不是某篇论文损失的逐项复写。T 是未来教师目标，sg 表示此项不向教师反传；学生的未来查询必须由允许的部署条件产生。",
+      "steps": [
+        "区分教师网络看到的训练材料，与学生推理时实际可见的输入。",
+        "标注用于对齐的投影和损失；辅助深度或视频目标的监督位置，可能是专门的查询，而不是每个视觉 token。",
+        "同时检查动作收益和感知收益。教师预测更准，不自动意味着动作更稳定。"
+      ],
+      "training": "LingBot-VLA 2.0 在图文 token 后加入当前与未来查询，用 LingBot-Depth 和 DINO-Video 提供几何、时间监督。",
+      "inference": "未来查询表达对未来特征的预测，不等于读取未来真值，也不必生成一张未来 RGB 图像。",
+      "example": "学生可以学会从当前画面估计接下来与操作有关的变化；应将这种训练知识与部署中实时运行视频生成器的成本分开记录。",
+      "tradeoff": "可以把额外监督吸收到学生中，但增加教师、数据和训练成本。需要用同预算的有无辅助目标对照确认收益。",
+      "refs": [
+        "lingbot",
+        "lingbotCode"
+      ]
+    }
+  ],
+  "models": [
+    {
+      "name": "OpenVLA · 原始模型",
+      "input": "RGB 图像",
+      "encoding": "DINOv2 与 SigLIP 的 patch 特征沿隐藏维拼接，再经 projector。",
+      "output": "投影后的视觉 token 与文本进入 LLM，参与动作 token 预测。",
+      "check": "这是同图双编码器；视角数量和后续改版要另外核对。",
+      "refs": [
+        "openvlaCode",
+        "openvla"
+      ]
+    },
+    {
+      "name": "π₀ / π₀.₅ · OpenPI 路径",
+      "input": "配置规定的多路 RGB 与图像有效性掩码",
+      "encoding": "共享 SigLIP 逐路编码，视觉序列和文本组成前缀。",
+      "output": "动作专家读取前缀计算出的上下文。",
+      "check": "核对相机顺序、输入变换、掩码和前缀缓存；不将本入口外推到整个 π 家族。",
+      "refs": [
+        "openpi",
+        "siglip"
+      ]
+    },
+    {
+      "name": "X-VLA",
+      "input": "多视角 RGB + image_mask",
+      "encoding": "各有效视角先编码；首视角与语言融合，其余视角展平为附加特征。",
+      "output": "vlm_features 与 aux_visual_inputs 交给动作端。",
+      "check": "主视角与其他视角的语言交互位置不同。",
+      "refs": [
+        "xvla"
+      ]
+    },
+    {
+      "name": "LingBot-VLA 2.0",
+      "input": "图文上下文，配合当前 / 未来查询",
+      "encoding": "Qwen3-VL 主干结合双查询，训练时接受深度与视频教师监督。",
+      "output": "上下文和被监督的查询参与后续动作计算。",
+      "check": "区分学生条件、教师目标和推理时真正运行的组件。",
+      "refs": [
+        "lingbot",
+        "lingbotCode"
+      ]
+    },
+    {
+      "name": "DiT4DiT",
+      "input": "条件观测帧与语言",
+      "encoding": "视频 VAE 压缩视觉；视频 DiT 形成动态中间特征。",
+      "output": "动作 DiT 通过 cross-attention 读取动态特征。",
+      "check": "记录特征层、生成时间和噪声；不把中间特征误画成先生成完的 RGB 视频。",
+      "refs": [
+        "dit"
+      ]
+    },
+    {
+      "name": "Cosmos 3",
+      "input": "随 Reasoner / Generator 和检查点而异",
+      "encoding": "统一 MoT 下区分视觉理解与生成任务；需从实际入口追踪视觉编码。",
+      "output": "可参与文本理解，也可用于多模态生成与动作任务。",
+      "check": "不能用 Reasoner 的输出代替 Policy 实际读取的条件；不预填未核对的编码维度。",
+      "refs": [
+        "cosmos"
+      ]
+    },
+    {
+      "name": "DP3 · 几何补充对照",
+      "input": "稀疏点云 + 机器人状态",
+      "encoding": "点编码器提取紧凑三维表示。",
+      "output": "作为扩散动作生成的条件。",
+      "check": "额外几何信息、深度与相机条件应纳入比较。",
+      "refs": [
+        "dp3"
+      ]
+    }
+  ]
+}
