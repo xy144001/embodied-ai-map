@@ -10,23 +10,23 @@ const root = `${base}/model-architecture`;
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="description" content={description} />
-    <title>{title} · 拆解模型 · 具身机器人技术地图</title>
+    <title>{title} · 宏观路线 · 具身机器人技术地图</title>
     <link rel="stylesheet" href={`${root}/module-sections.css`} />
-    <link rel="stylesheet" href={`${root}/breakdown/breakdown.css`} />
+    <link rel="stylesheet" href={`${root}/routes/routes.css`} />
   </head>
-  <body class="subpage breakdown-page">
-    <a class="breakdown-skip" href="#main">跳转到正文</a>
+  <body class="subpage mr-page">
+    <a class="mr-skip" href="#main">跳转到正文</a>
     <header class="top">
       <div class="brand">MODEL<b>/</b>ATLAS</div>
-      <a class="home-link" href={detail ? `${root}/breakdown/` : `${base}/`}>{detail ? "← 返回拆解模型" : "← 返回技术地图"}</a>
-      <div class="status">@xy144001 · 信息流</div>
+      <a class="home-link" href={detail ? `${root}/routes/` : `${root}/`}>{detail ? "← 全部宏观路线" : "← 返回模型架构"}</a>
+      <div class="status">@xy144001 · 宏观路线</div>
     </header>
     <nav class="module-tabs" aria-label="模型架构组版块">
       <a href={`${root}/`}>架构</a><a href={`${root}/problems/`}>问题</a><a href={`${root}/tasks/`}>任务</a><a href={`${root}/robots/`}>机器人</a>
-      <a class="breakdown-tab active" href={`${root}/breakdown/`} aria-current={detail ? undefined : "page"}>拆解模型</a>
-      <a class="macro-tab" href={`${root}/routes/`}>宏观路线</a>
+      <a class="breakdown-tab" href={`${root}/breakdown/`}>拆解模型</a>
+      <a class="macro-tab active" href={`${root}/routes/`} aria-current={detail ? "location" : "page"}>宏观路线</a>
     </nav>
     <slot />
-    <footer class="breakdown-footer"><a href={`${root}/breakdown/`}>拆解模型</a><span>从输入的信息，追踪到它在模型中的作用。</span></footer>
+    <footer class="mr-footer"><a href={`${root}/routes/`}>宏观路线</a><span>模型架构组 · 从未来判断，回到可验证的问题。</span><a href="#main">返回页首 ↑</a></footer>
   </body>
 </html>

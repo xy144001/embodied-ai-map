@@ -34,6 +34,7 @@ const weekRoot = root + "/" + section + "/";
       <a class:list={{ active: section === "tasks" }} href={root + "/tasks/"}>任务</a>
       <a href={root + "/robots/"}>机器人</a>
       <a class="breakdown-tab" href={root + "/breakdown/"}>拆解模型</a>
+      <a class="macro-tab" href={root + "/routes/"}>宏观路线</a>
     </nav>
     <main id="main" class:list={["section-main", "weekly-main", { "weekly-tasks": section === "tasks" }]}>
       <nav class="week-tabs" aria-label={label + "周次"}>
