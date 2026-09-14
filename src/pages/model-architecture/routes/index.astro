@@ -4,13 +4,13 @@ import data from "../../../data/macro-routes.json";
 const base = import.meta.env.BASE_URL.replace(/\/$/, "");
 const root = `${base}/model-architecture`;
 ---
-<MacroRouteLayout title="具身智能的九条发展路线" description="Levine、Jim Fan、Fei-Fei、LeCun、DeepMind、Tedrake、Brooks、Sutton / Silver 与 Daniela Rus 如何看具身智能的未来：观点、证据、分歧与可验证的问题。">
+<MacroRouteLayout title="具身智能的九条发展路线" description="Levine、Jim Fan、Fei-Fei、LeCun、DeepMind、Tedrake、Brooks、Sutton / Silver 与 Daniela Rus 如何看机器人未来：他们想解决什么、为什么这样做，以及现在走到了哪一步。">
   <main id="main" class="mr-main">
     <header class="mr-hero">
-      <div><p class="mr-eyebrow">FUTURE DIRECTIONS / 09</p><h1>宏观路线<span>具身智能，走向哪里？</span></h1><p class="mr-intro">从前沿研究者的判断出发，理解他们认为下一步该解决什么、靠什么持续进步，以及这些选择怎样落到模型与机器人上。</p></div>
+      <div><p class="mr-eyebrow">FUTURE DIRECTIONS / 09</p><h1>宏观路线<span>具身智能，走向哪里？</span></h1><p class="mr-intro">机器人怎样才能走出实验室，真正帮人做事？这里从九组研究者和团队的想法出发，看看他们最在意什么、为什么选择这条路，以及希望把机器人带向怎样的未来。</p></div>
       <p class="mr-date">资料核对<time datetime={data.updated}>{data.updated}</time><span>本人文章 · 官方访谈 · 原始论文</span></p>
     </header>
-    <div class="mr-reading"><p>点击一条路线，进入独立详情页。每页包含核心主张、发展路径、代表证据、开放问题与研究启发。</p><p>路线名称和对照由本站归纳，代表不同关注重点；“发展路径”和“研究启发”为分析，不是人物原话或各方承诺的时间表。</p></div>
+    <div class="mr-reading"><p>点击下面的按钮，先了解一条路线的核心想法，再看它准备怎样发展、已有多少进展、还面临什么困难。无需先熟悉模型结构，也可以从这里开始阅读。</p><p>这些路线反映了不同的关注重点，彼此也有交集。名称和对照由本站整理；发展步骤与研究启发是依据公开观点作出的分析，不是人物原话或官方时间表。</p></div>
     <section aria-labelledby="routes-heading">
       <div class="mr-section-heading"><h2 id="routes-heading">选择一条路线</h2><span>09 条路线 · 独立阅读</span></div>
       <div class="mr-card-grid">
@@ -22,22 +22,22 @@ const root = `${base}/model-architecture`;
       </div>
     </section>
     <section class="mr-index-section" aria-labelledby="comparison-heading">
-      <div class="mr-section-heading"><h2 id="comparison-heading">他们在押注什么？</h2><span>横向对照 · 本站归纳</span></div>
-      <p class="mr-muted">这张表比较研究重心，不构成优劣排名。证据和适用边界见各路线详情。</p>
+      <div class="mr-section-heading"><h2 id="comparison-heading">他们认为，下一步最该做什么？</h2><span>放在一起看 · 本站整理</span></div>
+      <p class="mr-muted">可以先用这张表抓住每条路线的重点。它们有的关心经验从哪里来，有的关心机器怎样理解世界，有的关心身体与可靠性，彼此并非简单的胜负关系。</p>
       <div class="mr-table-wrap" tabindex="0" role="region" aria-label="九条路线对照表，小屏可横向滚动">
-        <table class="mr-table"><caption>经验如何增长，世界模型做什么，身体如何参与，进展怎样验证。</caption><thead><tr><th scope="col">路线</th><th scope="col">主要增长来源</th><th scope="col">世界模型的角色</th><th scope="col">怎样看待本体</th><th scope="col">关键检验</th></tr></thead>
+        <table class="mr-table"><caption>能力从哪里来，怎样理解环境，身体有多重要，如何判断有没有进步。</caption><thead><tr><th scope="col">路线</th><th scope="col">靠什么学得更好</th><th scope="col">怎样理解和预测环境</th><th scope="col">怎样看待机器人身体</th><th scope="col">怎样判断进步</th></tr></thead>
           <tbody>{data.routes.map(route=><tr><th scope="row"><a href={`${root}/routes/${route.id}/`}>{route.person}</a></th><td>{route.comparison.scale}</td><td>{route.comparison.world}</td><td>{route.comparison.body}</td><td>{route.comparison.gate}</td></tr>)}</tbody>
         </table>
       </div>
     </section>
     <section class="mr-index-section" aria-labelledby="debates-heading">
-      <div class="mr-section-heading"><h2 id="debates-heading">带着三个问题读</h2><span>把路线分歧变成实验</span></div>
+      <div class="mr-section-heading"><h2 id="debates-heading">带着三个问题读</h2><span>帮助理解不同选择</span></div>
       <div class="mr-debates">
-        <article><span>01 / 经验从哪里来</span><h3>什么信息还没有被学到？</h3><p>是真机数据不够、仿真覆盖不足，还是缺少触觉和力觉？先判断信息缺口，再决定增加模型、数据或传感器。</p></article>
-        <article><span>02 / 世界模型做什么</span><h3>它为哪一步提供帮助？</h3><p>区分生成场景、模拟物理、预测潜状态和辅助动作规划；然后检查是否改善真实任务，而不只改善画面或预测分数。</p></article>
-        <article><span>03 / 怎样判断进步</span><h3>一次成功之后，还要看什么？</h3><p>新任务数据成本、跨环境迁移、失败恢复和连续运行，都能帮助判断能力是否真正扩大。</p></article>
+        <article><span>01 / 怎样学得更好</span><h3>它最缺少哪一种经验？</h3><p>是真实练习太少、虚拟练习不够丰富，还是身体感觉不到接触时的变化？对困难的判断不同，下一步的选择也会不同。</p></article>
+        <article><span>02 / 怎样理解世界</span><h3>它需要预想什么，才能做好事情？</h3><p>“世界模型”可以理解为机器用来描述或预测环境变化的模型。有的生成练习场景，有的预测行动后果；读每条路线时，可以留意它希望这种能力帮上什么忙。</p></article>
+        <article><span>03 / 怎样走向实际使用</span><h3>一次成功以后，能否一直做好？</h3><p>换个房间、换件物品，还能做好吗？出错后能否自己恢复？连续工作是否需要人频繁帮忙？这些问题能把未来愿景与实际进展联系起来。</p></article>
       </div>
     </section>
-    <aside class="mr-bridge"><div><p class="mr-eyebrow">从路线回到架构</p><h2>把未来判断放进模型的信息流。</h2><p>观察、表示、记忆、世界模型、动作策略和 WBC：每条路线的选择，最终都要接到可执行的系统上。</p></div><div class="mr-bridge-links"><a href={`${root}/`}>查看模型架构 →</a><a href={`${root}/breakdown/`}>进入拆解模型 →</a><a href={`${root}/robots/`}>对照机器人本体 →</a></div></aside>
+    <aside class="mr-bridge"><div><p class="mr-eyebrow">从路线回到架构</p><h2>这些想法，怎样变成机器人真正的本领？</h2><p>理解思想之后，可以继续看模型怎样观察和思考、怎样决定动作，以及机器人的身体如何把动作做出来。</p></div><div class="mr-bridge-links"><a href={`${root}/`}>查看模型架构 →</a><a href={`${root}/breakdown/`}>进入拆解模型 →</a><a href={`${root}/robots/`}>了解机器人身体 →</a></div></aside>
   </main>
 </MacroRouteLayout>
