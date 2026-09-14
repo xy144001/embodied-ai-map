@@ -1,0 +1,47 @@
+---
+import data from "../data/macro-routes.json";
+import MacroCitations from "./MacroCitations.astro";
+interface Props { progress: (typeof data.progress)[keyof typeof data.progress] }
+const { progress } = Astro.props;
+---
+<section id="progress" class="mr-article-section mr-progress">
+  <p class="mr-section-label">CURRENT PROGRESS / DATA</p>
+  <h2>目前走到了哪一步？</h2>
+  <div class="progress-summary"><p>{progress.summary}</p><MacroCitations refs={progress.refs}/></div>
+  <p class="progress-scope">{progress.scope}</p>
+  {progress.stages.map((stage,index)=><details class="progress-stage" open={index<2}>
+    <summary><span>{stage.model}<small>{stage.date}</small></span><span class="progress-toggle" aria-hidden="true">＋ / −</span></summary>
+    <div class="progress-body">
+      <p>{stage.intro}</p>
+      <div class="progress-table-wrap" tabindex="0" role="region" aria-label={stage.caption+"，小屏可横向滚动"}>
+        <table><caption>{stage.caption}</caption><thead><tr>{stage.headers.map(h=><th scope="col">{h}</th>)}</tr></thead><tbody>{stage.rows.map(row=><tr>{row.map((value,i)=>i===0?<th scope="row">{value}</th>:<td>{value}</td>)}</tr>)}</tbody></table>
+      </div>
+      <ul class="progress-notes">{stage.notes.map(note=><li>{note}</li>)}</ul>
+      <MacroCitations refs={stage.refs}/>
+    </div>
+  </details>)}
+  <div class="progress-takeaways">{progress.takeaways.map(item=><article><h3>{item.title}</h3><p>{item.text}</p></article>)}<MacroCitations refs={progress.takeawayRefs}/></div>
+</section>
+<style>
+  .progress-summary{padding:22px;border:1px solid #496c9a;border-left:3px solid #8bb7fa;background:#142239}
+  .progress-summary>p{font-size:17px!important;color:#d6e5fa!important;margin:0!important}
+  .progress-scope{font-size:13px;line-height:1.9;color:#9db1ce;margin:20px 0 26px}
+  .progress-stage{border:1px solid #334b69;background:#0d1827;margin-top:16px}
+  .progress-stage summary{display:flex;align-items:center;justify-content:space-between;gap:18px;padding:20px 22px;cursor:pointer;font-size:19px;font-weight:600;color:#dceaff;list-style:none}
+  .progress-stage summary::-webkit-details-marker{display:none}
+  .progress-stage summary:hover{background:#16243a}.progress-stage summary:focus-visible{outline:2px solid #a7caff;outline-offset:3px}
+  .progress-stage summary small{display:block;font-size:11px;font-weight:400;line-height:1.8;color:#92accf;margin-top:6px}
+  .progress-toggle{color:#9abae5;font-size:12px;white-space:nowrap}
+  .progress-stage[open] summary{border-bottom:1px solid #304766}
+  .progress-body{padding:22px}
+  .progress-table-wrap{overflow-x:auto;border:1px solid #2f4563;background:#101d30}
+  .progress-table-wrap:focus-visible{outline:2px solid #a7caff;outline-offset:4px}
+  table{border-collapse:collapse;min-width:510px;width:100%;font-size:13px;line-height:1.8;text-align:left}
+  caption{font-size:12px;color:#b0c5e2;padding:14px;text-align:left;background:#13233b}
+  th,td{border-top:1px solid #2c415f;padding:12px 14px;vertical-align:top}
+  thead th{color:#d9e8ff;background:#1a2b46;font-weight:600}tbody th{color:#bbd0ed;font-weight:500}td{color:#c7d6eb}
+  .progress-notes{padding-left:20px;margin:18px 0;color:#a3b7d2;font-size:12px;line-height:1.9}.progress-notes li+li{margin-top:10px}
+  .progress-takeaways{margin-top:30px}.progress-takeaways article+article{margin-top:26px}.progress-takeaways h3{font-size:18px}
+  @media(max-width:540px){.progress-summary,.progress-body{padding:17px}.progress-stage summary{padding:17px}.progress-summary>p{font-size:16px!important}}
+  @media print{.progress-summary,.progress-stage,.progress-table-wrap,caption,thead th{background:#fff;border-color:#aaa}table{min-width:0}.progress-table-wrap{overflow:visible}.progress-toggle{display:none}}
+</style>
