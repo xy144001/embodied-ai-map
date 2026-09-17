@@ -1,0 +1,20 @@
+---
+import WeeklyLayout from "./WeeklyLayout.astro";
+import Week3Topics from "../components/Week3Topics.astro";
+import "../styles/model-week3.css";
+interface Props { topic: "explicit" | "implicit" | "ours"; title: string; description: string; }
+const { topic, title, description } = Astro.props;
+const root = import.meta.env.BASE_URL.replace(/\/$/, "") + "/model-architecture/problems/week3/";
+---
+<WeeklyLayout title={title + " · Week 3 问题二"} description={description} section="problems" week={3}>
+  <div class="w3-scope">
+    <a class="w3-back" href={root + "#question-two"}>← 返回 Week 3 · 问题二</a>
+    <Week3Topics active={topic} compact />
+    <p class="eyebrow">WEEK 3 · QUESTION 02 · 3D & ACTION</p>
+    <h1>{title}</h1>
+    <p class="intro">{description}</p>
+    <p class="weekly-meta">资料核对：2026-09-17 · 重点为 2026 年工作 · “我们预想的”为待讨论雏形</p>
+    <div class="w3-body"><slot /></div>
+    <div class="w3-bottom"><Week3Topics active={topic} compact /></div>
+  </div>
+</WeeklyLayout>

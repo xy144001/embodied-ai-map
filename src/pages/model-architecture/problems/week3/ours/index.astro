@@ -1,0 +1,97 @@
+---
+import Week3TopicLayout from "../../../../../layouts/Week3TopicLayout.astro";
+---
+<Week3TopicLayout topic="ours" title="我们预想的：让语义意图落在一个持续的空间状态上" description="先讨论一个可以被验证的小雏形：把“要做什么”“对象在哪里”“身体怎么执行”拆开，让世界状态随真实证据逐步修正。">
+  <span class="w3-tag w3-draft">头脑风暴讨论稿 · 尚未定型</span>
+  <nav class="w3-reading-nav" aria-label="本页目录"><a href="#idea">核心思想</a><a href="#sketch">最小结构</a><a href="#state">记住什么</a><a href="#brainstorm">核心问题</a><a href="#experiments">怎样验证</a><a href="#meeting">讨论要形成什么</a></nav>
+  <section id="idea" class="weekly-question">
+    <span class="question-number">01 · 先说清我们想解决什么</span><h2>看不见，不应立即忘记；新证据出现，也必须能改</h2>
+    <p class="w3-proposal-lead">能否维护一个足够轻、足够稳定的粗三维状态，让语言负责表达意图，让语义定位找到对象，再由局部策略把意图变成动作？</p>
+    <p>延续此前的构想，语言分两路：一路提取“拿起、推开、放到里面”等行动意图；另一路结合图像找目标的 mask、位置或对象身份。目标再关联到持续的几何状态，并与机器人本体状态一起供动作模块使用。</p>
+    <p>这份雏形先保留<strong>不单独预测未来世界</strong>的最小版本：根据当前状态行动，执行后用真实观测修正。报告中延伸出的“稀疏未来 / 效果预测”留作后续可比较的选项，是否加入仍待讨论。</p>
+    <div class="weekly-callout note"><p><strong>两条边界：</strong>更新“现在的世界是什么样”不等于生成“接下来世界会怎样”；输出未来几步动作也不等于预测未来观测。因此，第一版更准确地说是<strong>带持续空间状态的分层策略雏形</strong>，尚不能直接称为完整 WAM。</p></div>
+    <p><strong>我们期待、但尚未证明的收益：</strong>视角改变时仍认得同一对象，遮挡后不会立即丢掉目标，无关措辞或背景变化不会扰乱动作意图，同时允许真实物体移动后迅速纠错。</p>
+  </section>
+  <section id="sketch" class="weekly-question">
+    <span class="question-number">02 · 最小结构草图</span><h2>把职责拆开，先不锁定模型和算法</h2>
+    <figure class="w3-diagram">
+      <div class="w3-diagram-scroll" tabindex="0" role="region" aria-label="结构草图，可横向滚动">
+        <svg viewBox="0 0 900 510" role="img" aria-labelledby="sketch-title sketch-desc" xmlns="http://www.w3.org/2000/svg">
+          <title id="sketch-title">无未来世界预测的最小概念结构</title><desc id="sketch-desc">语言进入行动意图与语义定位两路。当前图像进入语义定位和粗三维更新，历史世界状态也进入更新。语义定位读取世界状态关联对象。策略接收意图、对象与局部几何以及机器人状态，输出给低层控制器。执行后的真实观测在下一轮继续更新。</desc>
+          <defs><marker id="w3-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#91b9ed" /></marker></defs>
+          <g fill="none" stroke="#91b9ed" stroke-width="2" marker-end="url(#w3-arrow)">
+            <path d="M150 80V144"/><path d="M270 50H300V180H324"/><path d="M450 80V144"/><path d="M570 50H600V180H624"/><path d="M750 80V144"/><path d="M630 207H576"/>
+            <path d="M150 220V240H290V335H314"/><path d="M450 235V324"/><path d="M750 235V366H586"/><path d="M270 285H292V370H314"/><path d="M450 402V438"/>
+          </g>
+          <g fill="#17283d" stroke="#587699" stroke-width="1.3"><rect x="30" y="20" width="240" height="60" rx="8"/><rect x="330" y="20" width="240" height="60" rx="8"/><rect x="630" y="20" width="240" height="60" rx="8"/><rect x="30" y="150" width="240" height="70" rx="8"/><rect x="330" y="150" width="240" height="85" rx="8"/><rect x="630" y="150" width="240" height="85" rx="8"/><rect x="30" y="255" width="240" height="60" rx="8"/><rect x="320" y="330" width="260" height="72" rx="8"/></g>
+          <rect x="300" y="444" width="300" height="54" rx="8" fill="#14322e" stroke="#6dbdab" stroke-width="1.3"/>
+          <g text-anchor="middle" fill="#edf5ff" font-family="system-ui, sans-serif" font-size="18">
+            <text x="150" y="57">语言指令</text><text x="450" y="57">当前图像 / 可用深度</text><text x="750" y="57">上一轮的世界状态</text>
+            <text x="150" y="179">行动意图</text><text x="150" y="204" font-size="14" fill="#b9cde6">“做什么”</text>
+            <text x="450" y="180">语义定位与对象关联</text><text x="450" y="213" font-size="14" fill="#b9cde6">“对谁、在哪里做”</text>
+            <text x="750" y="180">持续粗 3D 的更新</text><text x="750" y="213" font-size="14" fill="#b9cde6">按证据修正，保留不确定性</text>
+            <text x="150" y="292">机器人状态 S</text>
+            <text x="450" y="359">局部动作策略</text><text x="450" y="384" font-size="14" fill="#b9cde6">意图 + 目标 + 几何 + S</text>
+            <text x="450" y="478">低层控制器 / WBC → 执行</text>
+          </g>
+        </svg>
+      </div>
+      <figcaption>概念关系图，不是已选定的实现。执行后的真实图像和本体状态进入下一轮；世界状态继续保留并更新。WBC 只在对应的全身机器人系统中承担全身协调，机械臂可接适合自身的低层控制器。</figcaption>
+    </figure>
+    <div class="w3-cards">
+      <article class="w3-card"><h3>“粗”到什么程度？</h3><p>第一版可以只关心对象的大致位置、范围、局部可接近空间和少量关系，而不追求整屋高保真重建。到底选择对象表、稀疏点、体素还是 Gaussian，取决于任务与更新预算，当前不预选答案。</p></article>
+      <article class="w3-card"><h3>“持续”不是拒绝变化</h3><p>遮挡时保留上次可信状态，同时降低置信度；相机移动时先对齐坐标；有物体运动证据时更新其位置。“逐步修正”不能变成让动态物体长期停在旧位置。</p></article>
+    </div>
+  </section>
+  <section id="state" class="weekly-question">
+    <span class="question-number">03 · 最小状态候选</span><h2>我们到底希望动作模块读到什么？</h2>
+    <p>下面是供讨论的字段草案，尚未证明都必要。应从一个任务倒推，删掉无法说明作用的字段。</p>
+    <div class="weekly-table-wrap" tabindex="0" role="region" aria-label="持续语义几何状态的候选字段"><table class="weekly-table w3-table"><caption>候选接口，不是已经确定的数据结构</caption><thead><tr><th scope="col">信息</th><th scope="col">它回答什么</th><th scope="col">需要警惕的问题</th></tr></thead><tbody>
+      <tr><th scope="row">对象身份与语义</th><td>“这仍是刚才那个杯子吗？它是当前目标吗？”</td><td>外观相似、遮挡后重现、一个物体被错误拆成多个身份。</td></tr>
+      <tr><th scope="row">粗位置、范围与局部形状</th><td>“它在哪？我应该接近哪里？附近有没有障碍？”</td><td>坐标系、尺度和标定误差；精细接触可能超出粗几何能力。</td></tr>
+      <tr><th scope="row">任务相关关系</th><td>“目标在容器里、物体后面，还是某个支撑面上？”</td><td>关系来自观测还是推断，是否过时，是否真的影响动作。</td></tr>
+      <tr><th scope="row">时间、来源与置信度</th><td>“多久没见了？这条信息有多可信？是谁更新的？”</td><td>把猜测当作测量；让过期记忆覆盖新观测。</td></tr>
+    </tbody></table></div>
+    <div class="weekly-callout"><p><strong>“语义解耦”不应理解成“抹掉所有外观”。</strong>如果只是背景颜色改变，动作应尽量稳定；如果指令从“拿红杯”变成“拿蓝杯”，目标就应改变。我们希望隔离的是与任务无关的变化，同时保留决定任务的语义。</p></div>
+  </section>
+  <section id="brainstorm" class="weekly-question">
+    <span class="question-number">04 · 头脑风暴的核心问题</span><h2>先回答这七件事，再决定架构</h2>
+    <ol class="w3-questions">
+      <li><strong>首个任务究竟缺的是几何、记忆，还是语言定位？</strong>选一个现有策略经常失败的场景：目标被手遮挡、相机转动后重找目标，或绕开障碍。若一个当前帧策略已经足够好，持续 3D 的价值就需要重新论证。</li>
+      <li><strong>哪些量必须显式，哪些量允许保持 latent？</strong>对象身份、粗位置与置信度是否足够？局部纹理和抓取细节是否继续留给视觉特征？能否用更小的对象记忆达到同样效果？</li>
+      <li><strong>持续状态怎样更新，怎样承认“不知道”？</strong>静态场景与动态对象是否采用不同规则？多久不见就降低信任？坐标漂移、对象关联冲突或深度异常时，谁触发重观察或重建？</li>
+      <li><strong>语言两路真的能分工吗？</strong>意图分支输出技能、约束还是低维向量？定位分支如何把 mask 对应到三维对象？用同义指令、目标交换和无关外观变化，怎样检验解耦，而不只靠模块命名？</li>
+      <li><strong>动作是否真的依赖几何，以及如何接低层控制？</strong>直接把字段送给策略，还是读局部几何 token？移除或扰动几何后行为是否改变？输出末端目标、轨迹还是技能参数，由哪些观测和约束交给 WBC / 控制器？</li>
+      <li><strong>无未来预测的版本能解决多少问题？</strong>先检验当前状态与闭环反馈的上限。如果失败源于不可逆动作或延迟后果，再比较是否只加短时对象位移、接触事件或任务效果预测，而不是直接堆完整视频生成。</li>
+      <li><strong>额外收益是否值得额外开销？</strong>按相同训练数据、策略容量和完整闭环时延比较。需要多少额外标注、深度质量和标定维护？提升来自持续几何，还是仅来自更多模型与监督？</li>
+    </ol>
+  </section>
+  <section id="experiments" class="weekly-question">
+    <span class="question-number">05 · 可否证的第一轮验证</span><h2>先做能区分解释的实验</h2>
+    <p>下列是实验建议，尚未执行。所有版本尽量共用动作网络、数据、训练预算和传感输入；先做“是否保留几何 / 是否保留记忆”的对照，再讨论增加未来预测。</p>
+    <div class="weekly-table-wrap" tabindex="0" role="region" aria-label="建议的对照版本"><table class="weekly-table w3-table"><caption>建议的最小对照组</caption><thead><tr><th scope="col">版本</th><th scope="col">改动</th><th scope="col">它检验什么</th></tr></thead><tbody>
+      <tr><th scope="row">A · 当前观测策略</th><td>图像、语言与本体状态直接驱动动作。</td><td>一个公平的基础参照。</td></tr>
+      <tr><th scope="row">B · 当前帧粗几何</th><td>保留同样的几何接口，但每轮只用当前观测。</td><td>明确空间表示本身有没有帮助。</td></tr>
+      <tr><th scope="row">C · 持续粗几何</th><td>在 B 上加入跨帧对象关联、更新与不确定性。</td><td>持续记忆相对单帧几何是否有额外收益。</td></tr>
+      <tr><th scope="row">D · 隐式记忆对照</th><td>在 A 上加入匹配预算的历史特征记忆。</td><td>C 的提升来自几何结构，还是仅因为能记住历史。</td></tr>
+    </tbody></table></div>
+    <p class="w3-note">后续可增加“只在训练时接受 3D 蒸馏”的对照，检验运行时几何是否必要。语义分路是否有效，应在上述最佳版本上单独消融，避免一次改动太多。</p>
+    <div class="w3-cards">
+      <article class="w3-card"><h3>场景一：遮挡后继续操作</h3><p>观察目标，再由手或障碍遮挡。测任务成功率、目标身份切换次数、遮挡后恢复时间；仅记住旧坐标但继续抓空，也应计为失败。</p></article>
+      <article class="w3-card"><h3>场景二：相机动，物体不动</h3><p>改变相机视角，检查对象在统一坐标下是否稳定、动作是否仍准确。需要同时记录位姿估计误差，避免把标定问题归因给策略。</p></article>
+      <article class="w3-card"><h3>场景三：物体真的被移动</h3><p>让新证据与旧记忆冲突，测修正延迟和过期记忆导致的错误。若持续状态让机器人更“固执”，更新机制就没有达到目标。</p></article>
+      <article class="w3-card"><h3>场景四：语义变化与无关扰动</h3><p>分别测试同义指令、背景改变、目标颜色改变、指定另一对象。无关变化应稳定，任务变化应及时响应，两者必须同时检查。</p></article>
+    </div>
+    <div class="weekly-callout note"><p><strong>什么结果会推翻最初判断？</strong>如果 B 已覆盖 C 的收益，持续状态可能不必要；如果 D 与 C 相当，优势可能主要来自历史记忆；如果 C 对遮挡有效却无法跟踪移动对象，就不能把它称为可靠的世界状态。</p></div>
+  </section>
+  <section class="weekly-question">
+    <span class="question-number">06 · 与前沿工作的关系</span><h2>已有相邻探索，差异需要靠验证建立</h2>
+    <p><a href="https://arxiv.org/abs/2608.14986">GaussMemory（2026-08）</a>已在研究任务驱动的持续 3D 记忆，<a href="https://arxiv.org/abs/2606.18960v3">Mem-World（2026-09 更新）</a>把几何用于历史检索，<a href="https://arxiv.org/abs/2608.24714">GaussianWAM（2026-08）</a>展示了训练期几何蒸馏。因此，“语义 + 3D + 记忆”这个组合本身不能当作创新结论。</p>
+    <p><strong>可讨论的研究主张：</strong>在限定任务和时延预算下，一小组持续、可修正、带置信度的对象几何状态，能否让分层策略比同预算的隐式记忆更可靠？这是我们提出的可验证问题，尚无实验结论。</p>
+  </section>
+  <section id="meeting" class="weekly-question">
+    <span class="question-number">07 · 本次讨论希望形成的结果</span><h2>带走一份能开工的小约定</h2>
+    <ol><li>选定<strong>一个任务与一个失败现象</strong>，说明为什么现有策略不够。</li><li>确定<strong>最小状态字段、坐标系与更新条件</strong>，列出还不知道的量。</li><li>确定<strong>两路语义与动作模块之间的接口</strong>，第一版先不加未来世界预测。</li><li>选好<strong>必要对照和失败标准</strong>，约定什么结果会让我们修改或放弃这个想法。</li></ol>
+    <p>先让“我们想解决什么、怎样证明解决了”达成一致，再选择重建模型、记忆形式和动作网络。</p>
+  </section>
+</Week3TopicLayout>
