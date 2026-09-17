@@ -1,0 +1,149 @@
+---
+import WeeklyLayout from "../../../../../layouts/WeeklyLayout.astro";
+import data from "../../../../../data/wording-sensitivity.json";
+import "../../../../../styles/model-week3.css";
+const weekRoot = import.meta.env.BASE_URL.replace(/\/$/, "") + "/model-architecture/problems/week3/";
+const pct = (success: number, n: number) => (100 * success / n).toFixed(2) + "%";
+const score = (success: number, n: number) => `${success}/${n} · ${pct(success, n)}`;
+const pp = (change: number, n: number) => `${change > 0 ? "+" : change < 0 ? "−" : ""}${(100 * Math.abs(change) / n).toFixed(2)} pp`;
+const total = (row: { ss: number; sf: number; fs: number; ff: number }) => row.ss + row.sf + row.fs + row.ff;
+const chapters = [
+  ["design", "先读懂实验"], ["cosmos", "Cosmos3：先看现象"], ["dit", "DiT4DiT：严格配对"],
+  ["instruct", "InstructVLA：训练后呢"], ["grounding", "等长度 A/B：为什么加"],
+  ["conclusions", "初步结论"], ["sources", "数据口径与来源"],
+];
+---
+<WeeklyLayout title="三个模型的敏感性实验 · Week 3 问题一" description="用通俗解释读懂 Cosmos3、DiT4DiT、InstructVLA 的指令敏感性实验：实验动机、配对结果、等长度 A/B，以及指令微调和 reasoning 的边界。" section="problems" week={3}>
+  <div class="w3-scope sensitivity-page">
+    <a class="w3-back" href={weekRoot + "#question-one"}>← 返回 Week 3 · 问题一</a>
+    <p class="eyebrow">WEEK 3 · QUESTION 01 · LANGUAGE & ACTION</p>
+    <h1>三个模型的敏感性实验</h1>
+    <p class="intro">模型到底对语义有多敏感，进行数据增强和指令微调后还有多敏感？从“换一句话会怎样”，逐步追到“为什么会改变动作”。</p>
+    <p class="weekly-meta">实验汇总：{data.updated} · Cosmos3 / DiT4DiT / InstructVLA · 组内实测，非模型排行榜</p>
+    <div class="sensitivity-lead"><strong>先记住一个区别：得分更高，不代表换句话也能稳定做好。</strong><p>指令训练和 reasoning 可以改善部分成绩，但已测场景仍会双向翻转：有的被改坏，有的被救好。三套测试的环境、任务和检查点不同，本页比较现象与证据，不按成功率给模型排强弱。</p></div>
+    <div class="weekly-reading">
+      <nav class="weekly-toc" aria-label="实验阅读目录"><strong>实验怎么一步步展开</strong>{chapters.map(([id, label]) => <a href={"#" + id}>{label}</a>)}</nav>
+      <article class="weekly-article">
+        <section id="design" class="weekly-question">
+          <span class="question-number">01 · 为什么这样测</span><h2>任务没变，只是换了说法，结果会不会变？</h2>
+          <p>我们不希望机器人“对所有语言都不敏感”。把“拿杯子”改成“拿盘子”，它当然应当改变动作。这里主要想测的是：<strong>目标与操作要求尽量保持相同，只调整措辞、长短或描述方式，是否就足以改变成败。</strong></p>
+          <p>另外两类干预也要分清：删去物体名称会减少信息，补充颜色会增加信息；它们与纯同义改写不是同一种实验。Cosmos3 的探索和后续等长度 A/B，会分别标明这一点。</p>
+          <div class="w3-cards">
+            <div class="w3-card"><h3>为什么要“同场景配对”？</h3><p>如果第一句在杯子靠近手时测，第二句在杯子很远时测，分数差就不一定来自语言。应让同一个场景分别接受各条指令，核对实际初态，再尽量固定策略随机数，让比较只留下我们想研究的变化。</p></div>
+            <div class="w3-card"><h3>为什么固定 seed 还不够？</h3><p>同一个种子编号不保证两个进程真的摆出了同一张桌子。DiT4DiT 旧轮次就出现过这个问题；修复后增加了场景指纹核对。这里以修复后的 240 场景为主，不混用旧结果。</p></div>
+          </div>
+          <h3>先看总分，再看“具体是谁变了”</h3>
+          <div class="weekly-table-wrap" tabindex="0" role="region" aria-label="指标的通俗解释"><table class="weekly-table"><thead><tr><th scope="col">指标</th><th scope="col">它回答什么</th></tr></thead><tbody>
+            <tr><th scope="row">成功率 SR</th><td>总共有多少回合完成任务？这里用最终 episode success，不用中间动作得分。</td></tr>
+            <tr><th scope="row">净变化</th><td>改写后的成功率比原指令高或低多少？单位 pp 是百分点。</td></tr>
+            <tr><th scope="row">成功 → 失败（S→F）</th><td>同一个场景，原来能做成，换说法后失败：有多少这样的退步？</td></tr>
+            <tr><th scope="row">失败 → 成功（F→S）</th><td>同一个场景，原来失败，换说法后做成：有多少这样的改善？</td></tr>
+            <tr><th scope="row">总翻转率</th><td>两种翻转加起来，除以配对场景数。它衡量最终成败的变化，不要求两条成功轨迹逐步完全相同。</td></tr>
+          </tbody></table></div>
+          <div class="sensitivity-example"><span>用 DiT4DiT 的详细改写举例</span><div><p><strong>26</strong>个场景：成功 → 失败</p><p><strong>24</strong>个场景：失败 → 成功</p></div><p>总分只少 <b>2</b> 次成功，但有 <b>50 / 240 = 20.83%</b> 的场景改变了成败。净分差小，可能只是改善和退步相互抵消。</p></div>
+          <h3>为什么接着测 InstructVLA？</h3>
+          <p>看到敏感性之后，一个自然的猜想是：“是不是训练时见过的指令说法太少？”于是加入明确做过多样化指令训练的模型，观察这种现象是否仍然存在。</p>
+          <p><strong>数据增强</strong>可以理解为给任务补充更多表达；<strong>指令微调</strong>是利用这类指令与目标输出继续训练。InstructVLA 原论文明确包含同义改写、属性指代和词汇变化；第一阶段得到 Expert，第二阶段的视觉—语言—动作指令训练得到 Generalist，同时改变适配模块与训练配方。<a href="https://arxiv.org/html/2507.17520v1#S3.SS2">训练流程</a> · <a href="https://arxiv.org/html/2507.17520v1#S4.SS1">指令数据</a></p>
+          <div class="weekly-callout note"><p><strong>这次能回答：</strong>经过这套官方训练的模型，是否仍会随措辞改变成败？<br /><strong>还不能单独回答：</strong>如果只增加同义指令、其他条件完全不变，敏感性会下降多少？现有 Expert / Generalist 对照同时改变多个因素，也不是我们重新训练的一次纯数据增强消融。</p></div>
+        </section>
+
+        <section id="cosmos" class="weekly-question">
+          <span class="question-number">02 · COSMOS3</span><h2>先看现象：说得模糊或具体，会怎样？</h2>
+          <p><span class="w3-tag">Nano-Policy-DROID 16B</span><span class="w3-tag">RoboLab-120</span><span class="w3-tag">360 回合</span></p>
+          <h3>实验怎么设计，为什么这样设计？</h3>
+          <p>对 120 个任务分别使用原始、模糊和具体三类指令，每类每任务运行一次。目的是先看“语言里提供的信息多少，是否与执行表现有关”。例如同一个香蕉入碗任务：</p>
+          <dl class="prompt-examples"><div><dt>Default · 原始</dt><dd lang="en">Pick up the banana and place it in the bowl</dd><dd>拿起香蕉并放进碗里。</dd></div><div><dt>Vague · 模糊</dt><dd lang="en">Put the fruit in the bowl</dd><dd>把水果放进碗里：弱化了具体对象指称。</dd></div><div><dt>Specific · 具体</dt><dd lang="en">Grasp the yellow banana and place it inside the red bowl on the table</dd><dd>补充黄色香蕉、桌上红碗等属性。</dd></div></dl>
+          <div class="weekly-table-wrap" tabindex="0" role="region" aria-label="Cosmos3 三种指令的结果"><table class="weekly-table result-table"><caption>每种条件 120 回合；原始指令合计 43 次成功</caption><thead><tr><th scope="col">指令</th><th scope="col">成功 / 总数 · SR</th><th scope="col">相对 Default</th></tr></thead><tbody>{data.cosmos.conditions.map((row,i) => <tr><th scope="row">{row.label}</th><td>{score(row.success,data.cosmos.n)}</td><td>{i === 0 ? "参照" : pp(row.success-43,data.cosmos.n)}</td></tr>)}</tbody></table></div>
+          <p><strong>具体指令比模糊指令高 15.00 个百分点，但比原始指令只高 3.33 个百分点。</strong>这两个比较不能混为一谈。复杂任务中，原始与具体指令都只完成 4/17，模糊指令为 0/17；没有观察到具体指令超过原始指令的复杂任务总成功数。</p>
+          <details class="experiment-details"><summary>同任务的成败对照：改善和退步各有多少？</summary><div><div class="weekly-table-wrap" tabindex="0" role="region" aria-label="Cosmos3 任务级转换计数"><table class="weekly-table"><thead><tr><th scope="col">Default → 改写</th><th scope="col">成功 → 成功</th><th scope="col">成功 → 失败</th><th scope="col">失败 → 成功</th><th scope="col">失败 → 失败</th></tr></thead><tbody>{data.cosmos.transitions.map(row=><tr><th scope="row">{row.label}</th><td>{row.ss}</td><td>{row.sf}</td><td>{row.fs}</td><td>{row.ff}</td></tr>)}</tbody></table></div><p>按任务 ID 对照，具体指令有 9 个任务从成功变失败、13 个从失败变成功。但这只是任务级结果对照，不能把所有变化都归因于语言。</p></div></details>
+          <div class="weekly-callout note"><p><strong>为什么这组证据还不够强？</strong>历史 Default 与新改写没有逐步配对策略随机数，GPU / 后端也不完全一致；每任务又只有一次。更重要的是，这里还改变了信息量，并非严格同义改写。</p></div>
+          <p class="model-takeaway"><strong>本组初步结论：</strong>模糊表达对应较低观测成绩，增加具体信息有改善趋势；要说“就是某句话导致了差异”，还需要更严格的配对复验。</p>
+        </section>
+
+        <section id="dit" class="weekly-question">
+          <span class="question-number">03 · DiT4DiT / GR1</span><h2>严格配对以后：总分差不多，场景成败却常常互换</h2>
+          <p><span class="w3-tag">RoboCasa-GR1 tabletop 检查点</span><span class="w3-tag">24 任务 × 10 seeds</span><span class="w3-tag">720 回合</span></p>
+          <h3>实验怎么设计，为什么这样设计？</h3>
+          <p>对 24 个桌面任务，各取 10 个初始场景，分别测试 Default、Concise（简短改写）和 Detailed（详细改写）。固定场景生成方式，逐组核对初始场景指纹，并配对策略随机数。分两组种子汇总，是为了检查一种说法的优势是否换一批场景就消失。</p>
+          <div class="weekly-table-wrap" tabindex="0" role="region" aria-label="DiT4DiT 修复后两轮结果"><table class="weekly-table result-table"><caption>仅使用修复后、初态可核对的两轮主结果</caption><thead><tr><th scope="col">场景范围</th><th scope="col">Default</th><th scope="col">Concise</th><th scope="col">Detailed</th></tr></thead><tbody>{data.dit.rounds.map(row=><tr><th scope="row">{row.label} · {row.n} 场景</th>{row.success.map(n=><td>{score(n,row.n)}</td>)}</tr>)}</tbody></table></div>
+          <p>第一组里详细改写较差，第二组里它反而略好。合并后，两种改写都只比 Default 低 <strong>0.83 个百分点</strong>。因此，不支持“详细指令总会降低 DiT4DiT 成绩”。</p>
+          <div class="weekly-table-wrap" tabindex="0" role="region" aria-label="DiT4DiT 成败翻转"><table class="weekly-table result-table"><caption>相对于 Default；总翻转率的分母为全部 240 个配对场景</caption><thead><tr><th scope="col">改写</th><th scope="col">成功 → 失败</th><th scope="col">失败 → 成功</th><th scope="col">总翻转率</th><th scope="col">原成功场景中改坏比例</th></tr></thead><tbody>{data.dit.transitions.map(row=><tr><th scope="row">{row.label}</th><td>{row.sf}</td><td>{row.fs}</td><td>{score(row.sf+row.fs,total(row))}</td><td>{score(row.sf,row.ss+row.sf)}</td></tr>)}</tbody></table></div>
+          <p class="model-takeaway"><strong>本组初步结论：</strong>在这 240 个场景中，换说法会改变约五分之一场景的最终成败；总成绩近似不变，掩盖了这种不稳定。</p>
+          <h3>进一步问：是没认出任务，还是执行细节变了？</h3>
+          <p>只看成功率无法知道原因。后续诊断先让不同指令读取同一个观测状态，检查内部表示和动作；再在同一条参考轨迹的预定时刻做比较，避免把“已经走到了不同位置”误当成语言的直接影响。</p>
+          <div class="w3-cards"><div class="w3-card"><h3>任务身份大多还能区分</h3><p>在“原来成功、改写失败”的场景里，用动作表征做 24 类任务检索，初始观测下仍有 91.67% / 92.31% 检索回原任务。这不等于完整理解所有细节，但不支持把失败一概解释成“连在做什么都认错了”。</p></div><div class="w3-card"><h3>没有找到稳定的全局放大链</h3><p>语言差异能传到视频和动作表示，但未检出“向量整体差得越大，就越容易失败”的稳定关系。不能直接把全局向量距离当成失败预警，也不能由此排除局部控制问题。</p></div></div>
+          <h3>为什么还要只在 0.6 秒里换一次指令？</h3>
+          <p>整段执行都换指令，后面的位置、接触与历史会越来越不同，很难判断是哪一步起作用。于是从 <strong>8 个预选的“原来成功、改写失败”场景</strong>出发，在指定窗口只替换一个 0.6 秒动作块使用的指令，再看最终结果。这是在主动改变一个环节，而不只是观察两条轨迹不同。</p>
+          <ul><li><strong>5/8 个场景</strong>中，至少一个已测窗口的单次替换改变了最终结果；其中换回 Default 救回为 3/8，换成改写诱发失败为 5/8，两组可以重叠。</li><li><strong>7/8 个场景</strong>至少一个窗口表现出历史影响：此前走得好，换成改写仍能成功；此前走偏，换回 Default 仍失败。这不等于物理上永远无法挽救。</li></ul>
+          <div class="weekly-callout"><p><strong>这些干预支持：</strong>瞬时的语言条件会影响控制，之前积累的状态变化也会影响结果，两者能同时存在。5/8 来自预选失败案例，不能读成“所有任务有 62.5% 都因此失败”。</p></div>
+          <details class="experiment-details"><summary>机制诊断的规模与尚未解决的问题</summary><div><p>时序诊断基于 67 条参考轨迹、每条 6 个预定探针，共 402 个观察点；它们不是 402 次独立任务。关键窗口试验共 181 条受控运行，含 44 条内部激活替换，比较了 24 个窗口。</p><p>部分动作层、右臂动作子集或完整语言 / 视频接口的替换能改变结果，说明被替换信号在被测条件下足以影响行为。错误任务的视频来源也能改变结果，保留样本的冻结动作块干预未复现诱发失败，因此尚未唯一定位故障层，也未证实一种特定的“语义重新绑定”机制。</p></div></details>
+        </section>
+
+        <section id="instruct" class="weekly-question">
+          <span class="question-number">04 · INSTRUCTVLA</span><h2>接受过指令训练以后，还会对措辞敏感吗？</h2>
+          <h3>实验怎么设计，为什么这样设计？</h3>
+          <p>保留 Default / Concise / Detailed 三种说法，比较三个模式：<strong>Expert OFF、Generalist OFF、Generalist ON</strong>。OFF / ON 表示关闭 / 开启文本 reasoning。这样分别观察经过第二阶段训练后的检查点表现，以及 Generalist 开启文本推理后的变化。</p>
+          <p>水果主组包含 6 个官方物理任务子集、96 个初态；另设 25 个可乐罐（Coke）场景作为单任务参照。它们要分开看：可乐罐上的改善，不自动代表其他对象和任务也改善。每个模式 10/10 个重复场景通过确定性检查，首轮共 <strong>1,089 个正式回合</strong>。</p>
+          {data.instruct.initial.map(group => <div class="weekly-table-wrap" tabindex="0" role="region" aria-label={"InstructVLA 首轮 " + group.label}><table class="weekly-table result-table"><caption>{group.label} · 首轮原始分母 {group.n} · 成功 / 总数 · SR</caption><thead><tr><th scope="col">模型 / reasoning</th><th scope="col">Default</th><th scope="col">Concise</th><th scope="col">Detailed</th></tr></thead><tbody>{group.rows.map(row=><tr><th scope="row">{row.mode}</th>{row.success.map(n=><td>{score(n,group.n)}</td>)}</tr>)}</tbody></table></div>)}
+          <p class="small-note">Coke 的 Concise 只改大小写和标点，不能当作明显缩短句子的实验。这里的水果判分主要是抓取 / 抬起，不等同于完整交接，也不代表整个官方 benchmark。</p>
+          <h3>Generalist 得分提高，也仍会把原成功场景改坏</h3>
+          <div class="sensitivity-example"><span>水果首轮 · Generalist OFF · Detailed 相对 Default</span><div><p><strong>+8.33 pp</strong>净成功率提高</p><p><strong>41.67%</strong>场景改变了成败</p></div><p>成功数从 <b>29/96</b> 增至 <b>37/96</b>，同时有 <b>16</b> 个原成功场景失败、<b>24</b> 个原失败场景成功。它改善了总体成绩，也改变了哪些场景能被做成。</p></div>
+          <div class="weekly-table-wrap" tabindex="0" role="region" aria-label="InstructVLA 水果首轮配对变化"><table class="weekly-table result-table"><caption>水果 96 场景；净变化统一为“改写 SR − Default SR”，正值表示改写更好</caption><thead><tr><th scope="col">模式 / 改写</th><th scope="col">净变化</th><th scope="col">成功 → 失败</th><th scope="col">失败 → 成功</th><th scope="col">总翻转率</th></tr></thead><tbody>{data.instruct.transitions.map(row=><tr><th scope="row">{row.mode}<br />{row.label}</th><td>{pp(row.fs-row.sf,total(row))}</td><td>{row.sf}</td><td>{row.fs}</td><td>{score(row.sf+row.fs,total(row))}</td></tr>)}</tbody></table></div>
+          <p>上例中，16/29 = <strong>55.17%</strong> 的原成功场景被这条 Detailed 模板改坏。这个数的分母是原成功的 29 个场景；41.67% 的分母则是全部 96 个场景，两者描述不同问题。不能只强调退步而忽略 24 个改善，也不能用总分提高来宣称“措辞已不影响行为”。</p>
+          <h3>训练和 reasoning 各说明什么？</h3>
+          <div class="w3-cards"><div class="w3-card"><h3>Expert → Generalist</h3><p>水果 Detailed 从相对 Default 低 8.33 pp，变为高 8.33 pp，说明这个检查点在该模板上表现更好。但 Concise 没有一致改善，Generalist 仍有大量场景翻转；训练配方和适配结构同时变化，无法单独估计语言增强的因果贡献。</p></div><div class="w3-card"><h3>Generalist OFF → ON</h3><p>水果 Default 从 30.21% 提高到 42.71%，Detailed 却从 38.54% 变成 36.46%。Coke 的 Detailed 相对 Default 的损失则从 24 pp 缩至 4 pp。推理有时有帮助，但没有统一消除敏感性；开关还会改变对话模板和高层文本缓存。</p></div></div>
+          <div class="weekly-callout note"><p><strong>怎样看统计把握？</strong>水果只有 6 个任务类别，很多摆放位置并不等于很多种独立任务。首轮六个主要改写对照经多重比较校正后均未达到 0.05；第二阶段训练对 Detailed 差距的影响区间也跨过 0。可以报告已观察到的翻转，不能把这些平均差异说成已证实的普遍规律。</p></div>
+          <p class="model-takeaway"><strong>本组初步结论：</strong>官方多样化指令训练之后，逐场景的措辞敏感性仍然存在。现有实验说明问题没有被消除，不说明数据增强完全无效，也不支持与 DiT4DiT 跨环境比较谁更脆弱。</p>
+        </section>
+
+        <section id="grounding" class="weekly-question">
+          <span class="question-number">05 · INSTRUCTVLA 后续 A/B</span><h2>长句不稳定，究竟是字太多，还是多说了什么？</h2>
+          <h3>为什么增加这轮实验？</h3>
+          <p>“详细指令”往往同时变长、换句式、增加信息。即使分数变了，也分不清哪个因素在起作用。后续把比较收紧到：<strong>同一个模板、相同 token 数，只把没有新增视觉属性的词换成场景中真实的颜色或形状。</strong>这种能够对应到画面里的信息，在这里称为 grounded 信息。</p>
+          <div class="ab-pair"><div><b>A1 · 冗余长句</b><p lang="en">Please carry out the task of picking up the <mark>particular</mark> coke can.</p><small>“特定的可乐罐”，没有增加新的颜色信息。</small></div><div><b>B1 · 带真实视觉属性的长句</b><p lang="en">Please carry out the task of picking up the <mark>red</mark> coke can.</p><small>“红色的可乐罐”，颜色经过场景审核。</small></div></div>
+          <p>这对指令在所用 tokenizer 下都是 <strong>13 tokens</strong>。另设第二套匹配模板 A2/B2，防止只对某一种句式成立；再保留 Default 和 Grounded short（短句加真实属性），一起观察。A/B 的 token 数被控制住了，但词频、指示词含义和训练中见过的表达仍可能不同。</p>
+          <div class="weekly-callout"><p><strong>本轮分母为何变了？</strong>运行前发现一个香蕉场景中目标已掉到桌下，不符合正常可见初态，所有模型与条件一致排除。水果从 96 变为 <strong>95</strong>，Coke 仍为 25；共 120 场景 × 6 条件 × 3 模式 = <strong>2,160 个正式回合</strong>。这不是根据模型做得好坏来筛场景，首轮表也保留原始 96 分母。</p></div>
+          {data.instruct.followup.map(group => <div class="followup-group">
+            <h3>{group.label} · {group.n} 场景</h3>
+            <div class="weekly-table-wrap" tabindex="0" role="region" aria-label={group.label + "等长度 A/B 结果"}><table class="weekly-table result-table wide-results"><caption>A 为冗余长句，B 为带真实属性的匹配长句；差值为 B − A</caption><thead><tr><th scope="col">模型 / reasoning</th><th scope="col">A1</th><th scope="col">B1</th><th scope="col">B1 − A1</th><th scope="col">A2</th><th scope="col">B2</th><th scope="col">B2 − A2</th></tr></thead><tbody>{group.rows.map(row=><tr><th scope="row">{row.mode}</th><td>{pct(row.a1,group.n)}</td><td>{pct(row.b1,group.n)}</td><td>{pp(row.b1-row.a1,group.n)}</td><td>{pct(row.a2,group.n)}</td><td>{pct(row.b2,group.n)}</td><td>{pp(row.b2-row.a2,group.n)}</td></tr>)}</tbody></table></div>
+            <div class="weekly-table-wrap" tabindex="0" role="region" aria-label={group.label + "短句真实属性对照"}><table class="weekly-table result-table"><caption>补充对照：短句里只增加真实属性，是否更好？</caption><thead><tr><th scope="col">模型 / reasoning</th><th scope="col">Default</th><th scope="col">Grounded short</th><th scope="col">净变化</th></tr></thead><tbody>{group.rows.map(row=><tr><th scope="row">{row.mode}</th><td>{pct(row.default,group.n)}</td><td>{pct(row.short,group.n)}</td><td>{pp(row.short-row.default,group.n)}</td></tr>)}</tbody></table></div>
+          </div>)}
+          <h3>把两组结果放在一起，才知道能说到哪一步</h3>
+          <ul><li><strong>水果主组：</strong>Generalist ON 的两套长句 A/B 分别提高 7.37 / 8.42 pp，方向一致，但 B1 / B2 的 40.00% / 35.79% 仍低于 Default 的 43.16%；相对 Default 仍有 16 / 18 个成功 → 失败。其他模式的改善并不一致。</li><li><strong>Coke 单任务：</strong>Generalist OFF 的两套 A/B 提高 24 / 20 pp，说明这里不能只用句子长度解释差异。但只有一个任务，且 Generalist ON 的第二套模板反而下降 4 pp。</li><li><strong>短句对照：</strong>所有模式的 Grounded short 在水果上都低于 Default，在 Coke 上却都更高。因此，“补充一项正确属性就一定更好”也不成立。</li></ul>
+          <details class="experiment-details"><summary>为什么说“有趋势”，还不能说“普遍有效”？</summary><div><p>水果 Generalist ON 的 B1−A1、B2−A2 按任务聚类估计的 95% 区间约为 [−6.25, +21.88]、[−7.29, +26.32] pp，均包含 0：数据还允许“没有改善”甚至反方向的解释。水果六个主要 A/B 对照的 Holm 校正 p 值均为 1.0。</p><p>这不证明 grounded 信息没有作用；它说明目前任务种类和样本结构不足以可靠宣布普遍收益。这里的区间与校正结果引用原汇总，并未把每个摆放位置当作完全独立的新任务来扩大证据。</p></div></details>
+          <p class="model-takeaway"><strong>本组初步结论：</strong>同样长的两句话也可能有明显差别；真实视觉属性是否帮助执行，依赖任务、句式和推理模式。现有 A/B 无法唯一定位表示空间或某个网络模块为根因。</p>
+        </section>
+
+        <section id="conclusions" class="weekly-question">
+          <span class="question-number">06 · 初步结论</span><h2>语言表达确实影响执行，训练后也没有保证逐场景稳定</h2>
+          <ol class="w3-questions">
+            <li><strong>敏感性需要同时看“净分差”和“双向翻转”。</strong>DiT4DiT 两类改写净差均仅 −0.83 pp，但总翻转率为 19.17% / 20.83%；InstructVLA Generalist OFF 的 Detailed 净提高 8.33 pp，同时有 41.67% 场景改变成败。更高平均分与更稳定执行不是同一指标。</li>
+            <li><strong>经过多样化指令训练，问题仍然存在。</strong>Generalist 在部分任务与模板更好，但未形成“同一目标换个说法，成败基本不变”的保证。现有对照不能算出单独的数据增强效果，更不能得出“增强无效”。</li>
+            <li><strong>详细描述、正确视觉属性和 reasoning 都不是通用补救。</strong>同一种改法在水果与 Coke、不同句式及推理模式之间可能相反。应保留具体适用条件，避免把局部改善写成通用经验。</li>
+            <li><strong>值得继续检验的是细粒度控制，而非只找“语义全错”或“距离放大”。</strong>DiT4DiT 的局部干预表明，短时指令变化与累积状态历史都能影响结果。接触附近的小动作差异可能改变后续轨迹，这是当前值得验证的解释；尚未唯一定位故障层，也不能把 DiT4DiT 的因果证据直接搬到另两个模型上。</li>
+          </ol>
+          <div class="weekly-callout"><p><strong>对我们下一步的直接启发：</strong>如果要验证“语义模块更稳定了”，应在匹配场景和预算下同时报告成功率、两方向翻转、重复性与任务类别；不能只看语言向量更接近，或只挑净成功率提高的一组。</p></div>
+          <p>下一步可优先复验 InstructVLA 中稳定的成功 → 失败案例，并加入正常成功、错误任务与无操作替换等对照；Cosmos3 则先补严格配对的随机数与多场景复验。这些是后续方向，本页没有启动新实验。</p>
+        </section>
+
+        <section id="sources" class="weekly-question">
+          <span class="question-number">07 · 口径与来源</span><h2>让每个数字对应到正确的一轮实验</h2>
+          <p>本页依据组内“解读具身智能论文”讨论及 <cite>{data.source}</cite> 整理。实验数字是组内已完成运行的汇总结果；InstructVLA 的训练背景另核对原论文。以下规则用于避免不同轮次被混在一起。</p>
+          <ul><li><strong>Cosmos3：</strong>Default 为 120 个唯一任务、43 次成功，包含已完成的 118 个任务和先前两个成功任务，不重复计数。</li><li><strong>DiT4DiT：</strong>主结果为修复后的 240 场景、720 回合；旧轮次另有 720 回合，但存在跨进程初态差异，不并入主表。机制实验使用 GR1 桌面检查点，不是 LIBERO 或 Unitree G1 全身模型。</li><li><strong>InstructVLA：</strong>首轮水果 96、后续水果 95，Coke 均为 25。后续 Default 成功数与首轮相同，百分比因分母改变而不同。确定性检查、重启复验、时序探针均不算额外独立正式样本。</li><li><strong>首轮措辞的小混杂：</strong>plum 改写还修正了原指令的 <code>tabel</code> 拼写；报告另有排除 plum 的敏感性分析。后续 A/B 保留原拼写，不混入这项修改。</li><li><strong>比例口径：</strong>“Retention = 改写 SR / 原始 SR”只是总成功率的比值，不是原成功场景的保留比例；大于 100% 也不能说明没有场景退步。本页以计数与双向翻转为主。</li></ul>
+          <details class="experiment-details"><summary>模型版本与统计追溯</summary><div><p>Cosmos3：官方 Nano-Policy-DROID 16B。InstructVLA：Generalist-Simpler without state 完整检查点 <code>step-013500-epoch-01-loss=0.1093.pt</code>，Expert without state 完整检查点 <code>step-034500-epoch-08-loss=0.1167.pt</code>；不是 LIBERO pretraining Generalist，也不是单独的 unload-LoRA。</p><p>成功计数与配对转换取自汇总文档；后续 A/B 表中的整数成功数按固定分母和报告百分比唯一换算，再统一计算百分比与百分点差。统计区间、校正检验和机制干预结论沿用报告，未重新估计。服务器原始 JSON、CSV 和运行轨迹由原实验记录留存。</p><p><a href="https://arxiv.org/html/2507.17520v1#S3.SS2">InstructVLA 原论文 §3.2：两阶段训练</a><br /><a href="https://arxiv.org/html/2507.17520v1#S4.SS1">InstructVLA 原论文 §4.1：指令改写与训练数据</a></p></div></details>
+        </section>
+        <nav class="sensitivity-footer" aria-label="继续阅读"><a href={weekRoot + "#question-one"}>← 返回问题一</a><a href={weekRoot + "#question-two"}>问题二：WAM 与 3D 信息 →</a></nav>
+      </article>
+    </div>
+  </div>
+</WeeklyLayout>
+<style>
+  .sensitivity-page{--result-accent:#a8caff}.sensitivity-page :is(section[id],h3){scroll-margin-top:90px}.sensitivity-page .weekly-toc{top:85px}
+  .sensitivity-lead{max-width:1100px;padding:24px 28px;margin:28px 0 38px;border:1px solid #496186;border-left:4px solid #8bb7ff;border-radius:6px;background:#142139}.sensitivity-lead>strong{display:block;color:#edf4ff;font-size:22px;line-height:1.7}.sensitivity-lead p{margin:14px 0 0;color:#bfcee2;font-size:16px;line-height:1.95}
+  .sensitivity-page .result-table{font-variant-numeric:tabular-nums;min-width:640px}.sensitivity-page .result-table td{white-space:nowrap}.sensitivity-page .result-table th:first-child{width:auto;min-width:150px}.sensitivity-page .wide-results{min-width:840px}
+  .sensitivity-example{border:1px solid #4d678c;border-radius:7px;padding:22px;margin:26px 0;background:#14233a}.sensitivity-example>span{font-size:14px;color:#abc8ed}.sensitivity-example>div{display:grid;grid-template-columns:1fr 1fr;gap:18px}.sensitivity-example>div p{padding:12px 0}.sensitivity-example strong{display:block;font:700 34px/1.5 system-ui,sans-serif;color:#deebff}.sensitivity-example>p{border-top:1px solid #3a5070;padding-top:16px;margin-bottom:0}
+  .prompt-examples{margin:24px 0;display:grid;gap:12px}.prompt-examples>div{border:1px solid #3d506b;border-radius:5px;padding:16px 20px;background:#101b2a}.prompt-examples dt{font-weight:650;color:#d5e6ff;margin-bottom:8px}.prompt-examples dd{margin:8px 0 0;color:#b9c9df;line-height:1.8}.prompt-examples dd[lang=en]{color:#e4edf9;font-size:16px}
+  .experiment-details{border:1px solid #3e5472;border-radius:6px;margin:24px 0;background:#0c1727}.experiment-details summary{padding:17px 20px;cursor:pointer;font-weight:600;color:#d6e8ff;line-height:1.8}.experiment-details summary:hover{background:#14263d}.experiment-details summary:focus-visible{outline:3px solid #c4ddff;outline-offset:3px}.experiment-details>div{padding:0 20px 16px;min-width:0}.sensitivity-page .experiment-details p,.sensitivity-page .small-note{font-size:14px}.sensitivity-page cite{font-style:normal;overflow-wrap:anywhere}
+  .sensitivity-page .model-takeaway{border-left:3px solid #76bcae;padding:16px 20px;background:#122824;color:#c4dfd8}.ab-pair{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:24px 0}.ab-pair>div{padding:20px;border:1px solid #3f5977;border-radius:6px;background:#102037}.ab-pair b{color:#d9e9ff}.ab-pair p{overflow-wrap:anywhere}.ab-pair mark{background:#365775;color:#f6fbff;padding:2px 5px;border-radius:3px}.ab-pair small{font-size:14px;color:#a9c0dd}.followup-group{margin:30px 0}.sensitivity-footer{display:flex;justify-content:space-between;flex-wrap:wrap;gap:16px;margin:30px 0}.sensitivity-footer a{padding:12px 16px;border:1px solid #496281;border-radius:5px;text-decoration:none;background:#132238}
+  @media(max-width:650px){.sensitivity-lead{padding:20px}.sensitivity-lead>strong{font-size:20px}.sensitivity-example{padding:18px}.sensitivity-example strong{font-size:29px}.sensitivity-example>div,.ab-pair{grid-template-columns:1fr;gap:8px}.sensitivity-example>div p{margin:6px 0;padding:8px 0}.experiment-details>div{padding:0 14px 14px}.experiment-details summary{padding:15px}.prompt-examples>div{padding:16px}.sensitivity-footer a{width:100%}}
+</style>

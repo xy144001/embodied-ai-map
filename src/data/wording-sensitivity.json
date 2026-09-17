@@ -1,0 +1,62 @@
+{
+  "updated": "2026-09-17",
+  "source": "Cosmos3_DiT4DiT_InstructVLA_experiment_summary_2026-09-17.md",
+  "provenance": "组内已完成实验的汇总文档；网站未重新运行模型，也未访问文档列出的服务器原始文件。成功数与转换计数来自汇总；后续 A/B 的整数成功数由固定分母和报告百分比唯一换算，用于统一格式计算。",
+  "cosmos": {
+    "n": 120,
+    "conditions": [
+      { "label": "Default · 原始指令", "success": 43 },
+      { "label": "Vague · 模糊指令", "success": 29 },
+      { "label": "Specific · 具体指令", "success": 47 }
+    ],
+    "transitions": [
+      { "label": "Vague", "ss": 24, "sf": 19, "fs": 5, "ff": 72 },
+      { "label": "Specific", "ss": 34, "sf": 9, "fs": 13, "ff": 64 }
+    ]
+  },
+  "dit": {
+    "rounds": [
+      { "label": "Seeds 0–4", "n": 120, "success": [71, 69, 67] },
+      { "label": "Seeds 5–9", "n": 120, "success": [70, 70, 72] },
+      { "label": "合计", "n": 240, "success": [141, 139, 139] }
+    ],
+    "transitions": [
+      { "label": "Concise · 简短改写", "ss": 117, "sf": 24, "fs": 22, "ff": 77 },
+      { "label": "Detailed · 详细改写", "ss": 115, "sf": 26, "fs": 24, "ff": 75 }
+    ]
+  },
+  "instruct": {
+    "initial": [
+      { "id": "fruit", "label": "水果主组", "n": 96, "rows": [
+        { "mode": "Expert OFF", "success": [21, 26, 13] },
+        { "mode": "Generalist OFF", "success": [29, 28, 37] },
+        { "mode": "Generalist ON", "success": [41, 37, 35] }
+      ] },
+      { "id": "coke", "label": "Coke 独立参照组", "n": 25, "rows": [
+        { "mode": "Expert OFF", "success": [19, 20, 12] },
+        { "mode": "Generalist OFF", "success": [21, 21, 15] },
+        { "mode": "Generalist ON", "success": [22, 22, 21] }
+      ] }
+    ],
+    "transitions": [
+      { "mode": "Expert OFF", "label": "Concise", "ss": 18, "sf": 3, "fs": 8, "ff": 67 },
+      { "mode": "Expert OFF", "label": "Detailed", "ss": 7, "sf": 14, "fs": 6, "ff": 69 },
+      { "mode": "Generalist OFF", "label": "Concise", "ss": 16, "sf": 13, "fs": 12, "ff": 55 },
+      { "mode": "Generalist OFF", "label": "Detailed", "ss": 13, "sf": 16, "fs": 24, "ff": 43 },
+      { "mode": "Generalist ON", "label": "Concise", "ss": 24, "sf": 17, "fs": 13, "ff": 42 },
+      { "mode": "Generalist ON", "label": "Detailed", "ss": 27, "sf": 14, "fs": 8, "ff": 47 }
+    ],
+    "followup": [
+      { "id": "fruit", "label": "水果主组", "n": 95, "rows": [
+        { "mode": "Expert OFF", "default": 21, "short": 13, "a1": 14, "b1": 17, "a2": 17, "b2": 12 },
+        { "mode": "Generalist OFF", "default": 29, "short": 25, "a1": 29, "b1": 29, "a2": 23, "b2": 27 },
+        { "mode": "Generalist ON", "default": 41, "short": 36, "a1": 31, "b1": 38, "a2": 26, "b2": 34 }
+      ] },
+      { "id": "coke", "label": "Coke 独立参照组", "n": 25, "rows": [
+        { "mode": "Expert OFF", "default": 19, "short": 22, "a1": 14, "b1": 17, "a2": 13, "b2": 15 },
+        { "mode": "Generalist OFF", "default": 21, "short": 23, "a1": 15, "b1": 21, "a2": 17, "b2": 22 },
+        { "mode": "Generalist ON", "default": 22, "short": 23, "a1": 21, "b1": 23, "a2": 22, "b2": 21 }
+      ] }
+    ]
+  }
+}
