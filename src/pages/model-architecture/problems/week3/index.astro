@@ -1,0 +1,23 @@
+---
+import WeeklyLayout from "../../../../layouts/WeeklyLayout.astro";
+import Week3Topics from "../../../../components/Week3Topics.astro";
+import "../../../../styles/model-week3.css";
+---
+<WeeklyLayout title="Week 3 · 架构问题" description="WAM 如何使用 3D 信息：显式、隐式，以及我们预想的持续语义几何状态。" section="problems" week={3}>
+  <div class="w3-scope">
+    <p class="eyebrow">ARCHITECTURE GROUP · WEEK 3</p>
+    <h1>Week 3 · 架构问题</h1>
+    <p class="intro">从“世界模型能看见什么”，走向“哪些信息真正帮助机器人行动”。</p>
+    <p class="weekly-meta">更新：2026-09-17 · 问题二围绕最新工作与下一步构想展开</p>
+    <section id="question-one" class="weekly-question w3-empty" aria-labelledby="q1-title"><span class="question-number">QUESTION 01</span><h2 id="q1-title">问题一</h2></section>
+    <section id="question-two" class="weekly-question" aria-labelledby="q2-title">
+      <span class="question-number">QUESTION 02 · 3D & ACTION</span>
+      <h2 id="q2-title">WAM 里目前如何使用这些 3D 信息，显式？隐式？我们呢？</h2>
+      <p>机器人看到杯子时，模型可能保存杯子的三维位置，也可能只在神经网络的特征里学到“它在手的右前方”。更关键的是：这些信息是否进入动作决策，杯子被挡住后是否还保留，以及新证据出现时怎样修正。</p>
+      <Week3Topics />
+      <div class="weekly-callout"><p><strong>先分清三个问题：</strong>几何有没有明确的表示？执行时是否真正读取它？它能否跨帧持续存在？“显式 / 隐式”是阅读入口，同一个模型在这三个问题上可以有不同答案。</p></div>
+      <p class="w3-note">本周把 WAM 理解为世界预测与动作学习相结合的模型。用于规划或数据生成的世界模型、用于空间记忆的 VLA 会作为相关路线单独标明。“有 3D”本身并不能决定它是不是 WAM。</p>
+      <p class="w3-note">阅读顺序：显式 → 隐式 → 我们预想的。研究事实附原论文；比较与设计建议标为本页判断或待验证假设。资料以 2026 年工作为主，核对至 2026-09-17。</p>
+    </section>
+  </div>
+</WeeklyLayout>

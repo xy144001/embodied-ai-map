@@ -1,0 +1,17 @@
+---
+interface Props { active?: "explicit" | "implicit" | "ours"; compact?: boolean; }
+const { active, compact = false } = Astro.props;
+const root = import.meta.env.BASE_URL.replace(/\/$/, "") + "/model-architecture/problems/week3/";
+const topics = [
+  { id: "explicit", label: "显式", number: "01", description: "深度、点图、点的运动与空间记忆：3D 在哪里，又怎样影响动作？" },
+  { id: "implicit", label: "隐式", number: "02", description: "几何藏在特征中：视频先验、3D 蒸馏，以及训练与执行的区别。" },
+  { id: "ours", label: "我们预想的", number: "03", description: "持续粗 3D × 语义意图 × 局部动作：带着核心问题一起头脑风暴。" },
+];
+---
+<nav class:list={["w3-topics", { "w3-compact": compact }]} aria-label="问题二的三个讨论入口">
+  {topics.map(topic => <a href={root + topic.id + "/"} class:list={{ active: active === topic.id }} aria-current={active === topic.id ? "page" : undefined}>
+    {!compact && <span class="w3-topic-number">{topic.number} / 3D & ACTION</span>}
+    <strong>{topic.label}</strong>
+    {!compact && <><p>{topic.description}</p><span class="w3-open">查看内容 →</span></>}
+  </a>)}
+</nav>

@@ -1,0 +1,47 @@
+---
+import Week3TopicLayout from "../../../../../layouts/Week3TopicLayout.astro";
+---
+<Week3TopicLayout topic="implicit" title="隐式：空间知识进入特征，动作从特征中读取" description="模型可以不输出点云或地图，也能学到有用的空间关系。问题在于：它学到了什么、是否持续可靠，以及我们能否检查和修正。">
+  <nav class="w3-reading-nav" aria-label="本页目录"><a href="#meaning">如何理解隐式</a><a href="#distillation">显式训练、隐式执行</a><a href="#video">视频特征与几何约束</a><a href="#compare">如何比较</a><a href="#questions">要追问什么</a></nav>
+  <section id="meaning" class="weekly-question">
+    <span class="question-number">01 · 隐式不是“没有空间知识”</span><h2>模型可能知道怎么伸手，却没有可读的位置表</h2>
+    <p>这里按<strong>动作执行时的接口</strong>理解“隐式”：动作网络主要读取神经特征，没有要求这些特征逐项对应可编辑的三维坐标、对象身份或地图单元。空间关系可以从视频学习，也可以由明确的 3D 监督教进去。</p>
+    <p>例如，网络可能从外观、遮挡和运动中学到距离与接近方向，但我们不能仅凭它能生成连贯视频，就认定内部存在准确、统一、可长期维护的三维世界。</p>
+    <div class="weekly-callout"><p><strong>不要混淆两个问题：</strong>“有没有显式几何监督”说的是怎么学；“执行时是否保留显式几何”说的是怎么用。一个方法完全可以前者有、后者没有。</p></div>
+  </section>
+  <section id="distillation" class="weekly-question">
+    <span class="question-number">02 · 2026-08-25</span><h2>GaussianWAM：训练时用 3D，部署时把它拿掉</h2>
+    <span class="w3-tag">显式几何教师</span><span class="w3-tag">隐式执行接口</span>
+    <p>GaussianWAM 先把多视角观测中的深度、相机参数和语义特征组织到共享的 3D Gaussian 场中，再将空间对齐的深度、语义与覆盖信号蒸馏进 WAM 的当前观测表示。</p>
+    <p><strong>训练结束后，教师模型、Gaussian 模块和辅助预测头都会移除。</strong>执行仍走原 WAM 路径，不新增几何前向模块。这是“3D 作为训练老师，而非运行时地图”的直接例子。<a href="https://arxiv.org/abs/2608.24714">原论文 · GaussianWAM</a></p>
+    <div class="weekly-callout"><p><strong>对我们的启发（推论）：</strong>如果持续维护 3D 太贵，可以把“只在训练时加入几何”作为对照组。只有运行时记忆额外改善遮挡、身份保持或纠错，才有理由承担它的复杂度。</p></div>
+  </section>
+  <section id="video" class="weekly-question">
+    <span class="question-number">03 · 隐式与混合路线</span><h2>视频先验也可以被几何约束加强</h2>
+    <div class="w3-cards">
+      <article class="w3-card"><span class="w3-tag">生成特征 → 动作</span><h3>DiT4DiT</h3><p class="w3-date">2026-03 · 站内已有模型</p><p>视频 DiT 学习未来动态，其中间特征为动作 DiT 提供条件；动作分支结合这些特征与机器人状态生成轨迹。</p><p class="w3-path">当前图像与语言 → 视频动态特征 → 动作 DiT</p><p><strong>按本文接口分类：</strong>动作依赖生成模型的内部表示，而非可编辑的持续三维地图。视频学习提供空间与运动线索，但不能直接断言其特征等价于度量准确的 3D 状态。</p><p class="w3-reference"><a href="https://arxiv.org/html/2603.10448v1">原论文 · 第 4 节与图 2</a></p></article>
+      <article class="w3-card"><span class="w3-tag">显式先验 + 隐式表示</span><h3>PAIWorld</h3><p class="w3-date">首版 2026-06-16 · 核对 v3：2026-06-23</p><p>在多视角视频世界模型中加入跨视角注意力、相机射线和外参相关的位置编码，并用 3D 教师特征约束 latent，使不同视角更一致。</p><p class="w3-path">相机几何 + 3D 特征对齐 → 多视角世界表示</p><p><strong>应归为混合：</strong>几何条件是明确的，世界计算仍主要在特征中；论文支持规划、WAM 等下游应用，不能因此把它本身写成“持续对象地图直接输出动作”的完整系统。</p><p class="w3-reference"><a href="https://arxiv.org/abs/2606.18375v3">原论文 · PAIWorld v3</a></p></article>
+    </div>
+    <p><strong>同一个模型也会跨越两类：</strong><a href="../explicit/#frontier">Flex-π</a> 的多模态训练保留了明确的几何目标，但动作单独生成的运行模式不要求输出三维点图。分类应跟着训练目标与推理配置走，而不是给模型贴一个永久标签。<a href="https://arxiv.org/abs/2608.10860v3">原论文</a></p>
+  </section>
+  <section id="compare" class="weekly-question">
+    <span class="question-number">04 · 选择接口，而非选择阵营</span><h2>哪些取舍真正影响我们的设计？</h2>
+    <div class="weekly-table-wrap" tabindex="0" role="region" aria-label="显式与隐式接口取舍"><table class="weekly-table w3-table"><caption>以下是架构层面的判断，具体效果需要实验确认</caption><thead><tr><th scope="col">我们关心的事</th><th scope="col">保留明确几何状态</th><th scope="col">主要依赖隐式特征</th></tr></thead><tbody>
+      <tr><th scope="row">空间关系能否检查</th><td>可以直接检查位置、尺度、对象关联与置信度。</td><td>通常需要额外探针或干预实验，不能直接读出所有含义。</td></tr>
+      <tr><th scope="row">纠正错误</th><td>可以设计局部修正接口；错误地图也可能持续误导策略。</td><td>依赖新观测和网络更新，定点纠错往往不直接。</td></tr>
+      <tr><th scope="row">训练数据</th><td>可能需要深度、相机参数或几何伪标签，并承受其误差。</td><td>视频预训练较易复用；若采用 3D 蒸馏，仍需对应教师信号。</td></tr>
+      <tr><th scope="row">运行开销</th><td>要计算、更新和读取几何，需测完整闭环延迟。</td><td>可省去显式重建；大模型或多步生成本身仍可能很慢。</td></tr>
+      <tr><th scope="row">长期记忆</th><td>需要明确的身份、坐标与更新规则，不能只保存一帧点云。</td><td>也能设计记忆机制，但普通 latent 或注意力缓存不自动保证对象永久性。</td></tr>
+    </tbody></table></div>
+  </section>
+  <section id="questions" class="weekly-question">
+    <span class="question-number">05 · 阅读新论文时的四个追问</span><h2>别只问“有没有 3D”，要问证据是什么</h2>
+    <ol class="w3-questions">
+      <li><strong>几何从哪里来？</strong>传感器深度、重建教师、未来预测，还是仅凭 RGB 自监督？监督噪声与坐标尺度是否说明？</li>
+      <li><strong>推理时真的调用了什么？</strong>生成三维结果、读取几何特征，还是仅在训练时接受过几何监督？哪个分支可以关闭？</li>
+      <li><strong>换视角、遮挡、物体移动后还成立吗？</strong>应观察同一对象能否被持续识别，区分相机变化与真实物体运动，而不只看单帧深度图。</li>
+      <li><strong>空间改善是否真的带来动作改善？</strong>固定数据、策略容量和时延预算，再比较成功率、碰撞、身份混淆与遮挡后的恢复；仅提升视频质量不够。</li>
+    </ol>
+    <p>因此，我们更有价值的问题可能是：<strong>把必须稳定、可检查的信息显式保留，把复杂但不必逐项解释的信息交给特征学习，边界应划在哪里？</strong></p>
+  </section>
+</Week3TopicLayout>

@@ -3,7 +3,7 @@ interface Props {
   title: string;
   description: string;
   section: "problems" | "tasks";
-  week: 1 | 2;
+  week: 1 | 2 | 3;
 }
 const { title, description, section, week } = Astro.props;
 const base = import.meta.env.BASE_URL.replace(/\/$/, "");
@@ -40,6 +40,7 @@ const weekRoot = root + "/" + section + "/";
       <nav class="week-tabs" aria-label={label + "周次"}>
         <a class:list={{ active: week === 1 }} href={weekRoot} aria-current={week === 1 ? "page" : undefined}>Week 1</a>
         <a class:list={{ active: week === 2 }} href={weekRoot + "week2/"} aria-current={week === 2 ? "page" : undefined}>Week 2</a>
+        {section === "problems" && <a class:list={{ active: week === 3 }} href={weekRoot + "week3/"} aria-current={week === 3 ? "page" : undefined}>Week 3</a>}
       </nav>
       <slot />
     </main>

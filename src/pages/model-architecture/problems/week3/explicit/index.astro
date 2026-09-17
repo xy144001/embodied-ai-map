@@ -1,0 +1,72 @@
+---
+import Week3TopicLayout from "../../../../../layouts/Week3TopicLayout.astro";
+---
+<Week3TopicLayout topic="explicit" title="显式：把空间信息表示出来，再看它怎样帮助行动" description="深度、三维点、物体运动和空间记忆，都能让几何变得可检查。但表示出来之后，动作模块究竟怎么用，仍要逐层拆开看。">
+  <nav class="w3-reading-nav" aria-label="本页目录"><a href="#meaning">什么算显式</a><a href="#frontier">近期 WAM</a><a href="#point-world">直接在 3D 中预测</a><a href="#memory">持续记忆</a><a href="#takeaway">对我们的启发</a></nav>
+  <section id="meaning" class="weekly-question">
+    <span class="question-number">01 · 先定义接口</span><h2>显式到哪一步？</h2>
+    <p>这里的“显式”，指空间量有可解释的含义，例如某个像素离相机多远、某个点的三维坐标、物体运动到了哪里。它们可以编码成 latent（压缩特征）再送入网络；<strong>经过压缩，并不会自动失去几何含义。</strong></p>
+    <div class="weekly-table-wrap" tabindex="0" role="region" aria-label="显式几何的三个使用层次"><table class="weekly-table w3-table"><caption>本页的分析框架：三个层次可以同时出现</caption><thead><tr><th scope="col">使用层次</th><th scope="col">实际在做什么</th><th scope="col">还不能据此认定什么</th></tr></thead><tbody>
+      <tr><th scope="row">作为预测目标</th><td>要求网络预测深度、点图或点的位移，让学习过程重视空间。</td><td>不代表部署时必须重建完整三维场景。</td></tr>
+      <tr><th scope="row">作为行动依据</th><td>动作分支读取几何特征；或规划器用预测的三维结果筛选动作。</td><td>“动作读取特征”与“规划器直接计算几何误差”是不同接口。</td></tr>
+      <tr><th scope="row">作为持续状态</th><td>把观测对应到同一个空间中，保存对象与历史证据，再按新观测更新。</td><td>预测一段 RGB-D 视频，并不自动得到长期地图或稳定对象身份。</td></tr>
+    </tbody></table></div>
+    <div class="weekly-callout note"><p><strong>三个常见误读：</strong>深度图主要描述当前视角可见表面，是 2.5D；二维点轨迹记录图像位置变化，本身不是三维轨迹；论文中的“4D”常指空间随时间变化，并不保证有持续的对象级记忆。</p></div>
+  </section>
+  <section id="frontier" class="weekly-question">
+    <span class="question-number">02 · 2026 年前沿工作</span><h2>近期 WAM 已经把哪些几何信息接进来了？</h2>
+    <p>下面按时间从近到远看。重点是“什么信息、在哪一阶段、通过什么接口影响动作”，不以生成画面是否逼真代替动作能力。</p>
+    <div class="w3-cards">
+      <article class="w3-card"><span class="w3-tag">结构化未来 → 动作</span><h3>ModAR</h3><p class="w3-date">2026-09-15 · 多模态 WAM</p>
+        <p>把未来模态分阶段生成，再生成动作。它研究了点轨迹、DINO 语义特征、深度与 RGB 的组合：前一阶段的结果成为后一阶段的条件。</p>
+        <p class="w3-path">当前观测与任务 → 依次生成未来模态 → 动作</p>
+        <p><strong>几何边界：</strong>这里的点轨迹来自二维追踪，不能写成完整 3D 运动场。深度提供额外的空间约束。论文消融中，加入未来 RGB 没有带来一致收益；这是该实验设置的结果，不是“视频预测无用”的普遍结论。</p>
+        <p class="w3-reference"><a href="https://arxiv.org/html/2609.17524v1">原论文 · 方法 III-B 与消融 IV-C</a></p>
+      </article>
+      <article class="w3-card"><span class="w3-tag">深度与动作联合建模</span><h3>SA-WAM</h3><p class="w3-date">2026-09-02 · 几何 latent 扩散</p>
+        <p>把深度变换到视频 VAE 可以接收的数值范围，复用冻结的编码器，在一个扩散主干中联合预测 RGB、深度与动作。</p>
+        <p class="w3-path">明确的深度信号 → 压缩表示 → 世界与动作联合预测</p>
+        <p><strong>如何理解：</strong>深度作为几何模态是显式的，内部计算仍在 latent 中进行。“用 latent”与“有明确几何监督”并不矛盾；这也不是先建好长期三维地图、再调用独立规划器。</p>
+        <p class="w3-reference"><a href="https://arxiv.org/abs/2609.02531">原论文 · 2026-09-02</a></p>
+      </article>
+      <article class="w3-card"><span class="w3-tag">训练多模态，推理可选择</span><h3>Flex-π</h3><p class="w3-date">首版 2026-08-11 · 核对 v3：2026-08-29</p>
+        <p>同时学习未来 RGB、三维点图、DINO 语义特征与动作。三维点图给像素附上三维位置，再与其他视觉信号一起编码到共享的 latent 空间。</p>
+        <p class="w3-path">几何 / 语义 / RGB 联合训练 → 按预算选择推理分支</p>
+        <p><strong>最值得注意：</strong>同一个模型可以只生成动作，也可以联合生成多种模态。因此“训练中有显式 3D”不等于“每次执行都显式重建 3D”。比较时必须写清运行模式。</p>
+        <p class="w3-reference"><a href="https://arxiv.org/abs/2608.10860v3">原论文 · Flex-π v3</a></p>
+      </article>
+      <article class="w3-card"><span class="w3-tag">几何训练，特征驱动动作</span><h3>RynnWorld-4D</h3><p class="w3-date">2026-07-07 · RGB / 深度 / 光流</p>
+        <p>从 RGB-D 和语言出发，联合预测未来 RGB、深度与光流，让外观、空间结构和运动共同参与学习。</p>
+        <p class="w3-path">多模态世界模型的内部表示 → 逆动力学动作头</p>
+        <p><strong>动作到底读什么：</strong>其 Policy 读取内部 4D 表示，单次前向即可输出动作，绕过完整的多步去噪。应归为“显式几何目标 + 特征接口”，不能描述成先完整重建未来场景、再逐点求动作。</p>
+        <p class="w3-reference"><a href="https://arxiv.org/abs/2607.06559">原论文 · RynnWorld-4D / Policy</a></p>
+      </article>
+      <article class="w3-card"><span class="w3-tag">多视角 RGB-D 与动作</span><h3>X-WAM</h3><p class="w3-date">首版 2026-04-29 · 核对 v2：2026-05-07</p>
+        <p>在预训练视频模型上增加深度预测分支，用多视角 RGB-D 表示未来空间；同一框架同时支持动作与世界生成。</p>
+        <p class="w3-path">视频先验 + 深度分支 → 联合建模，异步去噪</p>
+        <p><strong>工程重点：</strong>动作可以用较少去噪步数更早解码，视频继续生成。显式几何与视频主干可以共存，执行也不必等待完整高质量画面。</p>
+        <p class="w3-reference"><a href="https://arxiv.org/abs/2604.26694v2">原论文 · X-WAM v2</a></p>
+      </article>
+    </div>
+  </section>
+  <section id="point-world" class="weekly-question">
+    <span class="question-number">03 · 另一种更直接的接口</span><h2>PointWorld：预测三维点会怎样移动</h2>
+    <span class="w3-tag">2026-01-07</span><span class="w3-tag">动作条件世界模型 + 规划</span>
+    <p>PointWorld 将 RGB-D 转为点云，把场景与机器人动作都放进三维点的运动表示中。给定候选动作，它预测场景点的位移，再结合模型预测控制（MPC）寻找合适的动作。</p>
+    <p><strong>与上面的联合生成路径不同：</strong>这里有可直接检查的三维运动预测，规划可以利用这些结果。它是与本问题密切相关的动作条件世界模型，不是将语言、视频和动作一起生成的同构 WAM。</p>
+    <p class="source-line"><a href="https://arxiv.org/html/2601.03782v1">PointWorld 原论文</a> · <a href="https://github.com/NVlabs/PointWorld">官方代码</a></p>
+    <div class="weekly-callout"><p><strong>本页判断：</strong>“预测点如何移动”很接近行动所需的空间变化，但仍要另查对象语义、遮挡后的身份保持和记忆更新机制，不能由点云输出直接推导出这些能力。</p></div>
+  </section>
+  <section id="memory" class="weekly-question">
+    <span class="question-number">04 · 3D 是否会留下来</span><h2>持续空间记忆，是另一条需要单独看的轴</h2>
+    <div class="w3-cards">
+      <article class="w3-card"><h3>Mem-World</h3><p class="w3-date">首版 2026-06-17 · 核对 v3：2026-09-15</p><span class="w3-tag">动作条件世界模型</span><p>用随时间变化的表面元素组织历史观测，依据几何和未来动作检索有用的历史帧，帮助生成遮挡、相机运动下更连贯的未来视频。这里的 3D 首先服务于<strong>记忆检索</strong>，不能直接等同于策略读取对象状态表。</p><p class="w3-reference"><a href="https://arxiv.org/abs/2606.18960v3">原论文 · Mem-World v3</a></p></article>
+      <article class="w3-card"><h3>GaussMemory</h3><p class="w3-date">2026-08-15</p><span class="w3-tag">相关路线：空间记忆策略</span><p>以 3D Gaussian 为持续几何载体，让任务需求影响哪些内容被记住、如何更新、怎样读取。它与“持续的语义几何状态”直接相关，但<strong>空间记忆策略不因有 3D 就自动成为生成式 WAM</strong>。</p><p class="w3-reference"><a href="https://arxiv.org/abs/2608.14986">原论文 · GaussMemory</a></p></article>
+    </div>
+  </section>
+  <section id="takeaway" class="weekly-question">
+    <span class="question-number">05 · 带回我们的讨论</span><h2>我们想要哪一种“显式”？</h2>
+    <p>上述工作说明，几何可以是训练目标、推理中的一个分支、规划的计算对象，也可以是持续记忆。本页的判断是：<strong>我们的核心选择不只是“要不要 3D”，而是“哪些空间事实必须跨时间保留，并能被动作模块稳定读取”。</strong></p>
+    <ul><li><strong>只加深度监督：</strong>改动相对集中，但不会自动得到长期对象记忆。</li><li><strong>让动作读取几何：</strong>能明确检查空间信息有没有被使用，同时必须处理估计误差。</li><li><strong>维护持续状态：</strong>有机会应对遮挡与视角变化，但对象身份、动态更新和不确定性都成为核心问题。</li></ul>
+  </section>
+</Week3TopicLayout>
