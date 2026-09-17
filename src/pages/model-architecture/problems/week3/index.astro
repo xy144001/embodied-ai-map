@@ -2,14 +2,25 @@
 import WeeklyLayout from "../../../../layouts/WeeklyLayout.astro";
 import Week3Topics from "../../../../components/Week3Topics.astro";
 import "../../../../styles/model-week3.css";
+const experimentUrl = import.meta.env.BASE_URL.replace(/\/$/, "") + "/model-architecture/problems/week3/semantic-sensitivity/";
 ---
-<WeeklyLayout title="Week 3 · 架构问题" description="WAM 如何使用 3D 信息：显式、隐式，以及我们预想的持续语义几何状态。" section="problems" week={3}>
+<WeeklyLayout title="Week 3 · 架构问题" description="问题一：模型对语言表达有多敏感，指令训练后是否仍敏感？问题二：WAM 如何使用 3D 信息，以及我们的构想。" section="problems" week={3}>
   <div class="w3-scope">
     <p class="eyebrow">ARCHITECTURE GROUP · WEEK 3</p>
     <h1>Week 3 · 架构问题</h1>
-    <p class="intro">从“世界模型能看见什么”，走向“哪些信息真正帮助机器人行动”。</p>
-    <p class="weekly-meta">更新：2026-09-17 · 问题二围绕最新工作与下一步构想展开</p>
-    <section id="question-one" class="weekly-question w3-empty" aria-labelledby="q1-title"><span class="question-number">QUESTION 01</span><h2 id="q1-title">问题一</h2></section>
+    <p class="intro">一句话的不同说法，会怎样改变动作？世界中的三维信息，又该怎样进入动作决策？</p>
+    <p class="weekly-meta">更新：2026-09-17 · 问题一：语义敏感性实验 · 问题二：3D 信息与架构构想</p>
+    <section id="question-one" class="weekly-question" aria-labelledby="q1-title">
+      <span class="question-number">QUESTION 01 · LANGUAGE & ACTION</span>
+      <h2 id="q1-title">模型到底对语义有多敏感，进行数据增强和指令微调后还有多敏感？</h2>
+      <p>同一个任务，换一种说法，机器人还能稳定做好吗？从 Cosmos3、DiT4DiT 到经过多样化指令训练的 InstructVLA，我们比较平均成绩，也追踪同一个场景是否从成功变为失败、或从失败变为成功。</p>
+      <a class="w3-experiment-entry" href={experimentUrl}>
+        <span class="w3-topic-number">EXPERIMENTS · COSMOS3 / DiT4DiT / INSTRUCTVLA</span>
+        <strong>三个模型的敏感性实验</strong>
+        <span>为什么这样设计实验 → 已完成的结果 → 数据增强、指令微调与 reasoning 的初步结论</span>
+        <b>查看实验设计与结果 →</b>
+      </a>
+    </section>
     <section id="question-two" class="weekly-question" aria-labelledby="q2-title">
       <span class="question-number">QUESTION 02 · 3D & ACTION</span>
       <h2 id="q2-title">WAM 里目前如何使用这些 3D 信息，显式？隐式？我们呢？</h2>
@@ -21,3 +32,8 @@ import "../../../../styles/model-week3.css";
     </section>
   </div>
 </WeeklyLayout>
+<style>
+  .w3-experiment-entry{display:flex;flex-direction:column;gap:14px;margin:26px 0 4px;padding:26px;border:1px solid #456187;border-top:3px solid #8bb7ff;border-radius:8px;background:#111e30;text-decoration:none}
+  .w3-experiment-entry:hover{background:#1d3555;border-color:#a8caff}.w3-experiment-entry .w3-topic-number{margin:0}.w3-experiment-entry strong{font-size:25px;line-height:1.5}.w3-experiment-entry>span:not(.w3-topic-number){font-size:16px;color:#bdcde2;line-height:1.9}.w3-experiment-entry b{font-size:15px;color:#b7d5ff}
+  @media(max-width:650px){.w3-experiment-entry{padding:20px}.w3-experiment-entry strong{font-size:22px}}
+</style>
