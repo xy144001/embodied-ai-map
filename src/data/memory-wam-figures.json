@@ -1,0 +1,38 @@
+[
+  {
+    "id": "overview",
+    "title": "八模块总体图",
+    "alt": "从 L/O/S 输入，经语义、未来、对象三路处理，到事件触发检索、验证、动作调制和结果写回的闭环。",
+    "width": 1491,
+    "height": 1055,
+    "src": "overview.webp",
+    "preview": "overview-768.webp",
+    "bytes": 195698,
+    "previewBytes": 59394,
+    "sourceBytes": 2184875
+  },
+  {
+    "id": "modules-m1-m4",
+    "title": "模块细化图（上）：M1–M4",
+    "alt": "语义编码、世界与未来编码、对象路由与定位，以及任务或子任务事件门控。",
+    "width": 1491,
+    "height": 1055,
+    "src": "modules-m1-m4.webp",
+    "preview": "modules-m1-m4-768.webp",
+    "bytes": 267146,
+    "previewBytes": 78600,
+    "sourceBytes": 2517224
+  },
+  {
+    "id": "modules-m5-m8",
+    "title": "模块细化图（下）：M5–M8",
+    "alt": "经验粗检索、相关性验证、记忆调制动作，以及执行结果编码与记忆写回。",
+    "width": 1491,
+    "height": 1055,
+    "src": "modules-m5-m8.webp",
+    "preview": "modules-m5-m8-768.webp",
+    "bytes": 262762,
+    "previewBytes": 77368,
+    "sourceBytes": 2677933
+  }
+]

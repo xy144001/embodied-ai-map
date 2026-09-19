@@ -1,4 +1,5 @@
 ---
+import ModelSectionNav from "../components/ModelSectionNav.astro";
 interface Props { title: string; description: string; detail?: boolean }
 const { title, description, detail = false } = Astro.props;
 const base = import.meta.env.BASE_URL.replace(/\/$/, "");
@@ -11,7 +12,7 @@ const root = `${base}/model-architecture`;
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="description" content={description} />
     <title>{title} · 具身机器人技术地图</title>
-    <link rel="stylesheet" href={`${root}/module-sections.css?v=20260914-routes`} />
+    <link rel="stylesheet" href={`${root}/module-sections.css?v=20260919-memory`} />
     <link rel="stylesheet" href={`${root}/robots/robots.css`} />
   </head>
   <body class="subpage robot-page">
@@ -21,14 +22,7 @@ const root = `${base}/model-architecture`;
       <a class="home-link" href={detail ? `${root}/robots/` : `${base}/`}>{detail ? "← 返回机器人" : "← 返回技术地图"}</a>
       <div class="status">@xy144001 · 机器人</div>
     </header>
-    <nav class="module-tabs" aria-label="模型架构组版块">
-      <a href={`${root}/`}>架构</a>
-      <a href={`${root}/problems/`}>问题</a>
-      <a href={`${root}/tasks/`}>任务</a>
-      <a href={`${root}/robots/`} class="active" aria-current={detail ? undefined : "page"}>机器人</a>
-      <a href={`${root}/breakdown/`} class="breakdown-tab">拆解模型</a>
-      <a class="macro-tab" href={`${root}/routes/`}>宏观路线</a>
-    </nav>
+    <ModelSectionNav active="robots" detail={detail} />
     <slot />
     <footer class="robot-footer">机器人本体调研 · @xy144001 · <a href={`${root}/`}>返回模型架构</a></footer>
   </body>

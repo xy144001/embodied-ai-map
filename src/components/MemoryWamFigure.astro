@@ -1,0 +1,14 @@
+---
+import figures from "../data/memory-wam-figures.json";
+interface Props { index: number }
+const { index } = Astro.props;
+const figure = figures[index];
+const root = import.meta.env.BASE_URL.replace(/\/$/, "") + "/model-architecture/assets/memory-wam/";
+---
+<figure class="mw-figure">
+  <figcaption><div><span>DESIGN FIGURE · 0{index + 1}</span><strong>{figure.title}</strong></div><a href={root + figure.src} target="_blank" rel="noopener">查看大图 ↗<span class="mw-sr-only">（新窗口）</span></a></figcaption>
+  <a class="mw-image-link" href={root + figure.src} target="_blank" rel="noopener" aria-label={figure.title + "，在新窗口查看大图"}>
+    <img src={root + figure.src} srcset={`${root + figure.preview} 768w, ${root + figure.src} ${figure.width}w`} sizes="(max-width: 800px) calc(100vw - 40px), (max-width: 1440px) calc(100vw - 112px), 1320px" width={figure.width} height={figure.height} alt={figure.alt} loading="lazy" decoding="async" />
+  </a>
+  <p>{figure.alt}</p>
+</figure>

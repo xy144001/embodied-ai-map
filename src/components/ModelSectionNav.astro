@@ -1,0 +1,20 @@
+---
+interface Props {
+  active: "architecture" | "problems" | "tasks" | "robots" | "breakdown" | "routes" | "memory-wam";
+  detail?: boolean;
+}
+const { active, detail = false } = Astro.props;
+const root = import.meta.env.BASE_URL.replace(/\/$/, "") + "/model-architecture";
+const sections = [
+  { id: "architecture", label: "架构", path: "/", className: "" },
+  { id: "problems", label: "问题", path: "/problems/", className: "" },
+  { id: "tasks", label: "任务", path: "/tasks/", className: "" },
+  { id: "robots", label: "机器人", path: "/robots/", className: "" },
+  { id: "breakdown", label: "拆解模型", path: "/breakdown/", className: "breakdown-tab" },
+  { id: "routes", label: "宏观路线", path: "/routes/", className: "macro-tab" },
+  { id: "memory-wam", label: "Memory-WAM", path: "/memory-wam/", className: "memory-tab" },
+];
+---
+<nav class="module-tabs" aria-label="模型架构组版块">
+  {sections.map(section => <a href={root + section.path} class:list={[section.className, { active: section.id === active }]} aria-current={section.id === active ? (detail ? "location" : "page") : undefined}>{section.label}</a>)}
+</nav>

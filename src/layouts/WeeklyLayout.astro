@@ -1,4 +1,5 @@
 ---
+import ModelSectionNav from "../components/ModelSectionNav.astro";
 interface Props {
   title: string;
   description: string;
@@ -18,7 +19,7 @@ const weekRoot = root + "/" + section + "/";
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="description" content={description} />
     <title>{title} · 具身机器人技术地图</title>
-    <link rel="stylesheet" href={root + "/module-sections.css?v=20260914-routes"} />
+    <link rel="stylesheet" href={root + "/module-sections.css?v=20260919-memory"} />
     <link rel="stylesheet" href={root + "/weekly-sections.css"} />
   </head>
   <body class="subpage weekly-page">
@@ -28,14 +29,7 @@ const weekRoot = root + "/" + section + "/";
       <a class="home-link" href={base + "/"}>← 返回技术地图</a>
       <div class="status">@xy144001 · {label} · Week {week}</div>
     </header>
-    <nav class="module-tabs" aria-label="模型架构组版块">
-      <a href={root + "/"}>架构</a>
-      <a class:list={{ active: section === "problems" }} href={root + "/problems/"}>问题</a>
-      <a class:list={{ active: section === "tasks" }} href={root + "/tasks/"}>任务</a>
-      <a href={root + "/robots/"}>机器人</a>
-      <a class="breakdown-tab" href={root + "/breakdown/"}>拆解模型</a>
-      <a class="macro-tab" href={root + "/routes/"}>宏观路线</a>
-    </nav>
+    <ModelSectionNav active={section} detail />
     <main id="main" class:list={["section-main", "weekly-main", { "weekly-tasks": section === "tasks" }]}>
       <nav class="week-tabs" aria-label={label + "周次"}>
         <a class:list={{ active: week === 1 }} href={weekRoot} aria-current={week === 1 ? "page" : undefined}>Week 1</a>
