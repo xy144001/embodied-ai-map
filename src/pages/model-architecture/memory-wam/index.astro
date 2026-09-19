@@ -1,0 +1,120 @@
+---
+import ModelSectionNav from "../../../components/ModelSectionNav.astro";
+import MemoryWamFigure from "../../../components/MemoryWamFigure.astro";
+import FlowFormula from "../../../components/FlowFormula.astro";
+import "katex/dist/katex.min.css";
+import "../../../styles/memory-wam.css";
+const base = import.meta.env.BASE_URL.replace(/\/$/, "");
+const root = base + "/model-architecture";
+const chapters = [["idea", "核心思想"], ["overview", "总体架构"], ["perception", "M1–M4 理解与门控"], ["experience", "M5–M8 记忆与行动"], ["memory", "记忆怎样留下来"], ["validation", "训练与验证"], ["questions", "待解决的问题"]];
+const perception = [
+  { id: "m1", tag: "SEMANTICS", name: "M1 · 语义编码器", question: "这句话究竟要完成什么任务？", input: "语言指令 L", output: "任务语义表示 Z_semantic", how: "语言经过 tokenizer 与编码器，得到用于任务匹配和经验检索的表示。希望同一个意图的不同说法落到相近位置，同时保留真正改变任务的差异。", why: "把“换种措辞”和“换了任务”分开，是稳定检索的第一步。表示接近只是中间目标，最终仍要检查执行是否稳定。", boundary: "图中的对比学习是候选训练方式。“红杯子”与“杯子”只有在场景和指代允许时才可作为同任务样本；不能抹掉颜色、对象、空间关系或否定条件。" },
+  { id: "m2", tag: "FUTURE", name: "M2 · 世界／未来编码器", question: "接下来，画面和状态可能怎样变化？", input: "视觉观测 O + 指令 L", output: "未来感知表示 Z_future；未来条件 K_f / V_f", how: "由 video backbone / world model 提取带有未来变化信息的表示，供动作分支使用，也供候选记忆的细验证参考。当前版本保留这条未来分支。", why: "任务名称相同，并不代表当前运动阶段相同；未来表征帮助区分“还没接触”“正在抓取”“准备放下”等情境。", boundary: "不要求每一步都解码完整视频。具体 backbone、预测时域，以及 Z_future 与 K/V 的接口尚待实现；图中的模型名只是组件示意。" },
+  { id: "m3", tag: "OBJECT", name: "M3 · 对象路由与定位", question: "要操作物体吗？如果要，是哪一个？", input: "视觉观测 O + 指令 L", output: "对象门控 g_obj + 对象表示 Z_object", how: "先判断指令是否需要操作对象，再通过语言条件注意力、mask、检测框或对象槽位等候选方式，把语言里的对象与画面中的对象对应起来。", why: "“拿起杯子”需要找到杯子；“向前走”不应被强迫绑定到某个物体。对象信息既服务于经验选择，也为动作提供条件。", boundary: "无对象时跳过对象定位与对象索引，不必连任务级记忆也关闭。可用对象有效性掩码表达这一情况，具体空对象接口待定；这里也不预设必须显式重建 3D。" },
+  { id: "m4", tag: "EVENT", name: "M4 · 任务／子任务事件门控", question: "现在值得重新翻一次经验库吗？", input: "Z_semantic、Z_object、Z_future 与当前状态 s_t", output: "是否检索的事件信号 g_event", how: "在回合开始、任务变化或子任务切换时考虑检索。第一版可先用明确的事件规则，再研究可学习的门控；高不确定性触发属于后续候选。", why: "连续执行同一段动作时，每帧都重新检索既增加开销，也可能让选中的经验来回切换。按事件读取更容易检查记忆何时起作用。", boundary: "这是长期记忆的读取节奏，不是动作控制频率。两个事件之间可以沿用当前候选；何时失效、何时重验需要明确规则。" },
+];
+const experience = [
+  { id: "m5", tag: "RETRIEVE", name: "M5 · 经验检索器", question: "过去有没有做过类似的事？", input: "任务语义 + 有效的对象表示 + 长期经验库", output: "通过粗检索阈值的少量候选记忆 C", how: "先用 Z_semantic 与 Z_object 构造粗查询，在任务／对象相关经验中筛选。每类约 10 条代表经验是当前的容量设想，目的是保留少量有区分度的经历。", why: "先缩小候选范围，避免让所有历史片段都参与动作生成。高阈值是使用偏好：没有足够可靠的匹配就返回空集。", boundary: "相似度高不等于有用；阈值和约 10 条的容量都需要校准，不能写成已经证明最优。Z_future 与状态重点用于下一步细验证。" },
+  { id: "m6", tag: "VERIFY", name: "M6 · 相关性验证器", question: "它看起来相似，但现在真的用得上吗？", input: "候选记忆 + 三路表示 + 当前机器人状态", output: "相关性／效用分数 r_i 与通过验证的记忆集合", how: "结合对象位置、动作阶段、机器人状态与未来表征，检查候选经验是否适用于当前情境。只有通过验证的记忆才交给 M7；全部不通过就不用记忆。", why: "都叫“抓杯子”，也可能一个在桌边、一个在桌中，或者夹爪状态不同。细验证试图减少“名字相同，经验却不适用”的错误。", boundary: "r_i 是需要训练与校准的预测分数，不是一个天然知道真实收益的判官。怎样得到“有用／有害”监督，是本方案最关键的开放问题之一。" },
+  { id: "m7", tag: "ACT", name: "M7 · 记忆调制 + 动作专家", question: "这段经验应该怎样改变当下动作？", input: "未来条件、当前任务／对象／状态条件、已验证记忆", output: "动作块 A_t:t+H", how: "动作专家保持实时感知驱动的生成路径，再由独立的记忆通路读取经验，通过门控残差影响动作中间表示。图中给出了未来 K/V 与记忆 K/V 分开的组织方式。", why: "经验需要适应眼前的物体与身体状态。调制中间过程，可以让经验影响决策，而不必原样重播过去的动作序列。", boundary: "当前方案只让 memory 调制 action branch，不把检索到的经验写入或改写 world/future branch。无可靠记忆时关闭记忆增量，回到无记忆路径。" },
+  { id: "m8", tag: "WRITE", name: "M8 · 结果编码器 + 记忆写入器", question: "这次做了什么，结果如何，值得留下什么？", input: "执行前状态、实际动作、执行后观测与可用的结果信号", output: "带检索键、经验内容和结果的新记忆项", how: "环境执行之后，再把 before → action → after 编码成经验，记录成功／失败或阶段性结果；经过相似性检查、归类与更新，写入跨回合保留的经验库。", why: "只有保存实际发生的结果，下一次遇到类似任务时才有新经验可用。长期记忆由此形成读取—执行—写回的闭环。", boundary: "失败记录可以有诊断价值，但失败动作不能自动成为要模仿的示范。成功、失败分别如何参与验证与调制，以及去重替换策略，仍需实验确定。" },
+];
+---
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="Memory-WAM：我们提出的跨回合经验记忆模型方案。介绍八模块架构、三路表示、事件触发检索、相关性验证、动作调制与执行后写回，以及需要验证的训练和评测问题。" />
+    <title>Memory-WAM · 我们的模型方案 · 具身机器人技术地图</title>
+    <link rel="stylesheet" href={root + "/module-sections.css?v=20260919-memory"} />
+  </head>
+  <body class="subpage memory-wam-page">
+    <a class="mw-skip" href="#main">跳转到正文</a>
+    <header class="top"><div class="brand">MODEL<b>/</b>ATLAS</div><a class="home-link" href={base + "/"}>← 返回技术地图</a><div class="status">@xy144001 · Memory-WAM</div></header>
+    <ModelSectionNav active="memory-wam" />
+    <main id="main" class="mw-main">
+      <header class="mw-hero">
+        <div><p class="mw-eyebrow">OUR MODEL / CROSS-EPISODE MEMORY</p><h1>Memory-WAM</h1><p class="mw-tagline">让一次尝试，成为下一次的经验。</p><p class="mw-intro">我们希望机器人再次面对同类任务时，能找回过去真正有帮助的经历，再结合眼前的画面与身体状态作出动作。核心不是让记忆库越堆越大，而是学会<strong>何时回想、该信哪段经验、怎样影响动作、事后留下什么。</strong></p></div>
+        <aside class="mw-status"><span>当前阶段</span><strong>架构草案</strong><p>八模块设计 · 待实验验证</p><time datetime="2026-09-19">2026 / 09 / 19</time></aside>
+      </header>
+      <nav class="mw-toc" aria-label="Memory-WAM 阅读目录">{chapters.map(([id,label],i)=><a href={"#"+id}><span>0{i+1}</span>{label}</a>)}</nav>
+
+      <section id="idea" class="mw-section">
+        <div class="mw-section-title"><span>01 / WHY MEMORY</span><h2>我们想补上的能力：做过之后，下一次能更好。</h2></div>
+        <p class="mw-lead">已有的措辞实验让我们看到：模型可能认出了任务，却仍在具体执行时失误。于是这里同时关注两个问题——任务表示能否更稳定，以及过去的执行经历能否帮到下一次动作。</p>
+        <div class="mw-principles">
+          <article><span>意图与现场分开看</span><h3>知道“要做什么”，也知道“眼前是什么”</h3><p>语言语义、视觉未来、操作对象分别形成表示，再服务于检索和动作。希望措辞变化不会轻易把任务身份带偏，也不丢掉对象与场景的具体差异。</p></article>
+          <article><span>经验要经过筛选</span><h3>先找相似，再判断是否适用</h3><p>任务相似只是入场条件。还要检查这段经验与当前身体状态、对象位置和任务阶段是否相容；不可靠时可以完全不用记忆。</p></article>
+          <article><span>经验跨回合保留</span><h3>让真实结果进入下一次尝试</h3><p>一轮结束后，环境可以重置，经验库仍然保留。跨回合积累有用经历，目标是改善同任务的重复执行成功率。</p></article>
+        </div>
+        <div class="mw-note"><strong>这里的“跨回合”是什么意思？</strong><p>Episode 指一次完整尝试。本方案关注上一次尝试结束后还能留下的经验；单回合的视觉历史和短时动作状态仍然重要，但不能代替跨回合记忆。跨任务迁移属于后续可能性，当前优先验证同任务重复的收益。</p></div>
+        <p class="mw-related">研究动机可对照 <a href={root + "/problems/week3/semantic-sensitivity/"}>Week 3 · 三个模型的敏感性实验 →</a>。那里是已有模型的实测；本页是我们提出的 Memory-WAM 方案，目前尚未报告它的性能增益。</p>
+      </section>
+
+      <section id="overview" class="mw-section">
+        <div class="mw-section-title"><span>02 / THE WHOLE LOOP</span><h2>三路理解当前情境，八个模块组成经验闭环。</h2></div>
+        <div class="mw-inputs"><div><b>L · Language</b><p>语言指令：想完成什么。</p></div><div><b>O · Observation</b><p>视觉观测：眼前看到了什么。</p></div><div><b>S · State</b><p>机器人状态：关节、末端、夹爪等当前状态。</p></div></div>
+        <MemoryWamFigure index={0} />
+        <div class="mw-loop"><p><b>先理解：</b>M1 提取任务语义，M2 保留未来变化信息，M3 判断并定位操作对象。</p><p><b>再回想：</b>M4 决定是否读取长期经验，M5 粗检索，M6 验证当前是否适用。</p><p><b>再行动与更新：</b>通过验证的记忆交给 M7 调制动作；环境执行后，由 M8 记录结果并写回记忆库。</p></div>
+        <p class="mw-caption">图中的三路表示不是三套完整机器人策略。它们承担不同的信息角色，最终由动作专家结合当前状态生成动作。图中对具体 backbone、每类记忆数量及损失形式的举例，都属于设计示意。</p>
+        <details class="mw-details"><summary>用“把红杯子放到架子上”走一遍</summary><div><ol><li><strong>理解：</strong>语义分支识别拿取与放置意图；对象分支在画面里定位红杯子及相关目标；未来分支提供可能的后续变化信息。</li><li><strong>选择经验：</strong>回合开始时先找相似经历，再排除物体摆放、夹爪状态或动作阶段明显不适用的候选。</li><li><strong>生成动作：</strong>有用的经验只通过门控影响动作分支，动作仍依赖此刻的观测与状态；若没有合适经验，就按无记忆路径执行。</li><li><strong>写回结果：</strong>完成或失败之后，记录实际发生的变化。下一次尝试再判断这段新经历是否值得使用。</li></ol></div></details>
+      </section>
+
+      <section id="perception" class="mw-section">
+        <div class="mw-section-title"><span>03 / M1–M4</span><h2>先弄清任务、对象和阶段，再决定是否检索。</h2></div>
+        <MemoryWamFigure index={1} />
+        <div class="mw-modules">{perception.map(m=><article id={m.id} class="mw-module"><span class="mw-module-tag">{m.tag}</span><h3>{m.name}</h3><p class="mw-module-question">{m.question}</p><dl><div><dt>输入</dt><dd>{m.input}</dd></div><div><dt>输出</dt><dd>{m.output}</dd></div></dl><h4>怎么工作</h4><p>{m.how}</p><h4>为什么这样设计</h4><p>{m.why}</p><p class="mw-boundary">{m.boundary}</p></article>)}</div>
+      </section>
+
+      <section id="experience" class="mw-section">
+        <div class="mw-section-title"><span>04 / M5–M8</span><h2>找回经验不算结束，要判断它能否帮上这一次。</h2></div>
+        <MemoryWamFigure index={2} />
+        <div class="mw-modules">{experience.map(m=><article id={m.id} class="mw-module"><span class="mw-module-tag">{m.tag}</span><h3>{m.name}</h3><p class="mw-module-question">{m.question}</p><dl><div><dt>输入</dt><dd>{m.input}</dd></div><div><dt>输出</dt><dd>{m.output}</dd></div></dl><h4>怎么工作</h4><p>{m.how}</p><h4>为什么这样设计</h4><p>{m.why}</p><p class="mw-boundary">{m.boundary}</p></article>)}</div>
+        <div class="mw-subsection"><h3>记忆如何进入动作：两条条件通路，一道调制门。</h3><p>用图中的简化写法说明设计意图：未来通路提供动作生成所需的变化信息，记忆通路提供经验增量，门控决定这次经验应当影响多少。</p>
+          <FlowFormula expression={String.raw`H_a^{j+1}=H_a^j+\Delta_f^j+\beta_j\Delta_m^j`} caption="候选调制形式：未来条件与记忆条件分别形成增量；具体插入层和训练方式待定。" />
+          <div class="mw-symbols"><p><b>H<sub>a</sub><sup>j</sup></b>：动作分支第 j 个调制位置的隐藏表示。</p><p><b>Δ<sub>f</sub><sup>j</sup></b>：从未来条件获得的增量。</p><p><b>Δ<sub>m</sub><sup>j</sup></b>：从已验证经验获得的增量。</p><p><b>β<sub>j</sub></b>：由当前情境决定的记忆影响强度。</p></div>
+          <p>没有通过验证的记忆时，将记忆增量或门控置零，退回无记忆计算路径。这给了模型“不要使用经验”的出口；是否真正提高稳定性，需要用<strong>同一套模型权重下的 memory on / off</strong>对照验证。</p>
+          <p class="mw-caption">该式只展示调制关系，不是完整 Transformer / DiT 层的计算定义；j 的具体粒度、K/V 的构造与注入位置还没有定案。β 也不是事先保证正确的可靠性分数。</p>
+        </div>
+      </section>
+
+      <section id="memory" class="mw-section">
+        <div class="mw-section-title"><span>05 / READ · VERIFY · WRITE</span><h2>一条记忆，应当同时说明“什么时候用”和“用过之后怎样”。</h2></div>
+        <p>当前设想把记忆分成检索键与经验内容：前者帮助找到它，后者帮助判断和利用它。下面是对应八模块图的概念字段，实际张量结构仍待实现。</p>
+        <div class="mw-table-wrap" tabindex="0" role="region" aria-label="一条记忆包含什么"><table><thead><tr><th scope="col">内容</th><th scope="col">记录什么</th><th scope="col">主要作用</th></tr></thead><tbody>
+          <tr><th scope="row">任务／对象键</th><td>任务语义、有效对象表示及对象存在标记。</td><td>M5 粗检索：这是不是同类任务、相关对象？</td></tr>
+          <tr><th scope="row">情境键</th><td>写入当时的未来表征、状态编码与阶段信息。</td><td>M6 细验证：过去的条件和当前条件是否相容？</td></tr>
+          <tr><th scope="row">经历</th><td>执行前状态或观测、实际动作片段、执行后的可用记录。</td><td>描述实际发生过什么，为结果编码和动作调制提供材料。</td></tr>
+          <tr><th scope="row">结果</th><td>结果表示、成功／失败或子任务完成情况。</td><td>区分达成目标的经验与需要避开的失败模式。</td></tr>
+        </tbody></table></div>
+        <div class="mw-two-col"><article class="mw-panel"><h3>读取：高相似度只是第一道门</h3><p>事件触发后，用任务与对象做粗筛，再加入未来和状态做细验证。候选为空、细验证不通过，都允许返回 <strong>No Memory</strong>。不应为了凑够固定数量而强行塞入不合适的经历。</p><p>第一版优先在回合开始与子任务边界读库；相同阶段内保留已选经验。新增触发条件需要与收益、误触发和检索延迟一起评估。</p></article><article class="mw-panel"><h3>写入：不是每一帧都存成独立经验</h3><p>在结果可观察后构建经验项，再做去重、归类和容量管理。图中“每类约 10 条”是可测试的初始预算，具体选择何种片段、何时替换仍未定。</p><p>若只保留非常相似的成功轨迹，可能丢掉罕见情境；若混入大量无用失败，也可能降低检索质量。代表性与结果质量都需要纳入更新规则。</p></article></div>
+        <div class="mw-note"><strong>闭环里的时间顺序必须清楚。</strong><p>本次决策只能读取过去已经写入的经历。当前回合的后续结果，必须等实际执行后才能编码与写回，不能提前作为“记忆”送给当前动作。跨回合比较时，也要规定哪些任务共享经验库、何时清空。</p></div>
+      </section>
+
+      <section id="validation" class="mw-section">
+        <div class="mw-section-title"><span>06 / WHAT WOULD COUNT AS EVIDENCE</span><h2>目标是重复执行更可靠，证据要落到闭环结果上。</h2></div>
+        <p class="mw-lead">八模块图已经给出信息分工，但还没有确定一套完整训练配方，也没有 Memory-WAM 的实测成绩。以下是从当前设计整理出的待验证路线。</p>
+        <div class="mw-two-col"><article class="mw-panel"><h3>训练时，需要补齐哪些监督？</h3><ul><li><strong>语义与对象：</strong>哪些指令是真同义，哪些属性改变了任务？对象定位使用什么标注，能否避免只凭任务名字猜对象？</li><li><strong>相关性验证：</strong>如何知道某条记忆对当前场景有帮助？仅用“记忆原先成功过”作正标签并不充分。</li><li><strong>动作调制：</strong>怎样让模型学会使用有用经验，同时在空记忆、无关记忆下保持基本执行能力？</li><li><strong>结果编码：</strong>怎样表示成功与失败的区别，让记忆保存影响后续决策的内容？</li></ul></article><article class="mw-panel"><h3>可以怎样分阶段做？</h3><ol><li>先固定一个可复现的 WAM 底座，测清楚无记忆时的表现与措辞敏感性。</li><li>把事件检索、验证、动作调制与执行后写回的最小闭环跑通，再逐项加入学习模块。</li><li>明确冻结范围、训练预算和对照组，逐步检查语义、记忆与门控各自带来的变化。</li></ol><p class="mw-caption">这是实现与消融的候选顺序；没有宣称 backbone、冻结策略、损失权重或训练数据已经选定。</p></article></div>
+        <h3 class="mw-table-heading">如何证明“做过之后，下一次更好”？</h3>
+        <div class="mw-table-wrap" tabindex="0" role="region" aria-label="Memory-WAM 候选评测设计"><table><thead><tr><th scope="col">要问的问题</th><th scope="col">建议的比较</th><th scope="col">为什么要这样测</th></tr></thead><tbody>
+          <tr><th scope="row">提升来自跨回合记忆吗？</th><td>相同模型与场景序列：持续保留记忆，对比每回合清空，以及 memory off。</td><td>把记忆积累与模型权重、场景难度、重试机会分开；测试阶段可先固定权重。</td></tr>
+          <tr><th scope="row">后面的尝试真的更好吗？</th><td>记录第 1、2、…次尝试的成功率曲线，用多组随机种子与任务类别复验。</td><td>不能只展示“终于有一次成功”；还要看平均提升、退步任务与不确定性。</td></tr>
+          <tr><th scope="row">检索和验证各有用吗？</th><td>完整方案，对比粗检索后直接使用、随机／错误任务记忆，以及关闭记忆门控。</td><td>判断收益是否来自找对并用对经验，而不只是增加额外计算或条件输入。</td></tr>
+          <tr><th scope="row">换说法仍能稳定使用经验吗？</th><td>固定场景，对同一意图进行严格同义改写，同时统计成功率与成功↔失败翻转。</td><td>语义向量更接近，不能自动推出动作更稳定；必须检验闭环行为。</td></tr>
+          <tr><th scope="row">约 10 条的预算合适吗？</th><td>改变容量与更新策略，记录成功率、错误调用率、拒绝率和检索耗时。</td><td>确认保留的内容是否有效，以及是否能在合理开销下维持收益。</td></tr>
+        </tbody></table></div>
+        <p class="mw-caption">先区分同初态复做、同任务新摆放、未见任务迁移三种难度。第一种有提升，并不能直接推出后两种也提升。若进一步声称优于其他模型，还需相同任务、数据与交互预算下的公平基线比较。</p>
+      </section>
+
+      <section id="questions" class="mw-section mw-final-section">
+        <div class="mw-section-title"><span>07 / OPEN QUESTIONS</span><h2>接下来最值得一起推敲的五件事。</h2></div>
+        <ol class="mw-questions"><li><strong>“记忆有用”从哪里获得监督？</strong><p>是用相同场景 memory on / off 的差异，还是学习可迁移的效用预测？训练信号怎样避免与任务成功标签混为一谈？</p></li><li><strong>存多长、存什么，才保留关键经验？</strong><p>整个回合、子任务片段还是关键接触窗口？失败经验用于提醒、验证还是调制，三种角色是否需要分开？</p></li><li><strong>如何对齐“同任务”与“同一可用情境”？</strong><p>任务语义接近，但对象位置、身体姿态不同，经验应保留哪些不变部分，又该如何适应变化？</p></li><li><strong>何时需要重新检索和验证？</strong><p>任务边界容易定义，执行偏离与高不确定性更难定义；沿用旧经验太久与频繁换经验，怎样平衡？</p></li><li><strong>在哪个动作层注入，最有效也最可控？</strong><p>隐藏状态残差、独立记忆 K/V 与门控力度如何选择？底座更新后，旧记忆的表示是否仍能兼容？</p></li></ol>
+        <div class="mw-note"><strong>当前方案的边界</strong><p>Memory-WAM 是上层模型方案，图中的动作序列仍需要与具体机器人、动作定义和执行控制器对齐。当前没有因为加入 memory 就自动解决全身协调或跨机器人适配；底座、机器人接口与下层控制器尚待选定。</p></div>
+        <p class="mw-source">依据项目对话“论文方法推导”中 2026-09-19 的最新八模块方案，以及本次提供的三张设计图整理。图中方案与正文中的实现候选均为研究设计；本文没有把历史已有模型的结果算作 Memory-WAM 的实验结果。</p>
+        <nav class="mw-next" aria-label="相关内容"><a href={root + "/problems/week3/semantic-sensitivity/"}>研究动机：语义敏感性实验 →</a><a href={root + "/breakdown/vision/"}>相关背景：图像信息怎样处理 →</a><a href="#main">返回页首 ↑</a></nav>
+      </section>
+    </main>
+    <footer class="mw-footer">Memory-WAM · 模型架构组 · 从模型方案走向可验证的经验闭环</footer>
+  </body>
+</html>
