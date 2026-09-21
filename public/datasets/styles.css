@@ -39,6 +39,14 @@
 .research-wearable > div { display: flex; gap: 8px; margin-top: 14px; }
 .research-wearable i { font-style: normal; border: 1px solid var(--line); border-radius: 20px; padding: 5px 10px; color: var(--cyan); font-size: 12px; }
 .research-note { color: var(--muted); font-size: 13px; line-height: 1.8; margin-top: 22px; }
+.research-source-index { display: flex; align-items: center; gap: 24px; justify-content: space-between; margin-top: 22px; padding: 24px 28px; background: var(--surface); border: 1px solid var(--line); border-radius: 18px; }
+.research-source-index > div:first-child { flex: 1; }
+.research-source-index span { color: var(--green); font-size: 12px; }
+.research-source-index h3 { font-size: 22px; margin: 10px 0; }
+.research-source-index p { margin: 0; color: var(--muted); font-size: 13px; line-height: 1.8; }
+.research-source-actions { display: grid; gap: 12px; }
+.research-source-actions a { color: var(--cyan); font-size: 14px; line-height: 1.5; }
+@media (max-width: 700px) { .research-source-index { align-items: stretch; flex-direction: column; padding: 22px; } }
 @media (max-width: 700px) { .research-grid { grid-template-columns: 1fr; } .research-card { padding: 22px; } }
 @media (prefers-reduced-motion: reduce) { .research-card { transition: none; } .research-card:hover { transform: none; } }
 

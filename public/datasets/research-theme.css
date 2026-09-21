@@ -46,6 +46,41 @@ body { min-height: 100vh; background: radial-gradient(ellipse at 15% 0%, #17345a
 @media (max-width: 880px) {
   .wearable-report .sidebar { top: 0; }
 }
+
+/* Author catalogue overview, outside the 23 presentation slides. */
+.author-catalog { margin: 0 auto 28px; max-width: 1280px; padding: clamp(22px, 3vw, 38px); border: 1px solid var(--line); border-radius: 16px; background: linear-gradient(140deg, #112b46, #0c1d32 75%); scroll-margin-top: 140px; }
+.author-catalog-heading h1 { font-size: clamp(28px, 3vw, 40px); line-height: 1.35; letter-spacing: -.03em; margin: 8px 0 16px; color: var(--ink); }
+.author-catalog p, .author-catalog li { font-size: 14px; line-height: 1.85; color: var(--muted); }
+.author-catalog p { margin: 0; }
+.author-catalog h2 { font-size: 19px; margin: 0 0 12px; color: var(--ink); line-height: 1.5; }
+.author-catalog-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 18px; margin: 24px 0 18px; }
+.author-catalog-actions a { font-size: 13px; font-weight: 650; text-decoration: none; padding-block: 8px; }
+.author-catalog-actions .author-catalog-primary { padding: 11px 16px; border-radius: 8px; background: var(--accent); color: #06101d; }
+.author-catalog .author-catalog-meta { font-size: 12px; }
+.author-catalog-total { display: flex; align-items: center; gap: 24px; border-block: 1px solid var(--line); padding: 24px 0; margin: 24px 0; }
+.author-catalog-total > strong { font-size: 48px; line-height: 1; color: var(--accent); white-space: nowrap; }
+.author-catalog-total > strong span { display: block; margin-top: 10px; font-size: 13px; font-weight: 500; color: var(--muted); }
+.author-catalog-categories { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 10px; }
+.author-catalog-categories article { padding: 16px 12px; background: #0c1d32; border: 1px solid var(--line); border-radius: 10px; }
+.author-catalog-categories article > span { font-size: 9px; color: var(--accent); letter-spacing: .03em; }
+.author-catalog-categories article > strong { display: block; font-size: 32px; margin: 12px 0 8px; color: var(--accent); line-height: 1; }
+.author-catalog-categories h2 { font-size: 15px; margin-bottom: 8px; }
+.author-catalog-categories p { font-size: 12px; }
+.author-catalog-columns { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 28px; margin-top: 28px; }
+.author-catalog-columns ol { margin: 0; padding-left: 20px; }
+.author-catalog-columns li, .author-catalog-columns p { margin-bottom: 12px; }
+.author-catalog .author-catalog-note { font-size: 12px; color: var(--gold); }
+.author-catalog-boundary { margin-top: 14px; padding: 18px; border-left: 3px solid var(--accent); background: var(--pale); }
+.author-catalog-boundary strong { display: block; margin-bottom: 8px; font-size: 15px; }
+.author-catalog-boundary p { font-size: 12px; }
+.presenter .author-catalog { display: none; }
+@media (max-width: 1000px) { .author-catalog-categories { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+@media (max-width: 680px) {
+  .author-catalog { scroll-margin-top: 160px; }
+  .author-catalog-categories { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .author-catalog-columns { grid-template-columns: 1fr; gap: 16px; }
+  .author-catalog-total { align-items: flex-start; flex-direction: column; gap: 16px; }
+}
 @media (max-width: 680px) {
   .research-site-nav { gap: 8px; padding: 9px 12px; min-height: 96px; flex-wrap: wrap; }
   .research-site-nav > div { width: 100%; justify-content: flex-start; gap: 0; }
@@ -64,6 +99,7 @@ body { min-height: 100vh; background: radial-gradient(ellipse at 15% 0%, #17345a
 @media print {
   :root { color-scheme: light; --ink: #142b38; --text: #142b38; --muted: #465968; --paper: white; --bg: white; --canvas: white; --line: #b8c4ce; --accent: #087f78; --teal: #087f78; --pale: #eef5f1; }
   .research-site-nav { display: none !important; }
+  .pyramid-report .author-catalog { display: none !important; } /* Keep the original 23-slide print layout. */
   body, .pyramid-report .sheet, .wearable-report .hero { background: white !important; color: #142b38; }
   body *:not(svg):not(svg *) { background: transparent !important; color: #142b38 !important; border-color: #b8c4ce !important; box-shadow: none !important; text-shadow: none !important; }
 }
