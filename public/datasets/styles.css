@@ -17,6 +17,31 @@
   font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", "Microsoft YaHei", sans-serif;
 }
 
+/* Dataset research entry points; no styles outside this section are changed. */
+.research-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 22px; }
+.research-card { display: flex; flex-direction: column; padding: 28px; border: 1px solid var(--line); border-radius: 20px; background: var(--surface); transition: border-color .2s, transform .2s; }
+.research-card:hover { border-color: var(--cyan); transform: translateY(-3px); }
+.research-card:focus-visible { outline: 3px solid var(--cyan); outline-offset: 5px; }
+.research-card-meta { display: flex; flex-wrap: wrap; gap: 10px; justify-content: space-between; color: var(--cyan); font-size: 12px; letter-spacing: .06em; }
+.research-card-meta > span:last-child { color: var(--muted); }
+.research-card h3 { margin: 24px 0 12px; font-size: 28px; }
+.research-card p { margin: 0 0 28px; color: var(--muted); line-height: 1.85; }
+.research-link { display: flex; align-items: center; justify-content: space-between; margin-top: auto; padding-top: 18px; border-top: 1px solid var(--line); color: var(--cyan); font-weight: 700; }
+.research-pyramid, .research-wearable { height: 220px; margin-top: 26px; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 7px; background: linear-gradient(140deg, #112b46, #0b1a2d); border-radius: 12px; }
+.research-pyramid i { width: 87%; padding: 7px; font-style: normal; text-align: center; font-size: 12px; background: var(--cyan-soft); border: 1px solid #365c79; color: var(--cyan); border-radius: 4px; }
+.research-pyramid i:nth-child(1) { width: 45%; color: var(--green); }
+.research-pyramid i:nth-child(2) { width: 55%; }
+.research-pyramid i:nth-child(3) { width: 65%; }
+.research-pyramid i:nth-child(4) { width: 76%; }
+.research-wearable strong { font-size: clamp(42px, 5vw, 68px); letter-spacing: -.06em; }
+.research-wearable strong span { color: var(--green); }
+.research-wearable small { color: var(--muted); font-size: 12px; text-align: center; padding-inline: 8px; }
+.research-wearable > div { display: flex; gap: 8px; margin-top: 14px; }
+.research-wearable i { font-style: normal; border: 1px solid var(--line); border-radius: 20px; padding: 5px 10px; color: var(--cyan); font-size: 12px; }
+.research-note { color: var(--muted); font-size: 13px; line-height: 1.8; margin-top: 22px; }
+@media (max-width: 700px) { .research-grid { grid-template-columns: 1fr; } .research-card { padding: 22px; } }
+@media (prefers-reduced-motion: reduce) { .research-card { transition: none; } .research-card:hover { transform: none; } }
+
 * { box-sizing: border-box; }
 html { overflow-x: clip; scroll-behavior: smooth; }
 body {
