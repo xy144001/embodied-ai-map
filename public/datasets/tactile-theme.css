@@ -1,0 +1,37 @@
+/* Report-only overrides. Original paper figures keep their colors and proportions. */
+.tactile-report { font-size: 16px; line-height: 1.9; }
+.tactile-report > aside { top: 64px; background: var(--paper); border-color: var(--line); }
+.tactile-report > aside nav a { color: var(--muted); }
+.tactile-report > aside nav a.active { color: var(--accent); background: var(--pale); }
+.tactile-report > aside nav a:hover { color: var(--accent); background: var(--pale); text-decoration: none; }
+.tactile-report main { border: 1px solid var(--line); border-radius: 18px; background: var(--paper); box-shadow: var(--shadow); padding: 44px 48px 60px; }
+.tactile-report .report-head { padding: 28px; margin: -16px -20px 35px; border: 1px solid var(--line); border-radius: 14px; background: linear-gradient(135deg, #17345a, #0c1d32); }
+.tactile-report h1 { font-size: clamp(28px, 3vw, 38px); letter-spacing: -.025em; }
+.tactile-report h2, .tactile-report .reference { scroll-margin-top: 100px; }
+.tactile-report h2 { color: var(--accent); }
+.tactile-report code { background: var(--pale); color: var(--ink); }
+.tactile-report .reference { border-color: var(--line); }
+.tactile-report .reference:target { background: var(--pale); outline: 1px solid var(--accent); }
+.tactile-report .tools button { color: var(--accent); background: var(--pale); border-color: var(--line); }
+.tactile-report .image-button { background: #fff; border-color: var(--line); border-radius: 10px; }
+.tactile-report dialog { background: var(--paper); border: 1px solid var(--line); color: var(--ink); }
+.tactile-report dialog img { background: #fff; }
+.tactile-report dialog button { color: var(--ink); background: var(--pale); border: 1px solid var(--line); }
+.tactile-report .equation { background: var(--pale); border: 1px solid var(--line); border-radius: 10px; padding: 18px 14px; }
+@media (max-width: 1000px) {
+  .tactile-report > aside { position: static; }
+  .tactile-report > aside nav { flex-wrap: nowrap; overflow-x: auto; }
+  .tactile-report > aside nav a { flex: 0 0 auto; }
+  .tactile-report main { margin: 18px; padding: 32px; }
+}
+@media (max-width: 680px) {
+  .tactile-report .research-site-nav { min-height: 128px; }
+  .tactile-report main { padding: 24px 18px; margin: 12px; }
+  .tactile-report .report-head { margin: 0 0 24px; padding: 20px 16px; }
+  .tactile-report h2, .tactile-report .reference { scroll-margin-top: 145px; }
+}
+@media print {
+  .tactile-report main { margin: 0; padding: 0; border: 0; box-shadow: none; }
+  .tactile-report .report-head { margin: 0 0 20pt; padding: 0 0 16pt; border: 0; border-bottom: 1px solid #b8c4ce; }
+  .tactile-report .equation { border: 0; padding: 10pt 0; }
+}

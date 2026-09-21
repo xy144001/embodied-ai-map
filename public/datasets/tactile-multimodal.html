@@ -1,0 +1,240 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>触觉多模态融合调研</title><style>
+:root{--ink:#1d2935;--muted:#647384;--line:#dfe5eb;--accent:#185d72;--paper:#fff;--bg:#f2f4f6}*{box-sizing:border-box}html{scroll-behavior:auto;scroll-padding-top:32px}body{margin:0;background:var(--bg);color:var(--ink);font-family:"Noto Serif CJK SC","Source Han Serif SC","SimSun",serif;font-size:17px;line-height:1.95}a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}aside{position:fixed;inset:0 auto 0 0;width:266px;padding:32px 22px;overflow:auto;border-right:1px solid var(--line);font-family:"Microsoft YaHei",sans-serif;background:#fafbfc}.nav-title{font-size:13px;letter-spacing:.12em;color:var(--muted);margin-bottom:20px}nav a{display:block;font-size:13px;line-height:1.65;padding:8px 10px;border-radius:5px;color:#455765}nav a.active{background:#e5eef1;color:#154f61;font-weight:600}.tools{display:flex;gap:8px;margin-top:22px}.tools button{border:1px solid #cdd7df;background:white;border-radius:5px;padding:8px 12px;color:var(--accent);cursor:pointer}main{margin:32px 42px 60px 304px;max-width:1040px;background:var(--paper);padding:60px 70px 76px;box-shadow:0 2px 18px #25354608;border:1px solid #e9edf0}.report-head{border-bottom:2px solid var(--accent);padding-bottom:28px;margin-bottom:35px}.eyebrow{font-family:"Microsoft YaHei",sans-serif;font-size:12px;letter-spacing:.14em;color:var(--accent)}h1{font-size:32px;line-height:1.5;letter-spacing:.02em;margin:14px 0 10px;font-family:"Microsoft YaHei",sans-serif;font-weight:650}.subtitle{color:var(--muted);font-size:15px;margin:0}h2{font-family:"Microsoft YaHei",sans-serif;font-size:23px;margin:54px 0 21px;padding-bottom:12px;border-bottom:1px solid var(--line);line-height:1.5}h3{font-family:"Microsoft YaHei",sans-serif;font-size:18px;margin:30px 0 14px;line-height:1.6}p{margin:14px 0;text-align:justify;overflow-wrap:anywhere}strong{font-weight:bold}figure{margin:30px 0 34px;break-inside:avoid}.image-button{display:block;width:100%;padding:16px;background:#fff;border:1px solid #e5e9ed;border-radius:5px;cursor:zoom-in;overflow:hidden}.image-button img{display:block;max-width:100%;max-height:920px;margin:auto;object-fit:contain}.image-button.crop-table{padding:0}.crop-table img{width:133%;max-width:none;max-height:none;margin:0}.image-button:focus-visible{outline:2px solid var(--accent)}figcaption{font-size:13px;line-height:1.8;color:var(--muted);padding:12px 5px;text-align:left}.citation{font-family:"Times New Roman",serif;font-size:.8em;vertical-align:super;line-height:0;margin:0 2px;white-space:nowrap}.reference{font-size:14px;line-height:1.8;padding:12px 0;margin:0;border-bottom:1px solid #edf0f2;scroll-margin-top:28px}.reference:target{background:#fff5ce}code{font-family:Consolas,"Microsoft YaHei",monospace;font-size:.86em;padding:2px 5px;background:#f0f3f5;border-radius:3px}ul{padding-left:25px}li{margin:12px 0}.equation{display:flex;align-items:center;gap:14px;overflow-x:auto;margin:24px 0;padding:18px 8px;font-family:"Cambria Math",serif}math{font-size:1.08em;flex:1;min-width:max-content}.eqno{margin-left:auto;font-size:14px;color:var(--muted)}dialog{border:none;border-radius:8px;width:min(96vw,1500px);max-width:96vw;padding:42px 16px 16px;background:#fff}dialog::backdrop{background:#152330d9}dialog img{display:block;max-width:100%;max-height:85vh;object-fit:contain;margin:auto}dialog button{position:absolute;right:12px;top:8px;border:0;background:#eef2f4;border-radius:4px;padding:6px 12px;cursor:pointer}.footnote{font-size:12px;color:var(--muted);margin-top:48px;border-top:1px solid var(--line);padding-top:16px}@media(min-width:1500px){main{margin-left:calc(266px + (100vw - 266px - 1040px)/2);margin-right:auto}}@media(max-width:1000px){aside{position:static;width:auto;border-right:0;border-bottom:1px solid var(--line);padding:18px 24px}nav{display:flex;gap:6px;flex-wrap:wrap}nav a{font-size:12px;padding:5px 8px}.nav-title{margin-bottom:10px}.tools{margin-top:12px}main{margin:18px;max-width:none;padding:35px 30px}h1{font-size:27px}}@media(max-width:560px){body{font-size:16px}main{margin:0;border:0;padding:28px 20px}h1{font-size:24px}h2{font-size:21px}figcaption{font-size:12px}}@media print{@page{size:A4;margin:20mm 19mm}body{background:#fff;font-size:10.5pt;line-height:1.7}aside,dialog,.tools{display:none!important}main{margin:0;padding:0;max-width:none;border:0;box-shadow:none}h1{font-size:23pt}h2{font-size:16pt;margin-top:24pt;break-after:avoid}h3{font-size:12pt;break-after:avoid}p{orphans:3;widows:3}figure{break-inside:avoid;margin:18pt 0}.image-button{border:0;padding:0}.image-button img{max-height:205mm}figcaption{font-size:9pt}a{color:#174556}.report-head{padding-bottom:16pt}.reference{font-size:9pt;break-inside:avoid}body{print-color-adjust:exact;-webkit-print-color-adjust:exact}.equation{break-inside:avoid}footer{display:none}}
+</style><link rel="stylesheet" href="./research-theme.css"><link rel="stylesheet" href="./tactile-theme.css"></head><body class="tactile-report">
+<nav class="research-site-nav" aria-label="数据地图专题导航"><a class="research-brand" href="./dashboard.html"><span aria-hidden="true">数</span>具身数据地图</a><div><a href="./dashboard.html#research">← 数据集全景</a><a href="./data-pyramid.html">数据金字塔</a><a href="./humanplus-wearable.html">Human+ 穿戴采集</a><a href="./tactile-multimodal.html" aria-current="page">触觉多模态</a></div></nav>
+<aside><div class="nav-title">文章目录</div><nav><a href="#section-0">摘要</a><a href="#section-1">一、引言</a><a href="#section-2">二、预备知识</a><a href="#section-3">三、多模态数据集</a><a href="#section-4">四、多模态方法</a><a href="#section-5">五、触觉传感器与系统集成</a><a href="#section-6">六、数据采集、组织与迁移</a><a href="#section-7">七、典型任务中的系统实现</a><a href="#section-8">八、评价与比较分析</a><a href="#section-9">九、挑战与未来方向</a><a href="#section-10">十、结论</a><a href="#section-11">附录 A：常见接触动作与触觉信号</a><a href="#section-12">参考文献与数据资源</a></nav><div class="tools"><button onclick="window.print()">打印 / 保存 PDF</button></div></aside><main><header class="report-head"><div class="eyebrow">研究综述 · 触觉与具身智能</div><h1>基于触觉的具身智能多模态融合：数据、方法与接触驱动操作</h1><p class="subtitle">数据资源、学习方法与接触驱动操作</p></header>
+<h2 id="section-0">摘要</h2>
+<p>触觉为机器人提供局部几何、接触载荷与滑移等交互信息，支持材料理解、稳定抓取和精细操作。触觉观测受传感器结构与接触条件共同影响，其数据表示、监督信号和使用方式因任务而异。本文从任务需求出发，围绕数据、方法与传感器组织多模态触觉研究：数据按模态组合及表示学习、状态估计、动作学习等用途梳理，方法分为感知与状态估计、跨模态生成、交互与操作，传感器则按换能原理和接触覆盖分析。在此基础上，讨论预训练与任务适配、采集与格式规范，以及触觉融入视觉—语言—动作模型和世界动作模型的主要路径，并结合典型任务联系传感器选型、数据组织、模型结构与评价。全文强调，触觉系统的有效性取决于任务所需信息能否被测量、数据是否具有明确的物理与动作含义，以及模型能否将接触反馈转化为稳定的操作收益。动作条件数据、跨设备一致性与闭环评价是进一步发展的关键。</p>
+<p><strong>关键词：</strong> 触觉感知；多模态融合；具身智能；触觉数据集；视觉—语言—动作模型；世界动作模型。</p>
+<h2 id="section-1">一、引言</h2>
+<p>机器人与物体接触后，需要持续判断夹持是否稳定、表面是否滑动，以及运动是否受到阻碍。视觉提供场景结构与物体外观，触觉则从接触界面补充局部几何、载荷和形变信息。将两者与机器人运动状态结合，有助于在遮挡、位姿误差和材料差异下调整动作。对于精密装配、易损物体抓取和持续表面操作，触觉的价值主要体现为对关键接触状态的感知及其对动作的修正。</p>
+<p>触觉观测具有局部性和动作依赖性。同一物体在不同加载力、滑动速度和传感器上会产生不同信号；相似读数也可能对应不同物体属性或接触条件。因此，解释触觉数据需要同时了解测量装置、采集过程与任务目标。视觉的全局信息、语言的任务语义和本体感觉中的姿态与运动，为局部接触提供互补的上下文，构成多模态融合的基础。</p>
+<p>在已有触觉识别和反馈控制研究的基础上，近年来的工作进一步探索可迁移表示、视觉语言对齐，以及接触信息与通用操作模型的结合。Sparsh 通过自监督学习获得可供下游任务适配的触觉特征，TVL 以视觉、触觉和语言配对支持语义对齐，VLA-Touch 等工作则将触觉理解与动作修正接入已有策略。相关研究的扩展，也反映了精细操作对滑移、载荷和接触转换等信息的需求。<a class="citation" href="#ref-1" aria-label="参考文献 1">[1]</a><a class="citation" href="#ref-2" aria-label="参考文献 2">[2]</a><a class="citation" href="#ref-3" aria-label="参考文献 3">[3]</a></p>
+<p>视觉—语言—动作模型（Vision-Language-Action，VLA）利用视觉、语言及相应训练经验生成动作，触觉可通过语义反馈、特征融合或执行修正参与其中。世界动作模型（World Action Model，WAM）进一步联系未来观测与动作，使接触信息既用于描述当前状态，也用于预测动作后果。这类方法推动数据需求从单次接触配对扩展到连续、同步且带有明确动作含义的交互轨迹。触觉的实际收益仍需结合任务中的接触不确定性、系统延迟与集成成本判断。<a class="citation" href="#ref-4" aria-label="参考文献 4">[4]</a><a class="citation" href="#ref-5" aria-label="参考文献 5">[5]</a></p>
+<p>随着数据和模型种类增加，贯通各环节的条件成为重要问题。属性标签、物理测量和动作示范分别服务于不同训练目标；相同的数据容器可能保存不同单位、坐标和标定含义的读数；预训练特征在目标传感器上的适配效果，也需要与实际操作表现共同评价。因此，选择触觉方案需要联系任务、硬件、数据与模型，明确各环节提供的信息及其使用条件。</p>
+<p>本文以 Cao 等多模态触觉融合综述为基础，结合相关论文与官方数据说明，围绕数据资源、学习方法和传感硬件展开，并以任务需求及评价贯通这些内容。数据部分关注模态组合、训练用途与复用条件；方法部分梳理感知、生成和操作路线，进一步讨论预训练及 VLA／WAM 中的触觉融合；硬件与采集部分说明观测能力、标定同步、格式和迁移要求。在此基础上，以抓取、装配、材料探索、表面操作、多指操作及人类示范迁移为例，串联从任务目标到闭环评价的系统设计。<a class="citation" href="#ref-6" aria-label="参考文献 6">[6]</a></p>
+<p>后文安排如下：第二章介绍触觉观测与多模态学习的预备知识；第三章梳理数据集；第四章讨论学习方法与模型融合；第五章分析传感器及选型；第六章说明数据采集、组织与迁移；第七章讨论典型任务的系统实现；第八章总结评价与比较方法；第九章讨论挑战与未来方向，第十章给出结论。附录 A 汇总常见接触动作及其信号，供采集与选型时查阅。</p>
+<h2 id="section-2">二、预备知识</h2>
+<h3 id="sub-29">A. 触觉观测的形成与物体属性</h3>
+<p>触觉信号是物体、传感器与动作共同作用的结果。物体决定可被探索的几何和材料特性，动作激发相应的接触变化，传感器再将这些变化转为观测。理解这一关系，有助于判断数据是否覆盖目标任务所需的信息。例如，<strong>按压</strong>引起载荷与形变变化，结合加载条件可估计软硬；<strong>滑动</strong>产生剪切和振动，为纹理与摩擦提供线索；<strong>保持接触</strong>可观察随时间变化的载荷、形变或接触热响应；<strong>多点包络与夹持</strong>则结合手指位置提供形状、尺寸及载荷分布。具体动作与信号见附录 A。<a class="citation" href="#ref-7" aria-label="参考文献 7">[7]</a><a class="citation" href="#ref-8" aria-label="参考文献 8">[8]</a></p>
+<p>在数据层面，常见装置可先理解为三种观测形态。<strong>视触传感器</strong>用相机拍摄柔性接触层，输出连续图像，即视触序列；<strong>压力阵列</strong>由多个测量单元组成，规则排布时形成随时间变化的压力网格；<strong>多轴触觉阵列</strong>在每个测点区分法向与切向作用，N 个三轴测点即对应每时刻 N 组三分量读数。热感知、动态压力或振动通道则补充时间波形。形态与换能原理可以交叉：例如，压力阵列可采用压阻或电容方式，多轴测量可由磁式或光学结构实现。第五章再按换能原理展开选型。<a class="citation" href="#ref-9" aria-label="参考文献 9">[9]</a><a class="citation" href="#ref-10" aria-label="参考文献 10">[10]</a><a class="citation" href="#ref-11" aria-label="参考文献 11">[11]</a></p>
+<p>任务关注的物体信息主要包括四类：<strong>几何属性</strong>，如局部轮廓、边界、曲率、尺寸和整体形状；<strong>表面属性</strong>，如纹理、粗糙度、摩擦和黏附；<strong>力学属性</strong>，如软硬、刚度、可压缩性、弹性恢复和黏弹性；以及<strong>热学与载荷属性</strong>，如温度、接触热响应和重量。软硬估计需结合加载条件、物体形状及传感器自身形变；摩擦描述的是特定接触材料和载荷条件下的关系；热响应则受初始温差与接触面积影响。<a class="citation" href="#ref-7" aria-label="参考文献 7">[7]</a><a class="citation" href="#ref-8" aria-label="参考文献 8">[8]</a></p>
+<p>操作过程还需估计接触位置、力、滑移、位姿和卡滞等实时状态。这些状态描述当前交互，物体属性则帮助解释交互为何发生，并指导下一次动作。由属性驱动探索的思路也见于经典触觉探索研究，其中按压、侧向运动、包络、轮廓跟随、持物和静态接触分别服务于不同信息目标。<a class="citation" href="#ref-12" aria-label="参考文献 12">[12]</a></p>
+<p>从输出目标看，触觉任务可沿三个方面理解。首先是<strong>感知与状态估计</strong>，包括物体或材料识别、接触定位、局部几何、力与滑移估计，以及手中物体位姿跟踪。其次是<strong>跨模态表示与生成</strong>，包括触觉与图像、文本的对齐、检索和条件生成。最后是<strong>决策与操作</strong>，包括稳定抓取、装配、表面加工、灵巧操作，以及决定下一次接触位置和探索动作的主动感知。接触动力学预测连接状态估计与决策，关注动作如何改变后续观测。</p>
+<p>这些层次可以共同组成一个系统。滑移检测可作为独立感知任务，也可成为抓取控制器的反馈；触觉语言描述可用于属性理解，也可辅助规划。区分它们的关键在于最终输出及监督信号：预测标签、生成观测与执行动作，对数据的要求不同。</p>
+<h3 id="sub-43">B. 编码、融合与解码</h3>
+<p>触觉、视觉和语言观测可写为：</p>
+<div id="equation-1" class="equation" role="group" aria-label="公式 1"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><msub><mi>x</mi><mrow><mtext>tac</mtext></mrow></msub><mo>∈</mo><msup><mi>ℝ</mi><mrow><msub><mi>S</mi><mrow><mtext>tac</mtext></mrow></msub><mo>×</mo><msub><mi>T</mi><mrow><mtext>tac</mtext></mrow></msub><mo>×</mo><msub><mi>C</mi><mrow><mtext>tac</mtext></mrow></msub></mrow></msup><mo>,</mo><mspace width="1em"/><msub><mi>x</mi><mrow><mtext>vis</mtext></mrow></msub><mo>∈</mo><msup><mi>ℝ</mi><mrow><msub><mi>S</mi><mrow><mtext>vis</mtext></mrow></msub><mo>×</mo><msub><mi>T</mi><mrow><mtext>vis</mtext></mrow></msub><mo>×</mo><msub><mi>C</mi><mrow><mtext>vis</mtext></mrow></msub></mrow></msup><mo>,</mo><mspace width="1em"/><msub><mi>x</mi><mrow><mtext>lang</mtext></mrow></msub><mo>∈</mo><msup><mi>𝒱</mi><mrow><mi>L</mi></mrow></msup></mrow></math><span class="eqno">(1)</span></div>
+<p>其中，空间配置、时间长度和通道维度分别由 S、T、C 表示。这一抽象描述兼容规则与非规则空间布局，实际文件格式由采集和存储方案确定。各模态经编码器得到表征，再进行融合与解码：</p>
+<div class="equation" role="group" aria-label="公式 2"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><msub><mi>z</mi><mrow><mi>m</mi></mrow></msub><mo>=</mo><msub><mi>ℰ</mi><mrow><mi>m</mi></mrow></msub><mo>(</mo><msub><mi>x</mi><mrow><mi>m</mi></mrow></msub><mo>;</mo><msub><mi>θ</mi><mrow><mi>m</mi></mrow></msub><mo>),</mo><mspace width="1em"/><msub><mi>z</mi><mrow><mtext>joint</mtext></mrow></msub><mo>=</mo><mi>Φ</mi><mo>(</mo><msub><mrow><mo>{</mo><msub><mi>z</mi><mrow><mi>m</mi></mrow></msub><mo>}</mo></mrow><mrow><mi>m</mi><mo>∈</mo><mi>ℳ</mi></mrow></msub><mo>),</mo><mspace width="1em"/><mi>y</mi><mo>=</mo><mi>𝒟</mi><mo>(</mo><msub><mi>z</mi><mrow><mtext>joint</mtext></mrow></msub><mo>)</mo></mrow></math><span class="eqno">(2)</span></div>
+<p>视触图像通常可由卷积网络或视觉 Transformer 编码；压力阵列和多轴测点可采用向量、时序或图结构编码；点云与表面重建结果则保留显式几何关系。对非规则阵列，测点位置、朝向和所属手指是输入含义的一部分，需要与读数一起提供。</p>
+<p>融合可发生在输入、特征或决策层。特征拼接结构简单，交叉注意力能够建模不同模态之间的局部依赖，共享嵌入和对比学习则适合建立跨模态对应。嵌入的物理语义需要通过配对、任务监督或接触预测建立。</p>
+<h3 id="sub-65">C. 数据表示与物理含义</h3>
+<p>从物理接触到任务输出，处理过程可概括为物理换能、模态特异表示、跨模态融合和具身解码四个阶段。
+（1）<strong>物理换能</strong>将接触引起的形变、压力或振动转换为图像、电学读数等时空观测；
+（2）<strong>模态特异表示</strong>由各自的编码器提取触觉、视觉和语言特征，保留相应的空间、时间或语义结构；
+（3）<strong>跨模态融合</strong>通过配对与联合建模，把局部接触与场景、任务和运动状态联系起来；
+（4）<strong>具身解码</strong>则将联合表示转为类别、物理状态、生成观测或动作指令。执行产生的新接触再返回观测端，构成闭环。</p>
+<p>对于常见传感器，所提取的数据大致有如下分类。视触序列可组织为 <code>[时间, 高, 宽, 通道]</code>，规则压力阵列可表示为 <code>[时间, 行, 列]</code>，N 个三轴测点可表示为 <code>[时间, N, 3]</code>。后者还需保存各测点的位置、方向和标定关系。腕部六维力／力矩记录合力与合力矩，指尖阵列则记录局部接触分布，两者提供不同尺度的信息。</p>
+<h3 id="sub-75">D. 综述方法与发表趋势</h3>
+<p>已有综述收集机器人、计算机视觉、触觉及多模态学习领域主要期刊和会议中的研究，纳入在数据驱动或学习框架下，将触觉与至少一种其他模态结合的工作，覆盖截至 2026 年第一季度的文献。图 1 按类别和年代梳理代表性数据集与方法，图 2 则呈现该综述收录论文的年度与发表渠道分布。</p>
+<figure id="fig-1"><button class="image-button" title="点击放大图片" aria-label="放大图 1"><img loading="lazy" decoding="async" src="./images/tactile/figure-01.png" alt="图 1：代表性数据集与方法的发展脉络，按模态组合和任务类别组织"></button><figcaption>图 1　代表性数据集与方法的发展脉络，按模态组合和任务类别组织。来源：Cao 等<a class="citation" href="#ref-6" aria-label="参考文献 6">[6]</a>，原图 2。</figcaption></figure>
+<p>从图 2 可见，收录论文在 2020 年后增长加快，发表渠道也从机器人与触觉领域扩展到视觉和多模态学习领域。其中 2026 年仅覆盖第一季度，应按部分年度观察。</p>
+<figure id="fig-2"><button class="image-button" title="点击放大图片" aria-label="放大图 2"><img loading="lazy" decoding="async" src="./images/tactile/figure-02.png" alt="图 2：2015—2026 年多模态触觉融合论文的发表趋势；2026 年为截至第一季度的统计"></button><figcaption>图 2　2015—2026 年多模态触觉融合论文的发表趋势；2026 年为截至第一季度的统计。来源：Cao 等<a class="citation" href="#ref-6" aria-label="参考文献 6">[6]</a>，原图 4。</figcaption></figure>
+<h2 id="section-3">三、多模态数据集</h2>
+<p>多模态触觉数据既可按模态组合分类，也应按训练用途区分。触觉—视觉或触觉—语言配对主要支持表示学习；带测量真值的数据支持状态估计；连续观测、动作和本体状态共同构成策略与动力学学习的基础。表 1 给出较完整的模态分类，以下选取覆盖关键训练用途的代表资源展开。</p>
+<figure id="table-1"><button class="image-button" title="点击放大图片" aria-label="放大表 1"><img loading="lazy" decoding="async" src="./images/tactile/figure-03.png" alt="原综述表 1：多模态触觉数据集概览；T-V、T-L、T-V-L、T-V-O 分别表示触觉与视觉、语言、视觉语言及其他模态的组合"></button><figcaption>表 1　多模态触觉数据集概览；T-V、T-L、T-V-L、T-V-O 分别表示触觉与视觉、语言、视觉语言及其他模态的组合。来源：Cao 等<a class="citation" href="#ref-6" aria-label="参考文献 6">[6]</a>，原表 1。</figcaption></figure>
+<p>表中数量和年份保留原文口径；Scale 混合使用帧、样本或交互等单位，具体数据版本、字段含义和下载情况应以作者说明为准。例如，OpenTouch 原论文以 5.1 小时和 2,900 个整理片段描述数据规模，本文对该资源的规模描述采用这一作者统计口径。截图内的方括号编号对应 Cao 等综述的参考文献，正文引用采用本文编号。<a class="citation" href="#ref-13" aria-label="参考文献 13">[13]</a></p>
+<p>这些例子的代表性主要来自任务和采集范式覆盖：Feeling of Success 对应抓取结果监督，VisGel 对应视触生成，Touch and Go 对应自然探索，TVL 与 TacQuad 分别对应语义及跨传感器对齐。AnyTouch 的训练与比较还复用了其中多项资源，为这一选择提供了后续研究依据。状态估计基准、标定资源及新近动作数据则分别补充物理监督、设备适配与控制学习。<a class="citation" href="#ref-14" aria-label="参考文献 14">[14]</a></p>
+<h3 id="sub-103">A. 触觉—视觉数据</h3>
+<p>早期视触数据多围绕受控抓取和局部接触展开。The Feeling of Success 记录双指 GelSight 的抓取实验，适合研究接触后的抓取结果预测；其作者页面提供 HDF5 数据与读取示例。此类标签描述单次抓取的结果。<a class="citation" href="#ref-15" aria-label="参考文献 15">[15]</a></p>
+<p>VisGel 由机器人采集对应的视觉与触觉图像序列，用于研究视觉到触觉、触觉到视觉的双向生成。其官方实现同时提供数据下载脚本及已见、未见物体划分，是连接跨模态生成与泛化评价的早期代表。<a class="citation" href="#ref-16" aria-label="参考文献 16">[16]</a><a class="citation" href="#ref-17" aria-label="参考文献 17">[17]</a></p>
+<p>Touch and Go 将采集扩展到自然场景中的人类探索，通过同步视觉与触觉研究自监督表示、跨模态生成和未来触觉预测。它增加了物体与环境多样性；用于机器人控制时，还需补充动作对应或目标本体的示范。<a class="citation" href="#ref-18" aria-label="参考文献 18">[18]</a><a class="citation" href="#ref-19" aria-label="参考文献 19">[19]</a></p>
+<h3 id="sub-111">B. 触觉—语言与三模态对齐数据</h3>
+<p>触觉—语言数据将接触观测与粗糙度、柔顺性等属性描述联系起来；加入视觉后，模型还可利用物体与环境上下文。TVL 提供约 4.4 万个视觉—触觉配对，其文本标注由人工和模型伪标签共同构成。在这里，语言标签相当于带来源和误差的监督。<a class="citation" href="#ref-2" aria-label="参考文献 2">[2]</a></p>
+<p>开放词汇对齐使触觉能够参与属性检索和描述生成，但物体身份、视觉外观和真实接触属性之间可能存在混淆。评价时需要区分模型是否使用了触觉证据，尤其应包含外观相似而物理属性不同的对象。数据版本也会影响配对关系：TVL 官方仓库指出原数据存在视觉／触觉文件夹交换问题，并给出修订版入口。<a class="citation" href="#ref-20" aria-label="参考文献 20">[20]</a></p>
+<p>TacQuad 面向跨传感器对应，涉及 GelSight Mini、DIGIT、DuraGel 和 Tac3D。其受控采样子集约束接触位置与加载过程，另一子集则提供较宽松的空间对应。两类配对分别适用于细粒度接触对齐和较宽松的空间对应研究。AnyTouch 以此及其他数据学习统一的静态—动态表示，但其结果仍受所覆盖的传感器类别与采集条件约束。<a class="citation" href="#ref-14" aria-label="参考文献 14">[14]</a><a class="citation" href="#ref-21" aria-label="参考文献 21">[21]</a></p>
+<h3 id="sub-119">C. 状态估计与标定数据</h3>
+<p>通用表示数据之外，力、滑移和位姿任务需要各自的监督。Sparsh 配套的 TacBench 将力估计、滑移检测、位姿估计、抓取稳定性、织物识别和珠迷宫操作组织为六类任务；官方仓库提供相关数据与读取代码，适合检验预训练特征在不同监督目标下的作用。此类数据与语言配对数据作用不同：后者建立语义关系，前者约束可测状态。<a class="citation" href="#ref-22" aria-label="参考文献 22">[22]</a></p>
+<p>FeelSight 记录在手旋转中的视觉、触觉和本体信息，为物体跟踪与重建提供基准。其真实装置使用 DIGIT 与 Allegro 手，并配有外部 RGB-D；数据结构包含图像、深度和本体记录，部分真值仅存在于仿真分支。<a class="citation" href="#ref-23" aria-label="参考文献 23">[23]</a></p>
+<p>标定数据解决另一层问题：如何将设备输出转换为几何或接触量。3D Cal 发布了 DIGIT、GelSight Mini 和 ReSkin 的探针接触数据及相关模型，可用于深度重建和接触定位研究。这类资源承担专项标定与适配作用，复用时应针对新设备、胶层或安装配置验证精度。<a class="citation" href="#ref-24" aria-label="参考文献 24">[24]</a></p>
+<h3 id="sub-127">D. 扩展模态与操作数据</h3>
+<p>ObjectFolder 系列结合视觉、触觉与声音，属于触觉—视觉—其他模态（T-V-O）资源。ObjectFolder-Real 提供 100 个真实物体的多感官测量，触觉分支记录局部接触的凝胶形变视频及配套视觉，适合研究同一物体的多感官对应。各分支采用各自的采集协议，音频分支所附力记录的用途应按该分支解释。<a class="citation" href="#ref-25" aria-label="参考文献 25">[25]</a></p>
+<p>面向动作学习的数据应连续记录接触观测及对应动作。FreeTacMan 将视触传感器与操作者指尖耦合到夹爪接口，在机器人不参与采集时记录操作。其官方处理流程从运动捕捉标记恢复工具中心点（TCP）位姿，再结合机器人模型转换动作并输出训练数据。人类操作提高了采集便利性，但位姿转换、可达性和接触几何匹配仍是迁移环节。<a class="citation" href="#ref-26" aria-label="参考文献 26">[26]</a><a class="citation" href="#ref-27" aria-label="参考文献 27">[27]</a></p>
+<p>OpenTouch 记录自然操作中的第一视角视频、全手触觉和手姿，适合研究接触分布与人类行为。<a class="citation" href="#ref-13" aria-label="参考文献 13">[13]</a><a class="citation" href="#ref-28" aria-label="参考文献 28">[28]</a></p>
+<p>OmniViTac 面向视触—动作建模。OmniVTA 的更新版本报告了跨多类接触任务的连续轨迹，并将其用于世界模型与反馈控制。<a class="citation" href="#ref-29" aria-label="参考文献 29">[29]</a><a class="citation" href="#ref-30" aria-label="参考文献 30">[30]</a><a class="citation" href="#ref-31" aria-label="参考文献 31">[31]</a></p>
+<h3 id="sub-137">E. 数据规模与适用范围</h3>
+<p>数据集的适用性还取决于探索动作的覆盖与记录。按压数据中的软硬标签需要结合加载条件解释，滑动纹理需要关注速度与法向载荷，形状恢复则需要接触位置及传感器姿态。选用资源时，应核对这些条件是受控固定、逐样本记录，还是仅提供动作类别，进而确定可复用的任务范围。</p>
+<p>触觉数据集的“规模”可能指帧数、接触次数、视频片段、操作轨迹或采集小时数，比较时需先统一计量单位。高帧率主要提高时间采样密度，独立交互的多样性取决于实际接触覆盖。更有意义的描述应同时包括物体、设备、接触方式、完整轨迹及失败恢复的覆盖程度。</p>
+<p>公开资源已经能支持多类感知、对齐和局部操作研究，但特定机器人的动作空间、传感器响应和目标接触条件仍可能需要自采。材料识别数据适合初始化编码器，策略训练还需动作标签；接触视频适合学习时序表示，动作条件动力学则需记录每次动作及其后果。主动探索进一步关注探索动作带来的信息收益。</p>
+<h2 id="section-4">四、多模态方法</h2>
+<p>多模态方法共享“编码—融合—任务输出”的基本流程，如图 3 所示；差异主要在于融合位置、训练信号以及输出是否进入动作闭环。表 2 汇总原综述中的模态、编码器与任务类别，后文进一步介绍在各类触觉任务中多模态方法的应用过程。</p>
+<figure id="fig-3"><button class="image-button" title="点击放大图片" aria-label="放大图 3"><img loading="lazy" decoding="async" src="./images/tactile/figure-04.png" alt="图 3：触觉、视觉与语言经各自编码器及融合模块产生不同任务输出的通用流程"></button><figcaption>图 3　触觉、视觉与语言经各自编码器及融合模块产生不同任务输出的通用流程。来源：Cao 等<a class="citation" href="#ref-6" aria-label="参考文献 6">[6]</a>，原图 5。</figcaption></figure>
+<figure id="table-2"><button class="image-button crop-table" title="点击放大图片" aria-label="放大表 2"><img loading="lazy" decoding="async" src="./images/tactile/figure-05.png" alt="表 2：代表方法的输入模态、编码器与任务覆盖；PR、CG、IM 分别指感知识别、跨模态生成与交互操作"></button><figcaption>表 2　代表方法的输入模态、编码器与任务覆盖；PR、CG、IM 分别指感知识别、跨模态生成与交互操作。来源：Cao 等<a class="citation" href="#ref-6" aria-label="参考文献 6">[6]</a>，原表 2。</figcaption></figure>
+<p>截图内模型名称与方括号编号沿用原文；该表用于比较方法结构，近期补充的 WAM 工作见“世界动作模型与接触预测”小节。</p>
+<h3 id="sub-160">A. 感知、识别与状态估计</h3>
+<figure id="fig-4"><button class="image-button" title="点击放大图片" aria-label="放大图 4"><img loading="lazy" decoding="async" src="./images/tactile/figure-06.png" alt="图 4：感知识别的典型输出：物体、属性与材料、抓取结果，以及跨模态匹配"></button><figcaption>图 4　感知识别的典型输出：物体、属性与材料、抓取结果，以及跨模态匹配。来源：Cao 等<a class="citation" href="#ref-6" aria-label="参考文献 6">[6]</a>，原图 6。</figcaption></figure>
+<p>感知方法通常遵循编码—融合—预测流程。视觉提供全局形状与语义线索，触觉提供局部接触证据，本体感觉约束接触时的姿态与运动。预测对象可以是物体或材料类别，也可以是接触位置、力、滑移和位姿等连续状态。</p>
+<p>任务定义决定监督方式。材料分类可使用类别标签，力估计需要测力参照或明确的代理量，滑移检测应具有相对运动依据。单帧适合部分局部几何与纹理任务，接触转换、摩擦变化和初始滑移则通常需要时间上下文。</p>
+<p>除了直接预测，触觉还可参与几何优化。NeuralFeels 将视觉、触觉和本体信息结合，通过神经场表示物体几何，并与位姿估计共同优化。这一方法说明触觉可以先改善机器人对环境状态的估计，再通过状态估计结果服务于控制。<a class="citation" href="#ref-32" aria-label="参考文献 32">[32]</a></p>
+<h3 id="sub-172">B. 跨模态生成与转换</h3>
+<figure id="fig-5"><button class="image-button" title="点击放大图片" aria-label="放大图 5"><img loading="lazy" decoding="async" src="./images/tactile/figure-07.png" alt="图 5：视觉—触觉和语言—触觉之间的生成与转换"></button><figcaption>图 5　视觉—触觉和语言—触觉之间的生成与转换。来源：Cao 等<a class="citation" href="#ref-6" aria-label="参考文献 6">[6]</a>，原图 7。</figcaption></figure>
+<p>跨模态生成研究由视觉或语言推断触觉，或由触觉生成图像和描述。其用途包括表征学习、缺失模态补全和数据增强；重现具体接触还需要相应的交互条件。触觉响应依赖接触位置、施力和运动条件，仅凭物体图像或文字往往存在多种合理结果。</p>
+<p>因此，生成模型的条件越接近实际交互，输出越容易得到物理解释。评价也应从图像相似度扩展到接触位置、形变、力或滑移等任务相关量，并检验生成数据对真实任务的作用。</p>
+<h3 id="sub-183">C. 交互、控制与主动感知</h3>
+<figure id="fig-6"><button class="image-button" title="点击放大图片" aria-label="放大图 6"><img loading="lazy" decoding="async" src="./images/tactile/figure-08.png" alt="图 6：多模态操作的两种任务组织：感知驱动操作与语言指令下的操作"></button><figcaption>图 6　多模态操作的两种任务组织：感知驱动操作与语言指令下的操作。来源：Cao 等<a class="citation" href="#ref-6" aria-label="参考文献 6">[6]</a>，原图 8。</figcaption></figure>
+<p>闭环操作将触觉估计转化为动作修正。例如，抓取控制根据滑移征兆调整夹持，装配根据接触方向修正位姿，表面操作根据接触变化维持作用状态。这类系统可以由经过标定的信号、规则和反馈控制器实现。</p>
+<p>学习型策略进一步从示范或交互经验中建立观测与动作的关系。模仿学习需要与观测对齐的动作，强化学习则需要可交互的环境和明确的任务回报。主动感知则将动作同时作为控制手段和信息获取手段。当当前接触不足以区分材料或几何时，系统可以选择下一次按压、滑动或接触位置。</p>
+<h3 id="sub-193">D. 预训练与任务适配</h3>
+<p>预训练先从较广泛的数据中学习可复用特征，再用目标任务数据训练预测头或策略。触觉系统通常涉及三个层面：视觉语言底座提供通用语义，触觉编码器学习接触特征，跨模态对齐建立不同观测之间的对应。是否采用这些步骤，取决于模型路线、标签预算与泛化目标。</p>
+<p>对于固定设备上的接触检测、恒力维持和规则防滑控制，经过标定的信号与反馈规则即可构成系统，预训练属于可选扩展。对于材料分类、抓取成功预测、力、滑移和位姿估计，可以用目标任务标签直接训练；当标注有限、物体种类较多或需要跨设备适配时，复用预训练编码器更有价值。Sparsh 通过无标签触觉图像预训练，再以力、滑移等任务数据训练解码器，展示了这一安排在其基准上的数据效率收益。<a class="citation" href="#ref-1" aria-label="参考文献 1">[1]</a></p>
+<p>开放词汇触觉检索、属性描述和语言条件推理通常复用已预训练的视觉语言模型，并用视触语言配对建立触觉到语义空间的映射。这里对预训练的依赖来自所选模型方案；目标接触域仍需提供配对或适配数据。TVL 的模态对齐与 AnyTouch 的分阶段表示学习体现了这一训练路线。<a class="citation" href="#ref-2" aria-label="参考文献 2">[2]</a><a class="citation" href="#ref-14" aria-label="参考文献 14">[14]</a></p>
+<p>抓取、装配与多指操作的模仿策略可以直接从同步观测—动作示范学习；使用 VLA 路线时，视觉语言或动作底座已经经过预训练，触觉分支则可选择预训练初始化或随策略共同训练。视频底座驱动的 WAM 同样复用已有视频先验，再以动作条件视触轨迹学习接触后果。VTAM 即在视频底座上适配触觉与动作，其训练流程采用视触交互数据，省去了独立触觉—语言预训练阶段。<a class="citation" href="#ref-4" aria-label="参考文献 4">[4]</a></p>
+<p>因此，感知任务重点准备物理或类别标签，语义任务重点准备跨模态配对，操作与世界模型重点准备连续动作轨迹。预训练改善初始表示，任务适配建立具体输出，标定则确定读数与物理量的关系。评价时应分别比较数据效率、跨设备适配及真实操作结果，使各阶段的收益清晰可见。</p>
+<h3 id="sub-205">E. 视觉—语言—动作模型中的触觉</h3>
+<p>触觉融入 VLA 主要有三类路径。其一是将触觉转换为属性或事件描述，供语言规划器使用；其二是将触觉编码为特征，与视觉、语言和本体状态共同参与动作生成；其三是保留原有策略，在执行侧利用触觉修正动作。它们分别强调语义兼容、联合表示和模块化控制，适用的数据与时延条件不同。</p>
+<p>VLA-Touch 同时采用高层语义反馈和低层动作修正：触觉语言模型向规划器提供属性描述，控制器则结合触觉信号细化基础 VLA 的动作。其实现中的低层触觉由标记点跟踪得到，服务于连续动作修正，高层描述则服务于语义规划。该方案以模块化方式接入基础策略，结合已有触觉语言模型与任务数据训练的控制器。<a class="citation" href="#ref-3" aria-label="参考文献 3">[3]</a></p>
+<p>直接特征融合是把触觉编码器输出的数值特征，与当前图像、语言指令和机器人状态一起送入动作模型。训练样本将当前观测与示范者随后执行的移动、夹持动作配对，策略由此学习在不同接触状态下选择动作。例如，在防滑抓取中，连续触觉帧呈现的切向变化，可以与示范中的夹持调整建立联系；实际控制规律则由目标设备上的数据确定。</p>
+<p>视触图像可采用空间编码器，阵列数据需带有测点位置和方向，动态接触则使用短时间历史。预训练触觉编码器提供初始特征，动作示范进一步教会策略如何利用这些特征；接触或滑移标签也可作为辅助监督。语言描述适合提供属性与事件摘要，连续数值特征则适合保留载荷变化和快速接触反馈。</p>
+<h3 id="sub-215">F. 世界动作模型与接触预测</h3>
+<p>与仅根据当前观测产生动作的策略相比，世界模型还学习动作后的观测变化。一个概念性表示是：</p>
+<div class="equation" role="group" aria-label="公式 3"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><msub><mover><mi>o</mi><mo>^</mo></mover><mrow><mi>t</mi><mo>+</mo><mn>1</mn><mo>:</mo><mi>t</mi><mo>+</mo><mi>H</mi></mrow></msub><mo>=</mo><mi>F</mi><mo>(</mo><msub><mi>o</mi><mrow><mo>≤</mo><mi>t</mi></mrow></msub><mo>,</mo><msub><mi>s</mi><mrow><mi>t</mi></mrow></msub><mo>,</mo><msub><mi>a</mi><mrow><mi>t</mi><mo>:</mo><mi>t</mi><mo>+</mo><mi>H</mi><mo>−</mo><mn>1</mn></mrow></msub><mo>)</mo></mrow></math><span class="eqno">(3)</span></div>
+<p>其中，o 包含视觉与触觉，s 为机器人状态，a 为动作序列。联合 WAM 也可在统一生成框架内学习未来观测与动作，并通过共享训练联系两者。其数据基础都是连续交互及明确的动作语义。</p>
+<p>VTAM 将触觉引入视频模型，并在动作学习中加入由形变导出的虚拟力代理，使表示保留接触相关信息。该量是由光流构造的几何代理，适合监督模型关注形变；报告以牛顿计的力误差则需要经过标定的物理测量。<a class="citation" href="#ref-4" aria-label="参考文献 4">[4]</a></p>
+<p>进一步的研究关注模态之间的信息路径。Tactile-WAM 使用不对称注意力限制触觉对视觉预测分支的干扰，同时保留动作分支访问触觉的能力；VT-WAM 在流匹配框架中联合建模未来视觉、触觉形变与动作，并引导接触阶段的动作预测使用触觉。这些工作表明，增加触觉输入之外，融合位置与训练约束同样影响结果。<a class="citation" href="#ref-33" aria-label="参考文献 33">[33]</a><a class="citation" href="#ref-5" aria-label="参考文献 5">[5]</a></p>
+<p>预测也需要与真实反馈结合。OmniVTA 将视触世界模型、融合策略和触觉反馈控制组合起来；TouchWorld 则区分高层规划、触觉目标预测、动作生成与局部残差修正。两者都体现了一个方向：接触预测用于预判，实际观测用于纠偏，两者共同支持闭环执行。<a class="citation" href="#ref-29" aria-label="参考文献 29">[29]</a><a class="citation" href="#ref-34" aria-label="参考文献 34">[34]</a></p>
+<h2 id="section-5">五、触觉传感器与系统集成</h2>
+<h3 id="sub-235">A. 换能原理与可观测量</h3>
+<p>按物理作用转换为读数的机制，常见触觉传感器主要包括：<strong>电阻／压阻式</strong>，以电阻变化反映受压或应变；<strong>电容式</strong>，以电极间距、面积或介质变化反映接触；<strong>压电式与摩擦电式</strong>，分别利用受力极化及接触起电过程产生电信号；<strong>磁式</strong>，通过磁场变化测量柔性结构的位移；<strong>光学式</strong>，以图像、光强或光纤响应记录形变，其中相机成像型构成本文讨论的视触传感器。温度或热流感知常作为补充通道，与机械触觉共同用于材料辨识；复合传感器可集成多种机制。<a class="citation" href="#ref-35" aria-label="参考文献 35">[35]</a><a class="citation" href="#ref-11" aria-label="参考文献 11">[11]</a></p>
+<p>换能机制决定原始读数的来源，结构与标定决定可以恢复的物理量，测点布局则决定空间覆盖。因此，“视触序列”“压力网格”和“三轴测点”分别描述观测与组织形式，在具体设备中需要与换能机制配合解释。</p>
+<p>视触传感器通过内部相机观察弹性体形变，适合局部纹理和几何感知。GelSight、DIGIT 等具有相似的基本成像思路，但由于尺寸、接触面、照明和标记设计不同，数据复用需要设备适配。DIGIT 的官方说明也将几何成像与进一步的力估计区分开来。
+图 7 汇总了常见视触装置及其结构特点，可用于理解局部成像、接触覆盖和几何重建之间的关系。</p>
+<figure id="fig-7"><button class="image-button" title="点击放大图片" aria-label="放大图 7"><img loading="lazy" decoding="async" src="./images/tactile/figure-09.png" alt="图 7：代表性视触传感器的结构与能力；具体量程和精度以相应设备及标定条件为准"></button><figcaption>图 7　代表性视触传感器的结构与能力；具体量程和精度以相应设备及标定条件为准。来源：Cao 等<a class="citation" href="#ref-6" aria-label="参考文献 6">[6]</a>，原图 3。</figcaption></figure>
+<p>压阻与电容阵列通过电学响应获得接触分布，适合柔性表面及较大覆盖范围；能否区分法向和切向载荷取决于结构与标定。磁式阵列通过弹性体内磁体位移形成多轴响应，但需处理环境磁场和温漂。压电与摩擦电方式擅长动态变化，稳定静态量的测量能力则取决于器件和读出设计。不同机制在空间分辨率、动态响应、柔顺性、布线和耐久性之间存在权衡。<a class="citation" href="#ref-35" aria-label="参考文献 35">[35]</a></p>
+<p>多轴测量指区分不同方向上的接触作用。以三轴触觉测点为例，Fz 表示垂直接触面的法向力，Fx、Fy 表示沿接触面的两个切向力，分别对应按压与侧向拖动。轴的方向以该测点的局部坐标系定义；使用多点阵列时，还需记录各测点相对手指或机器人坐标系的朝向。</p>
+<p>将原始电学或磁场读数换算为牛顿，需要建立读数与已知载荷之间的映射，这一过程称为力标定，通常涉及零点、灵敏度及各方向之间的耦合。uSkin 官方提供通用参数和逐测点两种力标定方式，并介绍温度与磁场补偿。选用时应核对实际型号的量程、标定精度和输出频率；闭环响应还需计入通信、推理和执行延迟。<a class="citation" href="#ref-10" aria-label="参考文献 10">[10]</a></p>
+<h3 id="sub-255">B. 部署形态与接触覆盖</h3>
+<p>指尖视触适合观察局部细节，手掌与指节阵列更适合分布式握持，全身皮肤强调接触覆盖与定位，可穿戴系统则便于采集人类交互。换能原理与部署形态是不同分类轴：同一种原理可以用于不同安装位置，同一末端也可以组合多种传感方式。</p>
+<p>安装位置决定实际观测的是哪一处接触。例如，机器人握住螺丝刀时，指尖触觉记录的是夹爪与刀柄之间的压力、形变和滑动；刀尖与螺钉的接触发生在另一位置。刀尖受力可以沿工具传回手部或腕部，而刀尖究竟哪一侧接触、局部怎样变形，需要工具端传感器或结合工具模型推断。腕部六维力／力矩传感器测量通过腕部传递的三方向合力和三方向合力矩，适合补充整体受力信息。系统设计因此应先明确接触界面，再配置局部触觉与整体力觉。</p>
+<h3 id="sub-261">C. 任务约束下的选型</h3>
+<p>选型应从任务容差和接触状态出发，并结合第二章介绍的属性与观测关系确定测量通道。软硬估计需要载荷与形变或位移的对应，滑动纹理需要匹配探索速度的空间分辨率和动态带宽，热属性辨识则需要温度或热交换通道。精细纹理或局部轮廓依赖空间分辨率；防滑抓取需要法向、切向变化及足够低的延迟；精密装配关心接触方向、错位和卡滞；多指操作则需要覆盖、几何标定和多指同步。对于全身接触，耐久性与定位可能比局部成像精度更重要。</p>
+<p>同时，绝对力测量、接触事件识别和形变代理具有不同要求。若任务只需检测接触转换，可以使用稳定的相对响应；若需约束实际施力，则必须验证量纲、量程和标定误差。传感器、数据表示与任务目标由此形成共同约束，选型时应一并确定。</p>
+<h2 id="section-6">六、数据采集、组织与迁移</h2>
+<h3 id="sub-269">A. 从测量目标到采集协议</h3>
+<p>采集应首先确定预测对象和真值来源。材料研究需要控制接触动作及属性标注，状态估计需要相应测量参照，策略学习需要执行动作，世界模型需要动作后的观测。明确这些约束有助于将学习目标集中在任务相关的接触变化上。</p>
+<p>探索动作应围绕目标属性设计，并记录可能影响信号的条件。按压采集需说明加载力或位移、加载速度和保持时间；滑动采集需控制或记录法向载荷、速度和方向；多点探索需同步接触位置、手指姿态与动作。对同一物体改变这些条件，有助于区分物体属性与操作方式造成的变化；附录 A 可作为动作覆盖的检查依据。</p>
+<p>受控探针或机器人采样适合标定及物理属性研究，遥操作适合获得目标本体的动作示范，手持夹爪和触觉手套有利于扩大自然交互覆盖。不同方式的主要差异不只是成本，还包括动作是否可直接执行、接触界面是否一致，以及真值的可获得性。</p>
+<p>数据应覆盖接近、初次接触、加载、稳定、滑动、卸载与恢复的全过程，并保留失败条件。仅采成功轨迹会缩小可学习的纠错范围；无接触帧过多则可能掩盖关键事件。所需规模应依据物体、设备与接触条件的覆盖以及验证学习曲线确定。</p>
+<h3 id="sub-279">B. 标定、同步与动作语义</h3>
+<p>原始数据至少应能关联回合、设备、物体、任务、标定版本与时间。触觉流需附带无接触参考或零点、测点布局、单位和有效标记；动作需说明控制模式、坐标系、持续时间，以及每一维是位置、速度、力还是其他设定。命令发出时间和实际执行时间在可获得时应分别记录。</p>
+<p>多模态系统应保留各流的原始时间戳，并测量时钟偏差与延迟。高频触觉可以通过历史窗口服务于较低频策略，同时保留原始采样以支持后续重处理。在线决策只能使用当时已获得的数据；离线最近邻对齐若选中未来帧，会使训练和评估偏离真实部署条件。</p>
+<p>原始观测、标定结果和学习表示应分层存储。深度、力估计、接触标签和嵌入需要注明算法与版本，并与原始信号分别保存。人工标签、仪器测量、模型代理与仿真真值也应区分，以便判断误差来源和重新处理数据。</p>
+<h3 id="sub-287">C. 格式规范与公共发布</h3>
+<p>现有公开实践尚未形成被普遍采用、同时覆盖全部传感原理、几何布局、物理单位和动作语义的端到端触觉格式。HDF5 等容器解决数据组织，通用机器人格式进一步规范回合与字段，跨设备物理对齐还需要测量与标定信息。</p>
+<p>LeRobotDataset 使用数值数据、视频和元数据共同组织轨迹，便于描述状态、动作及图像；RLDS 则规定回合与 step 的结构，并区分初始、末尾和终止状态。采用这些格式时仍应核对动作与观测的时间对应，特别是末尾 step 中可能无效的动作字段。<a class="citation" href="#ref-36" aria-label="参考文献 36">[36]</a><a class="citation" href="#ref-37" aria-label="参考文献 37">[37]</a></p>
+<p>对触觉而言，统一测量含义比统一后缀更关键。公开数据应说明设备与安装、字段形状、单位、时间基准、标定关系、缺失值和划分方式，并提供可运行的读取示例。压缩视频还应检验是否破坏细微形变或标记位移，并结合定量重建或下游任务检验质量。</p>
+<h3 id="sub-295">D. 跨传感器与跨本体迁移</h3>
+<p>传感器差异包括几何、材料、照明与响应函数；机器人差异还涉及关节、动作空间和接触方式。因此，跨传感器表示对齐关注观测对应，跨本体控制迁移还需处理动作对应；语义嵌入和可执行动作应分别适配。</p>
+<p>近期 DexTouch-WM 在人手与机器人手之间采用共享布局的压阻阵列，并将人类动作重定向到机器人动作空间后学习接触预测。这一设定说明，人类数据能够成为扩展来源，但前提是观测和动作具有可对应的结构，并通过目标机器人数据验证。<a class="citation" href="#ref-38" aria-label="参考文献 38">[38]</a></p>
+<h2 id="section-7">七、典型任务中的系统实现</h2>
+<p>以下按各类任务的可观测量，将已有感知与控制机制连接为系统设计。具体传感器组合和训练安排需在目标设备及任务条件下验证。</p>
+<h3 id="sub-305">A. 稳定抓取与易损物体操作</h3>
+<p>稳定抓取同时要求抑制滑移和避免过大载荷。双指视触或多轴阵列可观测接触分布与切向变化，数据应与夹爪宽度、执行动作及滑移、掉落和损伤结果同步。若目标涉及真实施力约束，还需测力参照，以建立形变与载荷之间的定量对应。</p>
+<p>系统可先学习滑移或接触状态，再通过控制器调整夹持；语言仅在选择目标或规划任务时介入，局部接触修正则可由独立控制器完成。Feeling of Success 和 Sparsh 下游数据可分别支持结果预测与状态估计，当前夹爪的响应、物体损伤条件和扰动恢复则通常需要本地数据。评价应共同考虑成功率、损伤率、滑移响应和峰值载荷。</p>
+<h3 id="sub-311">B. 精密插入与装配</h3>
+<p>装配需要在视觉遮挡和位姿误差下识别接触方向与卡滞。局部视触适合提供形变或边缘接触线索，腕部力／力矩可补充整体受力。数据应包含末端位姿、动作及其坐标系、接触过程和重试结果；连续过程数据有助于学习接触中的修正。</p>
+<p>在此基础上，视触融合策略可生成位姿或动作块，触觉反馈负责校正局部偏差；需要推断动作后果时再加入接触预测。训练应覆盖初始错位、公差和摩擦变化，并保留卡滞后的退出与再尝试。实际检验包括插入成功、耗时、峰值力矩和未见偏差下的恢复，并结合动作回归误差分析。</p>
+<h3 id="sub-317">C. 材料理解与主动探索</h3>
+<p>材料识别需要把物体属性与探索条件区分开。视触图像适合表面纹理，软硬估计还需加载力或位移，滑动纹理则依赖速度与动态响应。数据应记录接触位置和动作，并区分人工描述、定量测量与模型伪标签。</p>
+<p>Touch and Go、TVL 和 TacQuad 可用于表示初始化或语义对齐，随后通过任务标签学习属性估计。若当前接触存在歧义，策略可选择进一步按压或滑动。这类系统的核心是形成可区分属性的观测，可由属性估计器与探索控制器共同完成；评价应包含未见物体，以及外观相似但属性不同的对照。</p>
+<h3 id="sub-323">D. 持续擦拭、去皮与表面接触</h3>
+<p>持续表面操作要求在运动中保持适当接触，并适应曲率、摩擦和材料变化。传感器需能够观测工具与目标之间的接触，数据应连续记录触觉、工具姿态、执行动作与任务进度，包含脱离、卡住和恢复过程。</p>
+<p>视触预测可提供预期接触状态，融合策略据此生成动作，再用真实反馈修正偏差。VTAM 与 OmniVTA 为这类预测和控制组合提供了研究实例，但具体装置上的力代理和控制周期不应推广为通用规格。评价需同时考察完成率、接触保持、载荷波动、损伤与耗时，并以去除预测分支的消融判断其实际贡献。</p>
+<h3 id="sub-329">E. 多指在手操作</h3>
+<p>在手旋转与再抓涉及多点接触及频繁遮挡。多指触觉应与关节状态和传感器坐标变换关联，必要时补充手掌与指节覆盖。简单拼接多幅指尖图像而忽略所属位置，会丢失接触之间的几何关系。</p>
+<p>一种路径是先融合视觉、触觉与本体信息估计物体形状和位姿，再交由控制器使用；NeuralFeels 与 FeelSight 可为这一状态估计环节提供方法和数据入口。另一种路径是直接学习多模态动作，但仍需覆盖接触切换和失稳恢复。位姿跟踪与最终操作结果应分别报告，以检验感知模块和闭环系统的有效性。</p>
+<h3 id="sub-335">F. 人类示范驱动的技能迁移</h3>
+<p>触觉手套或指尖耦合采集器可以将人类操作转为接触数据来源。全手阵列适合记录接触分布，工具式采集器更容易建立末端轨迹；两者都需要同步视觉、姿态和接触，并明确人类动作到机器人动作的映射。</p>
+<p>迁移过程中应保留原始人体表示、转换后的机器人表示及转换版本，验证关节限制、可达性和接触接口。OpenTouch 可支持人类接触行为研究，FreeTacMan 提供工具轨迹与机器人动作转换的流程，DexTouch-WM 则研究对齐后的人类数据如何辅助机器人域预测。有效性应在固定机器人数据预算下比较，并对未见物体和操作者测试，同时报告机器人任务表现与人类数据重建质量。</p>
+<h2 id="section-8">八、评价与比较分析</h2>
+<h3 id="sub-343">A. 从感知质量到操作结果</h3>
+<p>已有综述表 3 按感知、生成和操作汇总常用指标，体现不同任务对评价目标的要求。</p>
+<figure id="table-3"><button class="image-button" title="点击放大图片" aria-label="放大表 3"><img loading="lazy" decoding="async" src="./images/tactile/figure-10.png" alt="已有综述表 3：多模态触觉任务的常用评价指标；箭头表示指标的优化方向，公式与参考编号沿用原文"></button><figcaption>表 3　多模态触觉任务的常用评价指标；箭头表示指标的优化方向，公式与参考编号沿用原文。来源：Cao 等<a class="citation" href="#ref-6" aria-label="参考文献 6">[6]</a>，原表 3。</figcaption></figure>
+<p>分类与检索可采用准确率、宏平均 F1 和召回指标；连续力、位姿和几何估计需要带单位的误差与适用量程；滑移检测还应关注误报、漏报和响应延迟。对生成任务，像素与感知相似度只能描述部分质量，应结合接触状态和下游效用。</p>
+<p>操作评价应回到任务结果，包括成功率、损伤、峰值载荷、完成时间及失败恢复。世界模型还需检验多步预测误差、接触转换和预测对动作选择的作用。</p>
+<h3 id="sub-355">B. 泛化协议与消融</h3>
+<p>触觉观测具有强时间相关性，随机打散同一轨迹的相邻帧容易高估泛化。数据应按物体、会话、场景或设备划分，并分别报告未见物体、未见设备及未见接触条件的结果。传感器更换、胶层老化和重新安装也可能构成新的分布。</p>
+<p>评估触觉贡献时，应尽量保持机器人、示范数量和控制能力一致，并比较视觉、本体感觉、腕部力觉与局部触觉的不同组合。触觉去除、时间打乱和缺失输入可帮助判断模型是否使用了正确的接触证据；未来预测分支与反馈控制器则应分别消融。</p>
+<h3 id="sub-361">C. 实证结果的解释边界</h3>
+<p>不同论文中的成功率受任务难度、试验次数、本体和训练数据影响，比较时应对齐这些实验条件。尤其在预印本阶段，模型机制和实验结论应分别表述。Tactile-WAM 的分析区分了保持视觉底座预测与提高相对真实观测的预测质量，二者分别检验底座一致性与真实预测精度；跨传感器研究也应分别报告少样本适配与零样本迁移。<a class="citation" href="#ref-33" aria-label="参考文献 33">[33]</a></p>
+<h2 id="section-9">九、挑战与未来方向</h2>
+<h3 id="sub-367">A. 动作条件数据与可扩展采集</h3>
+<p>触觉基础模型需要的不只是更多图片，还包括多样接触、动作后果和失败恢复。自然人类采集有利于规模扩展，机器人采集更直接连接控制，仿真则可补充受控条件。三者结合的关键是保留来源差异，并建立可核验的动作与观测对应。</p>
+<h3 id="sub-371">B. 硬件差异与物理一致性</h3>
+<p>统一表示可以减轻设备差异，其覆盖能力仍取决于设备实际测得的剪切、载荷和接触位置。后续标准化更适合从元数据、单位、坐标、标定和同步协议入手，再研究跨设备特征映射。对定量控制而言，物理一致性应与语义泛化同等重要。</p>
+<h3 id="sub-375">C. 多时间尺度与闭环建模</h3>
+<p>任务推理、动作生成与局部接触反馈具有不同时间需求。将它们强制放在同一更新频率下，可能损失触觉的响应价值。分层结构能够使语义规划、接触预测和快速修正相互配合，但收益仍取决于实际延迟、执行器能力和模块误差，需要通过闭环实验共同验证。</p>
+<h3 id="sub-379">D. 从任务收益判断触觉需求</h3>
+<p>触觉需求的增长主要与任务对接触状态的依赖加深有关。当机器人从搬运走向精密装配、柔性与易损物体操作、多指控制时，视觉不可见的物理状态更容易成为瓶颈。触觉由此从辅助识别逐步进入动作修正和动力学建模。</p>
+<p>然而，传感器耐久性、校准、集成成本和数据采集负担也会限制应用。对于接触条件简单且视觉已满足要求的任务，应结合新增成本衡量触觉收益。更可靠的发展路径是通过具体任务验证哪些接触信息不可缺少，再据此扩展硬件、数据和模型。</p>
+<h2 id="section-10">十、结论</h2>
+<p>触觉多模态融合的核心，是将局部接触观测转化为可用于理解和控制的物理信息。任务决定需要观测的状态，传感器决定这些状态是否可测，采集与标定赋予数据含义，模型则学习观测、动作及结果之间的关系。</p>
+<p>现有研究已形成从属性识别、跨模态对齐到触觉增强 VLA 和世界动作模型的多条路径。感知预训练提高数据利用效率，动作轨迹与设备校准分别支撑控制学习和物理解释；未来触觉预测辅助决策，真实反馈则提供持续校正。面向更通用的具身系统，关键进展将取决于动作条件数据、跨设备物理一致性以及能够同时评价预测与控制的基准。</p>
+<h2 id="section-11">附录 A：常见接触动作与触觉信号</h2>
+<p>以下按接触面的运动和载荷变化汇总常见探索过程，供设计采集协议和选择测量通道时查阅。插入、擦拭、旋拧等任务通常组合多个过程；各项观测的可获得性取决于传感结构、标定与带宽。</p>
+<ul>
+<li><strong>接近、初触与法向按压。</strong> 接近阶段提供无接触基线，初触产生接触起始信号，继续按压使接触面积、法向载荷与局部形变变化。视触图像呈现轮廓和形变，压力阵列呈现载荷分布；结合按压位移或已知载荷，可估计软硬与局部刚度。</li>
+<li><strong>静态保持。</strong> 保持位姿时可观察力随时间衰减，保持载荷时可观察形变增长，分别为应力松弛与蠕变提供线索。具备热感知通道的设备还可记录温度和接触后的热交换过程，用于材料辨识。</li>
+<li><strong>切向滑动与沿边扫描。</strong> 擦过表面会引起切向力、标记点位移、黏滑和振动，其空间或时间变化提供纹理、粗糙度与摩擦线索；沿边缘或沟槽移动时，接触轮廓的连续变化还可用于边界和方向跟踪。分析时需记录滑动速度与法向载荷。<a class="citation" href="#ref-39" aria-label="参考文献 39">[39]</a></li>
+<li><strong>扭转与旋拧。</strong> 绕接触面法向转动会形成旋转方向的剪切形变、局部滑移和抗扭载荷；这些信号用于判断转动是否传递到物体、是否发生旋转滑移，以及旋拧过程中的阻力变化。具体输出取决于设备是否测量切向分布或力矩。</li>
+<li><strong>滚动与摇摆。</strong> 物体或指尖滚动、倾转时，接触位置、法向方向和压力分布随运动迁移，为曲率、姿态和接触稳定性提供线索。记录接触位置并结合手指运动，可用于在手旋转与再定位。<a class="citation" href="#ref-40" aria-label="参考文献 40">[40]</a></li>
+<li><strong>敲击、轻触与振动激励。</strong> 短时碰撞或往复激励产生力脉冲、振动及衰减波形；在已知激励与接触条件下，这些响应可用于比较材料的动态刚度和阻尼。高频信息需要相应带宽的压力、压电或振动通道。<a class="citation" href="#ref-41" aria-label="参考文献 41">[41]</a></li>
+<li><strong>包络、夹持与挤压。</strong> 多指或手掌接触形成多点载荷和接触区域分布；结合手指位置，可推断物体尺寸、整体形状和抓持方式。进一步挤压产生力—位移响应，用于评价可压缩性及形变恢复。<a class="citation" href="#ref-8" aria-label="参考文献 8">[8]</a></li>
+<li><strong>提举、搬运与惯性扰动。</strong> 物体离开支撑面后，重力和加速度改变手部接触载荷，可能伴随微滑。结合机器人姿态、运动与合力／力矩测量，可以估计重量或载荷分配，并调整握持；指尖压力的解释需计入夹持内力。</li>
+<li><strong>卸载、分离与剥离。</strong> 减小载荷使接触区域收缩、形变恢复；有黏附时，拉离或剥离还会出现拉脱载荷及接触边界退缩。记录这一过程有助于分析恢复、滞回、黏附与释放状态，其中拉力测量需要传感结构和量程支持。<a class="citation" href="#ref-42" aria-label="参考文献 42">[42]</a></li>
+</ul>
+<p>弯折、拉伸、剪切变形和部件活动测试进一步组合上述接触过程。例如，两指拉伸薄片时，局部触觉记录夹持处的载荷与滑移，机器人位移或外部视觉记录薄片伸长；插入与拔出组合按压、滑动和分离，开合铰链则结合旋转运动与阻力变化。对于柔性或铰接物体，应同步保存整体运动，以联系局部信号与弯曲、拉伸或关节特性。上述分类描述动作如何激发观测，实际可用信号还由传感器的测量通道、接触覆盖和带宽决定。</p>
+<h2 id="section-12">参考文献与数据资源</h2>
+<p class="reference" id="ref-1">[1] <a target="_blank" rel="noopener noreferrer" href="https://arxiv.org/abs/2410.24090">Sparsh: Self-supervised touch representations for vision-based tactile sensing</a>. 2024.</p>
+<p class="reference" id="ref-2">[2] Fu 等. <a target="_blank" rel="noopener noreferrer" href="https://arxiv.org/abs/2402.13232">A Touch, Vision, and Language Dataset for Multimodal Alignment</a>. 2024.</p>
+<p class="reference" id="ref-3">[3] Bi 等. <a target="_blank" rel="noopener noreferrer" href="https://arxiv.org/abs/2507.17294v2">VLA-Touch: Enhancing Vision-Language-Action Models with Dual-Level Tactile Feedback</a>. 2025.</p>
+<p class="reference" id="ref-4">[4] Yuan 等. <a target="_blank" rel="noopener noreferrer" href="https://arxiv.org/abs/2603.23481">VTAM: Video-Tactile-Action Models for Complex Physical Interaction Beyond VLAs</a>. 2026.</p>
+<p class="reference" id="ref-5">[5] Tian 等. <a target="_blank" rel="noopener noreferrer" href="https://arxiv.org/abs/2607.02503">VT-WAM: Visual-Tactile World Action Model for Contact-Rich Manipulation</a>. 2026.</p>
+<p class="reference" id="ref-6">[6] Cao 等. <a target="_blank" rel="noopener noreferrer" href="https://arxiv.org/abs/2605.17336v1">Tactile-based Multimodal Fusion in Embodied Intelligence: A Survey of Vision, Language, and Contact-Driven Paradigms</a>. 2026. 本文组织框架的基础文献。</p>
+<p class="reference" id="ref-7">[7] <a target="_blank" rel="noopener noreferrer" href="https://arxiv.org/abs/1704.03955">Shape-independent Hardness Estimation Using Deep Learning and a GelSight Tactile Sensor</a></p>
+<p class="reference" id="ref-8">[8] <a target="_blank" rel="noopener noreferrer" href="https://doi.org/10.1016/j.robot.2014.09.021">Robotic Learning of Haptic Adjectives Through Physical Interaction</a></p>
+<p class="reference" id="ref-9">[9] <a target="_blank" rel="noopener noreferrer" href="https://arxiv.org/abs/1708.00922">Improved GelSight Tactile Sensor for Measuring Geometry and Slip</a></p>
+<p class="reference" id="ref-10">[10] <a target="_blank" rel="noopener noreferrer" href="https://xelarobotics.com/technology/">uSkin：三轴测量、力标定与补偿说明</a>.</p>
+<p class="reference" id="ref-11">[11] <a target="_blank" rel="noopener noreferrer" href="https://www.syntouchllc.com/Products/BioTac/_media/BioTac_Brochure.pdf">BioTac：多通道触觉传感器产品说明</a></p>
+<p class="reference" id="ref-12">[12] <a target="_blank" rel="noopener noreferrer" href="https://doi.org/10.1016/0010-0285(87)90008-9">Hand Movements: A Window into Haptic Object Recognition（Lederman 与 Klatzky，1987）</a></p>
+<p class="reference" id="ref-13">[13] <a target="_blank" rel="noopener noreferrer" href="https://arxiv.org/abs/2512.16842">OPENTOUCH: Bringing Full-Hand Touch to Real-World Interaction</a>. 2025.</p>
+<p class="reference" id="ref-14">[14] Feng 等. <a target="_blank" rel="noopener noreferrer" href="https://arxiv.org/abs/2502.12191">AnyTouch: Learning Unified Static-Dynamic Representation across Multiple Visuo-tactile Sensors</a>. 2025.</p>
+<p class="reference" id="ref-15">[15] <a target="_blank" rel="noopener noreferrer" href="https://sites.google.com/view/the-feeling-of-success">The Feeling of Success: Does Touch Sensing Help Predict Grasp Outcomes?</a>. 论文、代码与数据入口。</p>
+<p class="reference" id="ref-16">[16] Li 等. <a target="_blank" rel="noopener noreferrer" href="https://visgel.csail.mit.edu/">Connecting Touch and Vision via Cross-Modal Prediction（VisGel）</a>. CVPR, 2019.</p>
+<p class="reference" id="ref-17">[17] <a target="_blank" rel="noopener noreferrer" href="https://github.com/YunzhuLi/VisGel">VisGel：官方代码、数据下载与评估说明</a></p>
+<p class="reference" id="ref-18">[18] Yang 等. <a target="_blank" rel="noopener noreferrer" href="https://arxiv.org/abs/2211.12498">Touch and Go: Learning from Human-Collected Vision and Touch</a>. 2022.</p>
+<p class="reference" id="ref-19">[19] <a target="_blank" rel="noopener noreferrer" href="https://touch-and-go.github.io/">Touch and Go：作者项目与数据入口</a></p>
+<p class="reference" id="ref-20">[20] <a target="_blank" rel="noopener noreferrer" href="https://github.com/Max-Fu/tvl">TVL：官方实现与数据修订说明</a></p>
+<p class="reference" id="ref-21">[21] <a target="_blank" rel="noopener noreferrer" href="https://github.com/GeWu-Lab/AnyTouch">AnyTouch／TacQuad：官方实现与数据下载</a></p>
+<p class="reference" id="ref-22">[22] <a target="_blank" rel="noopener noreferrer" href="https://github.com/facebookresearch/sparsh">Sparsh／TacBench：官方实现、训练与下游数据</a></p>
+<p class="reference" id="ref-23">[23] <a target="_blank" rel="noopener noreferrer" href="https://github.com/facebookresearch/neuralfeels/blob/main/data/README.md">FeelSight：NeuralFeels 官方数据结构与下载说明</a></p>
+<p class="reference" id="ref-24">[24] Kota 等. <a target="_blank" rel="noopener noreferrer" href="https://rohankotanu.github.io/3DCal/">3D Cal：触觉标定、深度重建与数据</a>.</p>
+<p class="reference" id="ref-25">[25] <a target="_blank" rel="noopener noreferrer" href="https://objectfolder.stanford.edu/objectfolder-real-download">ObjectFolder-Real：数据与采集说明</a>.</p>
+<p class="reference" id="ref-26">[26] Wu 等. <a target="_blank" rel="noopener noreferrer" href="https://arxiv.org/abs/2506.01941">FreeTacMan: Robot-free Visuo-Tactile Data Collection System for Contact-rich Manipulation</a>. 2025.</p>
+<p class="reference" id="ref-27">[27] <a target="_blank" rel="noopener noreferrer" href="https://github.com/OpenDriveLab/FreeTacMan">FreeTacMan：官方实现与数据处理流程</a></p>
+<p class="reference" id="ref-28">[28] <a target="_blank" rel="noopener noreferrer" href="https://huggingface.co/datasets/rayxsong/opentouch/tree/main">OpenTouch：Hugging Face 数据文件</a></p>
+<p class="reference" id="ref-29">[29] Zheng 等. <a target="_blank" rel="noopener noreferrer" href="https://arxiv.org/abs/2603.19201v3">OmniVTA: Visuo-Tactile World Modeling for Contact-Rich Robotic Manipulation</a>. 2026，采用 v3。</p>
+<p class="reference" id="ref-30">[30] <a target="_blank" rel="noopener noreferrer" href="https://huggingface.co/datasets/tars-robotics/OmniVitac">OmniViTac：Hugging Face 数据入口</a></p>
+<p class="reference" id="ref-31">[31] <a target="_blank" rel="noopener noreferrer" href="https://github.com/MrSecant/OmniVTA">OmniVTA：官方代码仓库</a></p>
+<p class="reference" id="ref-32">[32] Suresh 等. <a target="_blank" rel="noopener noreferrer" href="https://arxiv.org/abs/2312.13469">Neural feels with neural fields: Visuo-tactile perception for in-hand manipulation</a>. 预印本 2023；Science Robotics, 2024.</p>
+<p class="reference" id="ref-33">[33] Wu 等. <a target="_blank" rel="noopener noreferrer" href="https://arxiv.org/abs/2606.26663v3">Tactile-WAM: Touch-Aware World Action Model with Tactile Asymmetric Attention</a>. 2026，采用 v3。</p>
+<p class="reference" id="ref-34">[34] Zhou 等. <a target="_blank" rel="noopener noreferrer" href="https://arxiv.org/abs/2607.07287v2">TouchWorld: A Predictive and Reactive Tactile Foundation Model for Dexterous Manipulation</a>. 2026.</p>
+<p class="reference" id="ref-35">[35] <a target="_blank" rel="noopener noreferrer" href="https://www.mdpi.com/1424-8220/18/4/948">Recent Progress in Technologies for Tactile Sensors</a></p>
+<p class="reference" id="ref-36">[36] <a target="_blank" rel="noopener noreferrer" href="https://huggingface.co/docs/lerobot/lerobot-dataset-v3">LeRobotDataset v3：格式文档</a>.</p>
+<p class="reference" id="ref-37">[37] <a target="_blank" rel="noopener noreferrer" href="https://github.com/google-research/rlds/blob/main/README.md">RLDS：回合结构与时序约定</a>.</p>
+<p class="reference" id="ref-38">[38] Qin 等. <a target="_blank" rel="noopener noreferrer" href="https://arxiv.org/abs/2609.20649">DexTouch-WM: Learning Action-Conditioned Tactile World Models from Human Touch for Dexterous Robot Manipulation</a>. 2026.</p>
+<p class="reference" id="ref-39">[39] <a target="_blank" rel="noopener noreferrer" href="https://arxiv.org/abs/1905.00842">Shear-invariant Sliding Contact Perception with a Soft Tactile Sensor</a></p>
+<p class="reference" id="ref-40">[40] <a target="_blank" rel="noopener noreferrer" href="https://arxiv.org/abs/2306.09946">Tactile-Reactive Roller Grasper</a></p>
+<p class="reference" id="ref-41">[41] <a target="_blank" rel="noopener noreferrer" href="https://www.robotcub.org/misc/papers/07_Takamuku_Gomez_Hosoda_Pfeifer.pdf">主动敲击与挤压的触觉探索研究（Takamuku 等）</a></p>
+<p class="reference" id="ref-42">[42] <a target="_blank" rel="noopener noreferrer" href="https://www.sciencedirect.com/science/article/abs/pii/S2095927326004652">Precise Perception of Surface Tackiness Enabled by a Soft Single-sensing-element Tactile Sensor</a></p>
+<footer class="footnote">图片与公式随文件保存，可离线阅读。外部文献及数据链接需联网访问。</footer></main><dialog><button aria-label="关闭放大图片">关闭 ×</button><img alt=""></dialog><script>const dialog=document.querySelector('dialog');document.querySelectorAll('.image-button').forEach(b=>b.addEventListener('click',()=>{const im=b.querySelector('img');dialog.querySelector('img').src=im.src;dialog.querySelector('img').alt=im.alt;dialog.showModal()}));dialog.querySelector('button').onclick=()=>dialog.close();dialog.addEventListener('click',e=>{if(e.target===dialog)dialog.close()});const links=[...document.querySelectorAll('aside nav a')];const observer=new IntersectionObserver(entries=>{for(const e of entries){if(e.isIntersecting){links.forEach(a=>a.classList.toggle('active',a.hash==='#'+e.target.id))}}},{rootMargin:'-5% 0px -80% 0px'});document.querySelectorAll('h2').forEach(h=>observer.observe(h));</script></body></html>
