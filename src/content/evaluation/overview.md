@@ -172,6 +172,7 @@ Benchmark 任务协议与数据集的关联、合规连接流程和最小报告�
 | [跨方法 Benchmark 复现实测总览](../reproductions/overview/) | 6 个已公开方法在 7 个目标 Benchmark 上的真实闭环结果、四档结果口径与空白原因 |
 | [Benchmark 原生机器人本体与控制量图谱](../guides/robot-action-audit/) | 每个 Benchmark 的原生本体、策略控制量与动作语义；跨本体适配必须记录的 6 个字段 |
 | [自动 Benchmark 构建与开放词汇评测](automated-benchmark-construction/) | 2026 年自动构建/开放词汇方向的相关工作、可复用机制与仍空缺的物理语义 operator |
+| [Open-Task Benchmark 能力框架与逐项对标](open-task-benchmark/) | I1/I2 输入 → C1–C4 → O1/O2 的需求清单、六项能力成熟度、系统对标明细与 41 篇论文清单 |
 
 ## 选择建议
 

@@ -87,6 +87,8 @@ references:
 
 尚无任何系统同时满足：①接受极端开放的自然语言语义；②接受用户自带本体（上传 URDF 即用）；③自动产出可验证的 state/event/temporal 判据。RoboLab 覆盖 6 项能力中的 5 项，是组合上最接近的单一系统；BenchForge 的 artifact 验证闭环补齐了“构建后如何保证质量”；**开放词汇物理语义（strike / scoop / roll / hammer 等新 operator 的自动合成）仍然空缺。**
 
+逐项能力对标（C1–C4 / O1–O2 需求清单、六项能力成熟度、端到端系统打分与 41 篇论文清单）见 [Open-Task Benchmark 能力框架与逐项对标](../open-task-benchmark/)。
+
 ## 4. 六个对照维度
 
 核对每一篇工作时，按六问追踪：
