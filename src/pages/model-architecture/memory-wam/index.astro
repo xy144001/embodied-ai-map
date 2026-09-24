@@ -38,6 +38,7 @@ const experience = [
         <div><p class="mw-eyebrow">OUR MODEL / CROSS-EPISODE MEMORY</p><h1>Memory-WAM</h1><p class="mw-tagline">让一次尝试，成为下一次的经验。</p><p class="mw-intro">我们希望机器人再次面对同类任务时，能找回过去真正有帮助的经历，再结合眼前的画面与身体状态作出动作。核心不是让记忆库越堆越大，而是学会<strong>何时回想、该信哪段经验、怎样影响动作、事后留下什么。</strong></p></div>
         <aside class="mw-status"><span>当前阶段</span><strong>架构草案</strong><p>八模块设计 · 待实验验证</p><time datetime="2026-09-19">2026 / 09 / 19</time></aside>
       </header>
+      <aside class="mw-note" aria-label="最新实验进展"><strong>2026-09-24 · 已有 Faster-WAM 简化实现与实验结果</strong><p>本页保留 09-19 八模块概念方案。最新的动作侧 V1、视频侧 V2、Mean 与 Top-3 实验见 <a href={root + "/problems/week4/"}>Week 4：Memory 模块该如何注入与架构设计 →</a>，其中明确区分实际启用的模块、结果和待实现能力。</p></aside>
       <nav class="mw-toc" aria-label="Memory-WAM 阅读目录">{chapters.map(([id,label],i)=><a href={"#"+id}><span>0{i+1}</span>{label}</a>)}</nav>
 
       <section id="idea" class="mw-section">

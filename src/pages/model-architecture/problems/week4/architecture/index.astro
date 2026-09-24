@@ -1,0 +1,72 @@
+---
+import Week4Layout from "../../../../../layouts/Week4Layout.astro";
+import Table from "../../../../../components/Week4Table.astro";
+import Diagram from "../../../../../components/Week4InjectionDiagram.astro";
+import FlowFormula from "../../../../../components/FlowFormula.astro";
+import "katex/dist/katex.min.css";
+const root=import.meta.env.BASE_URL.replace(/\/$/,"")+"/model-architecture/problems/week4/";
+const chapters=[["scope","当前简化到哪一步"],["flow","动作侧如何接入"],["representation","状态与经验存什么"],["selection","选一条，还是取均值"],["video","视频侧 V2"],["training","训练与收益监督"],["writer","写入、容量与防泄漏"],["versions","版本与开放问题"]];
+---
+<Week4Layout title="简化架构与注入方式" description="把八模块设想落到当前 Faster-WAM 实现：实际输入什么、在哪一层加 memory、哪些参数训练，以及哪些能力尚未启用。" active="architecture" chapters={chapters}>
+  <section id="scope" class="weekly-question"><span class="question-number">01 · 实现范围</span><h2>先验证单任务里的经验复用，再逐项扩展。</h2>
+    <p>当前方案保留官方 Faster-WAM 的文本、视频和动作主干，<strong>冻结原权重，离线训练新增 memory 模块</strong>。测试期间网络参数不更新，只有各方法自己的历史库逐回合增加经历。这让我们先检查“经验如何影响动作”，而不用同时改造整个基座。</p>
+    <p>已经扩展到五类任务，但每类单独训练 M7/M6；这是一套按任务验证的体系，还不是一个联合训练、能统一处理五类任务的 memory 模型。</p>
+    <div class="w4-cards"><div><h3>保留的目标</h3><p>语言、未来、对象／状态共同决定经验是否适用；在事件边界读取，作用于当前动作生成，执行之后再写回真实经历。</p></div><div><h3>为验证做的简化</h3><p>对象与几何来自仿真 GT；阶段由规则判断；状态对齐关闭；正式主线同步执行 action chunk。学习型 grounding、真实失败检测与异步边界同步并未在这些正式结果中启用。</p></div></div>
+    <div class="weekly-callout note"><p><strong>概念图与实现快照要分开：</strong>M1 没有新增语义等价训练；M2 当前只是视频 K/V 的 4 维统计摘要；M8 还没有学会判断局部片段的真实收益。下面描述的是已实现行为。</p></div>
+  </section>
+  <section id="flow" class="weekly-question"><span class="question-number">02 · 动作侧 V1 / Mean</span><h2>经验先变成隐藏状态增量，再让原模型继续生成动作。</h2>
+    <p>默认注入点在动作网络 <code>blocks[28]</code> 之后，也就是从 0 编号的第 29 个 block 之后。它前面的主干和后面的第 30 个 block、输出头与采样流程都保留。M7 为当前 hidden 提供一份经验增量。</p>
+    <Diagram />
+    <p>每次重规划先清除上一动作块的 memory，再在 chunk 边界判断 episode start、几何 phase 变化或停滞事件；冷却为 28 个动作。没有触发或没有合格候选，就不安装本块注入。触发后选定的候选会在该块的去噪过程中被读取，各去噪步的实际 residual 可以不同。</p>
+    <Table id="a2" caption="训练版 V1 / Mean：M1–M8 实际负责什么" />
+    <p class="w4-muted">规则 phase 只是粗略进度提示：夹爪闭合不代表抓稳，几何阶段变化也不等于 benchmark 判定的子任务成功。</p>
+  </section>
+  <section id="representation" class="weekly-question"><span class="question-number">03 · 表示与接口</span><h2>存的是“当时什么状态、做了什么、后来怎样”的片段。</h2>
+    <p>一条历史 episode 可以从多个 <strong>anchor（进入历史的位置）</strong>切出可复用片段。例如当前已接近杯子，就不必从旧轨迹最开始走起；但“位置接近”仍需核对夹爪、操作侧和阶段是否相容。</p>
+    <Table id="a3" caption="当前状态、经验 token、context 与动作的实际形状" />
+    <p>一份经验从 anchor 后的 <strong>28 个已执行动作中均匀采样 16 步</strong>。每步包含前状态 38 维、实际执行的归一化控制指令 14 维、后状态 38 维、有效标志 1 维，合计 91 维。这里没有历史 RGB，也没有直接重播旧动作。</p>
+    <div class="weekly-callout"><p>机器人状态的 14 维包含 drive target／夹爪命令，不能全部叫作实测关节运动；新增 38 维相对状态只供 memory 侧筛选和 context 使用，没有追加进官方 WAM 的 proprio 输入。</p></div>
+    <details><summary>状态距离具体怎样算，哪里可能不够？</summary><div><p>先要求操作侧、夹爪兼容和 phase 完全匹配，再平均六项归一化距离：左右 TCP 相对位置各除 0.10 m；左右旋转 6D 距离各除 2；目标位移差除 0.10 m；两个高度的向量差除 0.05 m。平均距离小于 1.2 才通过。</p><p>这个均值缺少逐项上限，关键一项的不匹配可能被其他小差异稀释。训练版 Direct-only 实际使用 <code>align_threshold=1.2</code> 作为共同半径；配置仍保留的 <code>direct_threshold=0.8</code> 不代表正式路径会先执行状态对齐。</p></div></details>
+  </section>
+  <section id="selection" class="weekly-question"><span class="question-number">04 · 选择与聚合</span><h2>先决定谁有资格，再决定怎么组合建议。</h2>
+    <p>M5 先要求同任务、同对象、语义余弦相似度至少 0.65，只在成功原型中粗检索最多 5 条历史；再展开 anchor 并做状态 hard 过滤。<strong>候选单位是 memory_id@anchor_step 片段</strong>，因此一条历史可以贡献多个候选，K 可以大于 5。</p>
+    <Table id="a4" caption="正式训练版 V1 及后续分支：Random、Learned、Mean、Top-3 的区别" />
+    <div class="weekly-callout note"><p><strong>Random 的顺序很重要：</strong>先从 hard pool 随机选一项，再检查它的 utility 是否 ≥ 0.5。它不是先筛完 utility 合格者再随机选，也不是从所有磁盘历史随便抽一条。早期 V1 的 Random 条件较宽松，需要单独看。</p></div>
+    <h3>M7 内部怎样产生一份“建议”？</h3><p>经验 token 被投影到 128 维；动作 hidden 的投影作为 query，经验作为 K/V，做 4 头 cross-attention，再映回 1024 维。内部 hidden gate 控制残差，108 维 context 产生 <code>2 × sigmoid(context_gate)</code> 的缩放。</p>
+    <p>输出投影零初始化；新增 context gate 的零权重对应缩放 1。空库旁路与零初始化保证了可检查的接入起点，但训练后非空注入仍然可能有害。</p>
+    <FlowFormula expression={String.raw`h_i=\mathrm{M7}_{\mathrm{single}}(h,c,m_i),\qquad \Delta_i=\mathrm{FP32}(h_i)-\mathrm{FP32}(h)`} caption="每个候选走一遍完整原单 memory 路径，包括内部 gate、context 缩放和原 dtype 舍入。" />
+    <FlowFormula expression={String.raw`K>1:\quad h_{\mathrm{out}}=\mathrm{cast}_{h.\mathrm{dtype}}\!\left(\mathrm{FP32}(h)+\frac{1}{K}\sum_{i=1}^{K}\Delta_i\right)`} caption="Mean 在同一个 hook 位置加回一次完整 residual 的均值。K=0 直接旁路；K=1 直接返回 h₁，保持原单条输出逐元素一致。" />
+    <p>所有候选使用相同的 hidden、观测、状态、语言、future 摘要、去噪时刻和噪声。这里只重复 M7，不重新运行整套 WAM，也不为每条候选重抽噪声。M6 负责准入或选择，<strong>均值没有 utility 加权</strong>；M7 context 中的 utility 槽在正式路径为常量 1。</p>
+    <details><summary>聚合计算还有哪些固定约定？</summary><div><p>K&gt;1 使用 FP32 累加，按稳定的 fragment ID 排序后计算；没有 softmax、范数匹配或 √K 补偿。诊断同时记录每条与均值的 L2 范数、两两余弦、抵消比和来源多样性。建议方向相近，也可能共同不适用于眼前状态。</p><p>Top-3 是在相同 coarse、hard、utility 流程之后，按原状态距离选最多 3 个片段；M6 不作 Top-3 排序或残差权重。同一轨迹可以占多个名额。</p></div></details>
+  </section>
+  <section id="video" class="weekly-question"><span class="question-number">05 · 视频侧 V2</span><h2>第二个注入位置：让未来条件也受到经验影响。</h2>
+    <p>V2 保留动作侧 M7，在视频网络 <code>blocks[27]</code> 之后新增 856,813 参数的 adapter。视频 hidden 为 <code>[1,360,3072]</code>：当前帧 120 tokens 原样保留，只修改未来帧 240 tokens，随后影响后续视频 K/V 与动作条件。</p>
+    <Diagram video />
+    <p>当前部署采用 <code>one_pass_future_cache</code>，通常不解码完整未来视频。视频 condition 层为 0、4、8、12、16、20、24、28；这个接法只影响最后的 layer 28，保护当前帧对应 K/V，并保留前面各层 cache。</p>
+    <p>视频 adapter 也读取 <code>[1,16,91]</code> 经验和 108 维 context：经验经 91→128→128 编码，未来 hidden 作 128 维 query，经 4 头 cross-attention 映回 3072 维。<strong>两侧各自平均自己的最终 residual</strong>，不是每条 memory 跑完整个视频＋动作模型后平均输出动作。</p>
+    <div class="weekly-callout"><p>有候选时多做一次视频 prefill，是 V2 的额外计算来源。训练仍用动作 MSE，没有新增视频重建或真实未来帧监督；已证实未来特征与 action 能改变，还没有证明未来画面预测更准确。</p></div>
+    <p>这一轮先重新训练 original-only 的动作 M7/M6，再冻结它们训练视频 adapter。V1 与 V2 对照共享这份动作权重；不能把它直接当作旧 mixed-prompt 模型多接了一层。<a href={root+"experiments/#video-results"}>查看五类任务的 V1 / V2 结果 →</a></p>
+  </section>
+  <section id="training" class="weekly-question"><span class="question-number">06 · 训练信号</span><h2>“动作 loss 变小”与“真实任务更容易成功”之间，还有距离。</h2>
+    <Table id="a6" caption="哪些部分离线训练，哪些部分只在测试时更新历史" />
+    <FlowFormula expression={String.raw`y=\mathbf{1}\!\left[\mathcal{L}_{\mathrm{action,on}}<\mathcal{L}_{\mathrm{action,off}}\right]`} caption="M6 的二分类标签：同一个开发 query、同噪声、同 timestep 下，memory 是否降低动作训练损失。" />
+    <p>M6 是 <code>LayerNorm(121) → Linear(121,64) → SiLU → Linear(64,1)</code>，再取 sigmoid。这个标签不区分收益幅度，也没有通过两条完整机器人 rollout 来比较真实成功率。</p>
+    <p>121 维输入包含 query 状态 38、anchor 状态 38、绝对差 38、距离／语义／源成功标志 3、future 统计 4；没有直接读取候选的完整后续动作、实际 M7 residual 或当前去噪噪声／时间步。因此分数应读成<strong>代理 loss 改善倾向</strong>，而不是任务成功概率。</p>
+    <details><summary>复用权重时，除了形状还要核对什么？</summary><div><p>旧 M6 的 <code>legacy_no_future_single_task</code> 策略把 future 设 0、semantic score 设 1；<code>full_v1</code> 才保留实际特征。同样是 121 维，不代表输入分布兼容。还需核对状态／phase schema、训练 prompt、候选协议与 checkpoint。</p><p>A→B 同时增加数据和训练步数；C→D 重建混合候选并重训；V2 重新训练 original-only 对照。测试前冻结阈值与 checkpoint，正式测试不在线反向传播。</p></div></details>
+  </section>
+  <section id="writer" class="weekly-question"><span class="question-number">07 · 经验生命周期</span><h2>保存经历、成为候选、值得影响动作，是三层不同的资格。</h2>
+    <p>模块化 V1 在 episode 完成后保存成功和失败轨迹，检查长度、有限值、seed 与结果一致性。anchor 来自动作块起点、phase 变化点，以及最后一个能提供完整 28 步后续动作的位置。没有 anchor 的经历只归档；目前只有成功原型参与动作检索。</p>
+    <p>同 task/object/outcome 下，覆盖距离 ≤ 0.05 的近重复经历合并统计，原始文件继续保留。writer 还没有给局部片段标注真实收益；<code>local_utility</code>、条目级 <code>utility_score</code> 通常为空。失败记录尚未成为已验证的恢复策略或负向动作建议。</p>
+    <Table id="a5" caption="原始文件、活跃容量、粗检索预算和最终片段数，不能混为一个“库大小”" />
+    <div class="weekly-callout note"><p><strong>无容量 ≠ 每次读全库：</strong><code>capacity=null</code> 只关闭容量淘汰，去重与无 anchor 归档仍存在，每次粗检索仍最多 5 条成功历史。Hanging Mug 旧容量通常是成功 10＋失败 10 条活跃原型。</p></div>
+    <h3>如何防止“刚测过的同场景答案”泄漏？</h3><p>单 prompt 在 episode 结束后提交；mixed-prompt 同一物理 scene 的三种表达都读取相同的此前历史，全部完成后才一起写入。训练、验证、测试按 scene 隔离；方法与轮次分别从空库开始，不导入训练、验证、smoke 或其他方法的轨迹。</p>
+    <p>方法一旦改变动作，后续经历也会分叉，所以长期成功率比较的是完整的在线历史策略。<code>reuse_success_rate</code> 只是“用了这条记忆的 episode 有多少成功”，既不是单片段因果收益，也没有自动停用或降权功能。</p>
+  </section>
+  <section id="versions" class="weekly-question"><span class="question-number">08 · 演变与开放问题</span><h2>多个分支并存，每次比较都要带上协议。</h2>
+    <Table id="a1" caption="实际架构与协议演变；阶段序号对应实验结果页" />
+    <p>V0 仅在回合开始读取、只作用于首个动作块；早期 V1 扩展到事件与 anchor；训练版 V1 学习 M7/M6；Mean 改的是推理聚合；视频 V2 才增加新的网络分支。后续挂杯位置、历史与 Top-3 均是动作侧分支，不自动命名为 V3。</p>
+    <h3>下一步优先讨论什么？</h3><ol class="w4-steps"><li><strong>局部片段是否真的值得复用？</strong><p>把原始经历保留与动作建议资格分开；终局成功不能替代局部接触、抓取、进展与意图判断。</p></li><li><strong>如何让收益监督更接近闭环执行？</strong><p>同状态 off/on 分支的真实执行收益是待讨论方向，当前仍用动作 loss 二分类代理，尚未构造该监督。</p></li><li><strong>用更清楚的状态语义，还是先改注入？</strong><p>阶段、夹爪与局部意图可能影响适用性；已有层位置与聚合结果提供线索，但还没有唯一定位负迁移原因。</p></li></ol>
+    <p class="w4-muted">预测—执行偏差驱动的失败恢复按当前决定暂缓；学习式 grounding、语义等价训练、自动按因果收益停用记忆，以及未来帧质量提升都未成为这些已完成实验的能力。</p>
+    <p class="w4-source">依据《Memory_WAM_Architecture_Evolution.md》§2–10，2026-09-24。页内描述与表格来自报告对实际 runtime、配置和已有审计的核查；本次网站更新没有访问实验服务器或重跑 GPU 验证。</p>
+  </section>
+</Week4Layout>

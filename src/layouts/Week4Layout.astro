@@ -1,0 +1,22 @@
+---
+import WeeklyLayout from "./WeeklyLayout.astro";
+import "../styles/model-week4.css";
+interface Props { title: string; description: string; active?: "overview" | "architecture" | "experiments"; chapters?: string[][] }
+const { title, description, active = "overview", chapters = [] } = Astro.props;
+const root = import.meta.env.BASE_URL.replace(/\/$/, "") + "/model-architecture/problems/week4/";
+const pages = [["overview", "本周问题", ""], ["architecture", "简化架构与注入方式", "architecture/"], ["experiments", "实验递进与结果", "experiments/"]];
+---
+<WeeklyLayout title={title + " · Week 4"} description={description} section="problems" week={4}>
+  <div class="w4-scope">
+    {active !== "overview" && <a class="w4-back" href={root}>← 返回 Week 4 · 本周问题</a>}
+    <p class="eyebrow">WEEK 4 · MEMORY INJECTION & ARCHITECTURE</p>
+    <h1>{title}</h1><p class="intro">{description}</p>
+    <p class="weekly-meta">更新：2026-09-24 · Faster-WAM memory 主线 · 依据组内实验报告与实际架构记录</p>
+    {active !== "overview" && <nav class="w4-subnav" aria-label="Week 4 内容">{pages.map(([id,label,path]) => <a href={root+path} aria-current={active === id ? "page" : undefined}>{label}</a>)}</nav>}
+    <div class:list={{"weekly-reading": chapters.length > 0}}>
+      {chapters.length > 0 && <nav class="weekly-toc" aria-label="本页阅读目录"><strong>阅读目录</strong>{chapters.map(([id,label])=><a href={"#"+id}>{label}</a>)}</nav>}
+      <article class="weekly-article"><slot /></article>
+    </div>
+    <nav class="w4-bottom" aria-label="继续阅读 Week 4">{pages.filter(([id])=>id!==active).map(([,label,path])=><a href={root+path}>{label} →</a>)}<a href="#main">返回页首 ↑</a></nav>
+  </div>
+</WeeklyLayout>
