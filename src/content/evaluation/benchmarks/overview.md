@@ -37,11 +37,13 @@ references:
 
 ## AlphaBrain Platform 评测套件（编排层）
 
-[AlphaBrain Platform](./alphabrain-platform/) 将 LIBERO（Spatial/Object/Goal/Long）、LIBERO-plus、CALVIN、RoboTwin、RoboCasa/RoboCasa365、SimplerEnv 与 BEHAVIOR-1K 接入统一的 policy-server / simulation-client 流程。它复用各 benchmark 的官方任务协议，不应被计作新的第九个 benchmark；持续学习场景可在 T×T 矩阵上补充 ASR、BWT、F 指标。详细的覆盖边界、平台自报结果证据等级与全身 humanoid 迁移注意事项见 [AlphaBrain 条目](./alphabrain-platform/)。
+[AlphaBrain Platform](../alphabrain-platform/) 将 LIBERO（Spatial/Object/Goal/Long）、LIBERO-plus、CALVIN、RoboTwin、RoboCasa/RoboCasa365、SimplerEnv 与 BEHAVIOR-1K 接入统一的 policy-server / simulation-client 流程。它复用各 benchmark 的官方任务协议，不应被计作新的第九个 benchmark；持续学习场景可在 T×T 矩阵上补充 ASR、BWT、F 指标。详细的覆盖边界、平台自报结果证据等级与全身 humanoid 迁移注意事项见 [AlphaBrain 条目](../alphabrain-platform/)。
 
-本目录现已提供各套件的独立调研卡片： [LIBERO](./libero/)、[LIBERO-plus](./libero-plus/)、[CALVIN](./calvin/)、[RoboTwin 2.0](./robotwin/)、[RoboCasa/RoboCasa365](./robocasa/)、[SimplerEnv](./simplerenv/) 与 [BEHAVIOR-1K](./behavior-1k/)。
+本目录现已提供各套件的独立调研卡片： [LIBERO](../libero/)、[LIBERO-plus](../libero-plus/)、[CALVIN](../calvin/)、[RoboTwin 2.0](../robotwin/)、[RoboCasa/RoboCasa365](../robocasa/)、[SimplerEnv](../simplerenv/) 与 [BEHAVIOR-1K](../behavior-1k/)。
 
-导航与通用操作补充卡片： [Habitat-Lab](./habitat-lab/) 与 [ManiSkill](./maniskill/)。二者都是可组合的 benchmark/仿真栈；使用自定义任务时，必须把结果标成项目协议或迁移实验。
+导航与通用操作补充卡片： [Habitat-Lab](../habitat-lab/) 与 [ManiSkill](../maniskill/)。二者都是可组合的 benchmark/仿真栈；使用自定义任务时，必须把结果标成项目协议或迁移实验。
+
+每个 Benchmark 的原生机器人型号、策略控制量与动作语义见[Benchmark 原生机器人本体与控制量图谱](../robot-action-audit/)；把方法实际部署到这些 Benchmark 的闭环结果见[复现与实测记录](../../reproductions/overview/)。
 
 ## 3. 数据集—benchmark 的合规连接流程
 
