@@ -41,24 +41,24 @@ AlphaBrain Platform 不属于本表：它是 LIBERO、CALVIN、RoboTwin、RoboCa
 
 | Benchmark | 原生本体 | 策略控制量 | 控制器 / 频率 | 适配状态 |
 |---|---|---|---|---|
-| [HumanoidBench](./humanoidbench/) | H1 + 双 Shadow Hand（主实验）；仓库另有 H1 原生手、H1 + Robotiq 2F-85、G1 三指手、Digit | 61D 连续动作＝H1 身体 19 + 每手 21；position target 或 torque | MuJoCo / MJX，50 Hz | 已锁定 |
-| [Mimicking-Bench](./mimicking-bench/) | Unitree H1（19 关节） | 19D；position / velocity / torque 三种控制语义 | Isaac Gym，50 Hz | 已锁定 |
-| [SMPLOlympics](./smplolympics/) | SMPL / SMPL-X 参数化物理人形（非量产型号） | PD joint-position target；latent 变体输出 embedding 再由低层策略解码 | Isaac Gym，30 Hz | 已锁定（参数化本体） |
-| [LeVERB-Bench](./leverb-bench/) | Unitree G1 | 高层 latent behavior → dynamics-level WBC 解码为关节量；统一动作维数未公开 | Isaac Sim 渲染 + WBC | 未锁定 |
-| [SIMPLE](./simple/) | G1 + Inspire 灵巧手；框架另支持 Franka / ALOHA / 轮式机器人 | 无统一维数：decoupled WBC 与 SONIC WBC 两条控制链 | MuJoCo 3.3 + Isaac Sim 4.5 | 随控制链变化 |
-| [BiGym](./bigym/) | H1 上身 + Robotiq 2F-85；浮动基座移动 | joint position 或 torque；floating-base 另有 pelvis x / y / yaw | MuJoCo | 随配置变化 |
-| [LIBERO](./libero/) | Franka Panda 单臂 + 平行夹爪 | 7D 末端增量＝Δpos 3 + Δrot 3 + gripper 1 | robosuite / MuJoCo，20 Hz | 已锁定 |
-| [LIBERO-plus](./libero-plus/) | Franka Panda（仅扰动初始状态，不换型号） | 继承 LIBERO 的 7D 末端增量 | robosuite / MuJoCo | 已锁定 |
-| [CALVIN](./calvin/) | Franka Panda 单臂 | 7D 相对末端动作（与 LIBERO 的 7D 语义不同） | PyBullet 内置控制器 | 已锁定 |
-| [RoboTwin 2.0](./robotwin/) | AgileX ALOHA 双臂；官方 profile 另含双 ARX X5、双 Franka | 14D 双臂关节（每臂 7，含夹爪通道），归一化 [-1,1] | SAPIEN | 已锁定（主榜）+ 可选 profile |
-| [RoboCasa / RoboCasa365](./robocasa/) | PandaOmron（Panda 臂 + Omron 底盘，旧名 PandaMobile） | 12D＝base motion 4 + control-mode 1 + EE 位姿 6 + gripper 1 | robosuite + MuJoCo，20 Hz | 已锁定（365 默认） |
+| [HumanoidBench](../humanoidbench/) | H1 + 双 Shadow Hand（主实验）；仓库另有 H1 原生手、H1 + Robotiq 2F-85、G1 三指手、Digit | 61D 连续动作＝H1 身体 19 + 每手 21；position target 或 torque | MuJoCo / MJX，50 Hz | 已锁定 |
+| [Mimicking-Bench](../mimicking-bench/) | Unitree H1（19 关节） | 19D；position / velocity / torque 三种控制语义 | Isaac Gym，50 Hz | 已锁定 |
+| [SMPLOlympics](../smplolympics/) | SMPL / SMPL-X 参数化物理人形（非量产型号） | PD joint-position target；latent 变体输出 embedding 再由低层策略解码 | Isaac Gym，30 Hz | 已锁定（参数化本体） |
+| [LeVERB-Bench](../leverb-bench/) | Unitree G1 | 高层 latent behavior → dynamics-level WBC 解码为关节量；统一动作维数未公开 | Isaac Sim 渲染 + WBC | 未锁定 |
+| [SIMPLE](../simple/) | G1 + Inspire 灵巧手；框架另支持 Franka / ALOHA / 轮式机器人 | 无统一维数：decoupled WBC 与 SONIC WBC 两条控制链 | MuJoCo 3.3 + Isaac Sim 4.5 | 随控制链变化 |
+| [BiGym](../bigym/) | H1 上身 + Robotiq 2F-85；浮动基座移动 | joint position 或 torque；floating-base 另有 pelvis x / y / yaw | MuJoCo | 随配置变化 |
+| [LIBERO](../libero/) | Franka Panda 单臂 + 平行夹爪 | 7D 末端增量＝Δpos 3 + Δrot 3 + gripper 1 | robosuite / MuJoCo，20 Hz | 已锁定 |
+| [LIBERO-plus](../libero-plus/) | Franka Panda（仅扰动初始状态，不换型号） | 继承 LIBERO 的 7D 末端增量 | robosuite / MuJoCo | 已锁定 |
+| [CALVIN](../calvin/) | Franka Panda 单臂 | 7D 相对末端动作（与 LIBERO 的 7D 语义不同） | PyBullet 内置控制器 | 已锁定 |
+| [RoboTwin 2.0](../robotwin/) | AgileX ALOHA 双臂；官方 profile 另含双 ARX X5、双 Franka | 14D 双臂关节（每臂 7，含夹爪通道），归一化 [-1,1] | SAPIEN | 已锁定（主榜）+ 可选 profile |
+| [RoboCasa / RoboCasa365](../robocasa/) | PandaOmron（Panda 臂 + Omron 底盘，旧名 PandaMobile） | 12D＝base motion 4 + control-mode 1 + EE 位姿 6 + gripper 1 | robosuite + MuJoCo，20 Hz | 已锁定（365 默认） |
 | RoboCasa-GR1（官方扩展） | Fourier GR-1 双臂 + 灵巧手 + 腰部 | 29D 关节级动作（DiT4DiT 权重实测） | robosuite-GR1 | 变体，按 embodiment 单列 |
-| [BEHAVIOR-1K](./behavior-1k/) | R1Pro（2026 Challenge 默认）；另 Fetch / TIAGo / Stretch / R1 | 底盘 + 头 + 躯干 + 单双臂 + 夹爪按所选机器人拼接；无跨本体统一维数 | OmniGibson → Isaac Sim / PhysX | 随配置变化 |
-| [Habitat-Lab](./habitat-lab/) | Fetch / Franka / Stretch 2 / Spot；Habitat 3 另有 humanoid agent | PointNav 离散 move / turn 或底盘速度；Rearrange 组合 base + arm + gripper | Habitat-Sim | 随 task 配置 |
-| [ManiSkill](./maniskill/) | Panda / Fetch / WidowX / xArm / UR10e / SO-100 / Allegro / G1 / H1 / Go2 等 | 关节、速度、末端、力矩多控制模式；维数从 `env.action_space` 读取 | SAPIEN（GPU 并行） | 随配置变化 |
-| [MS-HAB](./mshab/) | Fetch 移动操作体 | 13D normalized delta-pos＝底盘 2 + 躯干 3 + 臂 7 + 夹爪 1 | ManiSkill 3 / SAPIEN | 已锁定（基线） |
-| [SimplerEnv](./simplerenv/) | Google Robot / WidowX 250s + Bridge | 7D 末端＝Δxyz 3 + axis-angle 3 + gripper 1；IK + Ruckig 转关节目标 | SAPIEN / ManiSkill2_real2sim | 已锁定 |
-| [SPARK](./spark/) | Unitree G1（论文重点）；另 AgiBot G1、R1 Lite、iiwa 14、Kinova Gen3 | nominal action → filtered safe action；一阶 velocity 或二阶 acceleration / force | MuJoCo / Isaac Sim | 随 robot dynamic config |
+| [BEHAVIOR-1K](../behavior-1k/) | R1Pro（2026 Challenge 默认）；另 Fetch / TIAGo / Stretch / R1 | 底盘 + 头 + 躯干 + 单双臂 + 夹爪按所选机器人拼接；无跨本体统一维数 | OmniGibson → Isaac Sim / PhysX | 随配置变化 |
+| [Habitat-Lab](../habitat-lab/) | Fetch / Franka / Stretch 2 / Spot；Habitat 3 另有 humanoid agent | PointNav 离散 move / turn 或底盘速度；Rearrange 组合 base + arm + gripper | Habitat-Sim | 随 task 配置 |
+| [ManiSkill](../maniskill/) | Panda / Fetch / WidowX / xArm / UR10e / SO-100 / Allegro / G1 / H1 / Go2 等 | 关节、速度、末端、力矩多控制模式；维数从 `env.action_space` 读取 | SAPIEN（GPU 并行） | 随配置变化 |
+| [MS-HAB](../mshab/) | Fetch 移动操作体 | 13D normalized delta-pos＝底盘 2 + 躯干 3 + 臂 7 + 夹爪 1 | ManiSkill 3 / SAPIEN | 已锁定（基线） |
+| [SimplerEnv](../simplerenv/) | Google Robot / WidowX 250s + Bridge | 7D 末端＝Δxyz 3 + axis-angle 3 + gripper 1；IK + Ruckig 转关节目标 | SAPIEN / ManiSkill2_real2sim | 已锁定 |
+| [SPARK](../spark/) | Unitree G1（论文重点）；另 AgiBot G1、R1 Lite、iiwa 14、Kinova Gen3 | nominal action → filtered safe action；一阶 velocity 或二阶 acceleration / force | MuJoCo / Isaac Sim | 随 robot dynamic config |
 
 按本体类别统计：6 个双足/物理人形、7 个机械臂/移动操作/双臂、4 个平台型 Benchmark 栈；平台栈的动作维数随环境配置变化。
 
@@ -90,5 +90,5 @@ AlphaBrain Platform 不属于本表：它是 LIBERO、CALVIN、RoboTwin、RoboCa
 ## 5. 使用方式
 
 - 选一个 Benchmark 做横向比较前，先读它的“控制量”一列，确认自己的策略输出与官方 action 契约一致，或者明确写成“第三方适配实验”。
-- 报告里至少附上第 3 节的 6 个字段；转移评测的边界说明见[Benchmark 对比指南](./comparison-guide/)与[输入与量化指标手册](./input-metrics-guide/)。
+- 报告里至少附上第 3 节的 6 个字段；转移评测的边界说明见[Benchmark 对比指南](../comparison-guide/)与[输入与量化指标手册](../input-metrics-guide/)。
 - 要复现本页口径：以各官方仓库当前 release 的 robot config、env ID 与 action space 为准，逐条从代码读回维数与关节顺序，不从论文数字推断。
