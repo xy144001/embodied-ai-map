@@ -157,6 +157,14 @@ references:
 
 仿真技术栈到具体 benchmark 的选择、原生/适配边界与迁移接口见[仿真方法—Benchmark 适配地图](simulator-benchmark-map/)。
 
+## 复现实测与前沿方向
+
+| 页面 | 回答什么 |
+|---|---|
+| [跨方法 Benchmark 复现实测总览](../reproductions/overview/) | 6 个已公开方法在 7 个目标 Benchmark 上的真实闭环结果、四档结果口径与空白原因 |
+| [Benchmark 原生机器人本体与控制量图谱](../benchmarks/robot-action-audit/) | 每个 Benchmark 的原生本体、策略控制量与动作语义；跨本体适配必须记录的 6 个字段 |
+| [自动 Benchmark 构建与开放词汇评测](automated-benchmark-construction/) | 2026 年自动构建/开放词汇方向的相关工作、可复用机制与仍空缺的物理语义 operator |
+
 ## 选择建议
 
 - 想比较一个控制/规划算法：先用 **HumanoidBench**；同时给出状态输入与视觉/触觉输入的差异。
