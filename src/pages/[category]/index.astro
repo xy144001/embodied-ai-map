@@ -9,10 +9,11 @@ const labels = { datasets: "数据集", evaluation: "评测", "macro-thinking": 
 const category = Astro.params.category as keyof typeof labels;
 const items = (await getCollection("dossier", ({ data }) => data.category === category && !data.draft));
 const evaluationGroups = [
-  { key: "overview", title: "总览与评测范式", description: "范围界定、数据—仿真—基准链路，以及统一报告协议。" },
+  { key: "overview", title: "总览与评测范式", description: "范围界定、数据—仿真—基准链路、统一报告协议，以及自动构建/开放词汇等前沿方向的调研。" },
   { key: "platforms", title: "仿真与评测平台", description: "将算法部署到虚拟 humanoid、接入物理/传感器并执行 rollout 的引擎、训练栈与控制框架。" },
   { key: "datasets", title: "数据集", description: "用于预训练、动作重定向、感知评测和 benchmark 构造的全身运动、人—物交互与跨本体数据。" },
   { key: "benchmarks", title: "Benchmark", description: "固定任务、初始条件、成功判定和数据关联的可比评测协议；与上方数据集的使用路径单独说明。" },
+  { key: "guides", title: "评测口径与操作指南", description: "部署审计、Benchmark 对比、输入与指标口径、本体与控制量审计、数据集协议与格式、运行时接入。" },
   { key: "reproductions", title: "复现与实测记录", description: "把已公开方法部署到目标 Benchmark 后记录的真实闭环结果、结果口径、数据与环境缺陷修复。" },
 ];
 const macroAuthors = [

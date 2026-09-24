@@ -129,4 +129,4 @@ RoboCasa365 边界：当前 DiT4DiT RoboCasa checkpoint 面向 GR1 的 29 维动
 
 ## 7. 结论
 
-四个方法都只是“部分 Benchmark 上的成功案例”，而这个“部分”由方法自身的本体决定：**每多一个本体，就多写一份接口**。可复用的部分是成功判定（官方 evaluator 与本体无关），需要按 Benchmark 重写的是观测与动作映射。下一步的接口契约与优先级见[复现实测总览](../overview/)；各 Benchmark 的原生本体与动作语义见[本体与控制量图谱](../../benchmarks/robot-action-audit/)。
+四个方法都只是“部分 Benchmark 上的成功案例”，而这个“部分”由方法自身的本体决定：**每多一个本体，就多写一份接口**。可复用的部分是成功判定（官方 evaluator 与本体无关），需要按 Benchmark 重写的是观测与动作映射。下一步的接口契约与优先级见[复现实测总览](../overview/)；各 Benchmark 的原生本体与动作语义见[本体与控制量图谱](../../guides/robot-action-audit/)。

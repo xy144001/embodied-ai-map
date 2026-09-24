@@ -192,4 +192,4 @@ ActionCmd("decoupled_wbc",
 5. 实现并单元测试 `compute_reward`/`check_success` 的原子条件；用手工构造的 qpos/contact 状态验证成功与失败边界；
 6. 最后注册 Gym ID、加入评测 CLI，用 VideoRecorder 和 summary.json 检查 terminated、预算、视频与实际物理行为一致。
 
-本页与 [SIMPLE Benchmark 条目](../simple/)（任务协议与数据）及 [Psi0 × SIMPLE 复现记录](../../reproductions/simple-psi0/)（实测结果与缺陷）配套使用。
+本页与 [SIMPLE Benchmark 条目](../../benchmarks/simple/)（任务协议与数据）及 [Psi0 × SIMPLE 复现记录](../../reproductions/simple-psi0/)（实测结果与缺陷）配套使用。

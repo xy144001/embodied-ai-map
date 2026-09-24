@@ -42,10 +42,10 @@ $$
 
 | Benchmark | 必须或可选输入 | 输入中最容易被误用的字段 | 输出 action | 不能混淆的对照 |
 |---|---|---|---|---|
-| [HumanoidBench](../humanoidbench/) | 必须：robot proprioception、任务条件；可选：task-relevant object state、头部双相机 RGB、448-taxel tactile | object pose 是 privileged state；RGB 与 tactile 的频率、延迟和分辨率会改变难度 | 当前 robot XML actuator 对应的连续 control | state oracle、vision、vision+tactile 三套结果分表 |
-| [Mimicking-Bench](../mimicking-bench/) | human reference motion、scene/object geometry、robot state；视觉字段以发布 runner 为准 | human motion 是参考，不是 robot joint command；未见 object mesh 不可用于训练 | retargeted reference 或 position/velocity/torque 型全身 control | 仅 retarget、tracking policy、scene-aware generation+tracking 分开 |
-| [LeVERB-Bench](../leverb-bench/) | image history、language instruction、robot proprioception；task metadata 可含 objective/verb category | 图片/语言属于高层输入；真值 state 只能作 oracle | 高层 latent behavior + 低层 dynamics-level WBC action | image vs state、with/without language、不同 camera view 分开 |
-| [SIMPLE](../simple/) | Isaac Sim visual stream、MuJoCo state/proprioception、task language/config；可选 demonstration context | 必须检查 render state 与 physics state 同步；不允许用 object GT 偷看 | whole-body action 或 action chunk，经 AMO/SONIC/adapter 落到 controller | state policy、vision policy、VLA/WAM、不同 data source 分开 |
+| [HumanoidBench](../../benchmarks/humanoidbench/) | 必须：robot proprioception、任务条件；可选：task-relevant object state、头部双相机 RGB、448-taxel tactile | object pose 是 privileged state；RGB 与 tactile 的频率、延迟和分辨率会改变难度 | 当前 robot XML actuator 对应的连续 control | state oracle、vision、vision+tactile 三套结果分表 |
+| [Mimicking-Bench](../../benchmarks/mimicking-bench/) | human reference motion、scene/object geometry、robot state；视觉字段以发布 runner 为准 | human motion 是参考，不是 robot joint command；未见 object mesh 不可用于训练 | retargeted reference 或 position/velocity/torque 型全身 control | 仅 retarget、tracking policy、scene-aware generation+tracking 分开 |
+| [LeVERB-Bench](../../benchmarks/leverb-bench/) | image history、language instruction、robot proprioception；task metadata 可含 objective/verb category | 图片/语言属于高层输入；真值 state 只能作 oracle | 高层 latent behavior + 低层 dynamics-level WBC action | image vs state、with/without language、不同 camera view 分开 |
+| [SIMPLE](../../benchmarks/simple/) | Isaac Sim visual stream、MuJoCo state/proprioception、task language/config；可选 demonstration context | 必须检查 render state 与 physics state 同步；不允许用 object GT 偷看 | whole-body action 或 action chunk，经 AMO/SONIC/adapter 落到 controller | state policy、vision policy、VLA/WAM、不同 data source 分开 |
 
 ### 2.1 每次论文都应把 input 写成字段表
 

@@ -74,7 +74,6 @@ references:
 | SAPIEN + ManiSkill | 高吞吐操作仿真/基准栈 | 迁移：现成任务以操作为主，非双足全身基准 | [条目](../platforms/sapien-maniskill/) |
 | OmniGibson + BEHAVIOR | 家庭场景与长时程交互仿真 | 迁移：场景/任务丰富，原生重点非双足全身控制 | [条目](../platforms/omnigibson-behavior/) |
 | InternUtopia（原 GRUtopia） | 城市/社会场景的导航与移动操作栈 | 迁移：高层场景丰富，非专用双足全身基准 | [条目](../platforms/internutopia/) |
-| 平台部署审计 | 准入条件、官方硬件需求、安装路径与实验留档 | 只保留可将算法接入虚拟 robot 并运行 rollout 的系统 | [指南](../platforms/deployment-audit/) |
 
 ### 控制参考实现：可运行方法，不等同通用仿真平台
 
@@ -106,9 +105,6 @@ references:
 | SPARK | 高：humanoid autonomy/teleoperation 安全控制 | 以 task performance 与 safety constraint log 联合计分 | [条目](../benchmarks/spark/) |
 | BiGym | 迁移：移动双臂家庭操作，默认非双足 humanoid | 人类 demonstrations 可作上游操作数据；不能替代双足全身测试 | [条目](../benchmarks/bigym/) |
 | ManiSkill-HAB（MS-HAB） | 迁移：家居重排与低层全身控制，默认非双足 humanoid | RL/IL demos 与长时程 task graph 可迁移；需重写足部评测 | [条目](../benchmarks/mshab/) |
-| Benchmark—数据集关联总览 | 明确数据角色、去泄漏和闭环计分 | 连接全部数据集与目标 benchmark | [总览](../benchmarks/overview/) |
-| Benchmark 对比指南 | 横向解释任务、数据模态、输入输出与 success predicate | 防止把 data metric 当作 benchmark score | [指南](../benchmarks/comparison-guide/) |
-| Benchmark 输入与量化指标手册 | 统一定义 observation、action、success 与安全/效率诊断量 | 用于复现与横向比较 | [手册](../benchmarks/input-metrics-guide/) |
 
 ### 数据集
 
@@ -123,8 +119,18 @@ references:
 | EgoBody | 自我中心多模态社交动作 | 人形感知、遮挡、第一人称感知评测 | [条目](../datasets/egobody/) |
 | RH20T | 人类演示配对的机器人多模态轨迹 | 操作策略预训练/one-shot 转移，非全身人形原生 | [条目](../datasets/rh20t/) |
 | Open X-Embodiment | 跨机器人 RLDS 数据联盟 | 通用 VLA 预训练与跨本体对照，非全身人形原生 | [条目](../datasets/open-x-embodiment/) |
-| 数据集评测协议 | 数据→重定向→物理闭环的统一口径 | 连接全部数据集与目标 humanoid 任务环境 | [指南](../datasets/evaluation-protocols/) |
-| 数据集文件结构与字段 | 原始目录、容器、字段语义与仿真变量映射 | 防止将人体 pose 或异构 arm action 误作 robot command | [指南](../datasets/file-formats/) |
+
+### 评测口径与操作指南
+
+| 指南 | 作用 | 入口 |
+|---|---|---|
+| 平台部署审计 | 平台准入条件、官方硬件需求与实验留档标准 | [指南](../guides/deployment-audit/) |
+| Benchmark 对比指南 | 横向解释任务、数据模态、输入输出与 success predicate | [指南](../guides/comparison-guide/) |
+| 输入与量化指标手册 | 统一定义 observation、action、success 与安全/效率诊断量 | [手册](../guides/input-metrics-guide/) |
+| 本体与控制量图谱 | 每个 Benchmark 的原生机器人、动作语义与适配状态 | [图谱](../guides/robot-action-audit/) |
+| 数据集评测协议 | 数据→重定向→物理闭环的统一口径 | [指南](../guides/evaluation-protocols/) |
+| 数据集文件结构与字段 | 原始目录、容器、字段语义与仿真变量映射 | [指南](../guides/file-formats/) |
+| SIMPLE 运行时与扩展指南 | SIMPLE 源码级：自定义机器人/WBC 接入与成功判定 | [指南](../guides/simple-runtime-guide/) |
 
 ## 宏观路径分类
 
@@ -151,18 +157,20 @@ references:
 | 泛化 | 未见物体、布局、质量/摩擦、地形、指令、机器人参数的拆分 | 每一拆分的逐任务分数 | IID 与每类 OOD 分开，不混成一个平均数 |
 | 数据 | 训练数据来源、许可、过滤、human-to-robot retarget 规则 | 样本/轨迹统计、失败样本 | 训练/测试不泄漏；数据量与覆盖度消融 |
 
-## 关联矩阵
+## 关联矩阵与地图
 
 平台、数据集、benchmark 和代表工作的证据等级矩阵见[关系矩阵](relationship-matrices/)。矩阵把“官方直接使用/已发表外部使用/仅兼容建议”分别标成 D、E、C，避免把可接入误报为已使用。
 
 仿真技术栈到具体 benchmark 的选择、原生/适配边界与迁移接口见[仿真方法—Benchmark 适配地图](simulator-benchmark-map/)。
+
+Benchmark 任务协议与数据集的关联、合规连接流程和最小报告表见[Benchmark—数据集关联地图](benchmark-dataset-map/)。
 
 ## 复现实测与前沿方向
 
 | 页面 | 回答什么 |
 |---|---|
 | [跨方法 Benchmark 复现实测总览](../reproductions/overview/) | 6 个已公开方法在 7 个目标 Benchmark 上的真实闭环结果、四档结果口径与空白原因 |
-| [Benchmark 原生机器人本体与控制量图谱](../benchmarks/robot-action-audit/) | 每个 Benchmark 的原生本体、策略控制量与动作语义；跨本体适配必须记录的 6 个字段 |
+| [Benchmark 原生机器人本体与控制量图谱](../guides/robot-action-audit/) | 每个 Benchmark 的原生本体、策略控制量与动作语义；跨本体适配必须记录的 6 个字段 |
 | [自动 Benchmark 构建与开放词汇评测](automated-benchmark-construction/) | 2026 年自动构建/开放词汇方向的相关工作、可复用机制与仍空缺的物理语义 operator |
 
 ## 选择建议

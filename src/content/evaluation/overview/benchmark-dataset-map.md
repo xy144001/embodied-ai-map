@@ -30,20 +30,20 @@ references:
 
 | Benchmark | 固定的评测问题 | 可关联的数据集 | 数据如何进入 benchmark | 最终应报告 |
 |---|---|---|---|---|
-| [HumanoidBench](../humanoidbench/) | 27 个 locomotion 与 whole-body manipulation 仿真任务 | AMASS、GRAB、OMOMO | 用于预训练 walk/reach/motion imitation skill，或构造人类动作/接触先验；官方 benchmark 任务本身以 MuJoCo 环境为准 | 逐任务 success、return、完成时间、跌倒/接触安全、IID/OOD |
-| [Mimicking-Bench](../mimicking-bench/) | 人类动作到 humanoid-scene interaction 的 6 个家庭任务 | AMASS、GRAB、OMOMO、BEHAVE | 人类动作/交互几何是核心参考；通过 retarget 和 scene interaction generation 形成训练数据 | scene/generalization success、tracking、接触、penetration、跌倒 |
-| [LeVERB-Bench](../leverb-bench/) | vision-language humanoid WBC 的 150+ 闭环任务（论文报告） | AMASS/其他人类 MoCap、HumanML3D、EgoBody/H2O（感知迁移） | 重定向 MoCap 与 Isaac Sim 渲染构成视觉—语言训练源；视觉数据可做前端预训练，不能替换闭环评测 | 指令条件 success、视觉 OOD、跌倒/碰撞、oracle-vs-vision gap |
-| [SIMPLE](../simple/) | 60 个全身移动操作任务、50 个室内场景（项目报告） | Open X、RH20T、GRAB、BEHAVE、OMOMO | Open X/RH20T 用于 VLA 上游预训练；人—物数据用于 retarget/接触或感知；目标 task 不得泄漏到预训练 | VLA/WAM closed-loop success、对象/场景/指令 OOD、掉落/跌倒/安全 |
+| [HumanoidBench](../../benchmarks/humanoidbench/) | 27 个 locomotion 与 whole-body manipulation 仿真任务 | AMASS、GRAB、OMOMO | 用于预训练 walk/reach/motion imitation skill，或构造人类动作/接触先验；官方 benchmark 任务本身以 MuJoCo 环境为准 | 逐任务 success、return、完成时间、跌倒/接触安全、IID/OOD |
+| [Mimicking-Bench](../../benchmarks/mimicking-bench/) | 人类动作到 humanoid-scene interaction 的 6 个家庭任务 | AMASS、GRAB、OMOMO、BEHAVE | 人类动作/交互几何是核心参考；通过 retarget 和 scene interaction generation 形成训练数据 | scene/generalization success、tracking、接触、penetration、跌倒 |
+| [LeVERB-Bench](../../benchmarks/leverb-bench/) | vision-language humanoid WBC 的 150+ 闭环任务（论文报告） | AMASS/其他人类 MoCap、HumanML3D、EgoBody/H2O（感知迁移） | 重定向 MoCap 与 Isaac Sim 渲染构成视觉—语言训练源；视觉数据可做前端预训练，不能替换闭环评测 | 指令条件 success、视觉 OOD、跌倒/碰撞、oracle-vs-vision gap |
+| [SIMPLE](../../benchmarks/simple/) | 60 个全身移动操作任务、50 个室内场景（项目报告） | Open X、RH20T、GRAB、BEHAVE、OMOMO | Open X/RH20T 用于 VLA 上游预训练；人—物数据用于 retarget/接触或感知；目标 task 不得泄漏到预训练 | VLA/WAM closed-loop success、对象/场景/指令 OOD、掉落/跌倒/安全 |
 
 ## AlphaBrain Platform 评测套件（编排层）
 
-[AlphaBrain Platform](../alphabrain-platform/) 将 LIBERO（Spatial/Object/Goal/Long）、LIBERO-plus、CALVIN、RoboTwin、RoboCasa/RoboCasa365、SimplerEnv 与 BEHAVIOR-1K 接入统一的 policy-server / simulation-client 流程。它复用各 benchmark 的官方任务协议，不应被计作新的第九个 benchmark；持续学习场景可在 T×T 矩阵上补充 ASR、BWT、F 指标。详细的覆盖边界、平台自报结果证据等级与全身 humanoid 迁移注意事项见 [AlphaBrain 条目](../alphabrain-platform/)。
+[AlphaBrain Platform](../../benchmarks/alphabrain-platform/) 将 LIBERO（Spatial/Object/Goal/Long）、LIBERO-plus、CALVIN、RoboTwin、RoboCasa/RoboCasa365、SimplerEnv 与 BEHAVIOR-1K 接入统一的 policy-server / simulation-client 流程。它复用各 benchmark 的官方任务协议，不应被计作新的第九个 benchmark；持续学习场景可在 T×T 矩阵上补充 ASR、BWT、F 指标。详细的覆盖边界、平台自报结果证据等级与全身 humanoid 迁移注意事项见 [AlphaBrain 条目](../../benchmarks/alphabrain-platform/)。
 
-本目录现已提供各套件的独立调研卡片： [LIBERO](../libero/)、[LIBERO-plus](../libero-plus/)、[CALVIN](../calvin/)、[RoboTwin 2.0](../robotwin/)、[RoboCasa/RoboCasa365](../robocasa/)、[SimplerEnv](../simplerenv/) 与 [BEHAVIOR-1K](../behavior-1k/)。
+Benchmark 分组现已提供各套件的独立调研卡片： [LIBERO](../../benchmarks/libero/)、[LIBERO-plus](../../benchmarks/libero-plus/)、[CALVIN](../../benchmarks/calvin/)、[RoboTwin 2.0](../../benchmarks/robotwin/)、[RoboCasa/RoboCasa365](../../benchmarks/robocasa/)、[SimplerEnv](../../benchmarks/simplerenv/) 与 [BEHAVIOR-1K](../../benchmarks/behavior-1k/)。
 
-导航与通用操作补充卡片： [Habitat-Lab](../habitat-lab/) 与 [ManiSkill](../maniskill/)。二者都是可组合的 benchmark/仿真栈；使用自定义任务时，必须把结果标成项目协议或迁移实验。
+导航与通用操作补充卡片： [Habitat-Lab](../../benchmarks/habitat-lab/) 与 [ManiSkill](../../benchmarks/maniskill/)。二者都是可组合的 benchmark/仿真栈；使用自定义任务时，必须把结果标成项目协议或迁移实验。
 
-每个 Benchmark 的原生机器人型号、策略控制量与动作语义见[Benchmark 原生机器人本体与控制量图谱](../robot-action-audit/)；把方法实际部署到这些 Benchmark 的闭环结果见[复现与实测记录](../../reproductions/overview/)。
+每个 Benchmark 的原生机器人型号、策略控制量与动作语义见[Benchmark 原生机器人本体与控制量图谱](../../guides/robot-action-audit/)；把方法实际部署到这些 Benchmark 的闭环结果见[复现与实测记录](../../reproductions/overview/)。
 
 ## 3. 数据集—benchmark 的合规连接流程
 
@@ -53,7 +53,7 @@ references:
 4. **重定向与物理校验**：人体数据经过 coordinate/scale alignment、IK、joint/torque limit、碰撞体和物体惯量配置后，先评估可执行性，再投入 policy training。
 5. **闭环计分**：测试时由仿真传感器实时驱动 policy；GT human/object state 只能作为 oracle 上界，不能混入正式 vision score。
 
-详细的输入、输出、指标和泄漏审计见[数据集评测协议](../../datasets/evaluation-protocols/)。
+详细的输入、输出、指标和泄漏审计见[数据集评测协议](../../guides/evaluation-protocols/)。
 
 ## 4. 最小 benchmark 报告表
 

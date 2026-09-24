@@ -134,7 +134,7 @@ references:
 
 ## 7. 与本仓库评测地图的关系
 
-1. **接入现有 Benchmark 的工作仍然以人工适配为主**：自动构建系统的判据都建立在某个受控谓词库或固定动作语义之上；把方法落到 LIBERO/RoboCasa/SIMPLE 上，当前路径仍是“定死本体控制量契约 → 逐个 Benchmark 写适配”（依据见[复现实测总览](../../reproductions/overview/)与[本体与控制量图谱](../../benchmarks/robot-action-audit/)）。
+1. **接入现有 Benchmark 的工作仍然以人工适配为主**：自动构建系统的判据都建立在某个受控谓词库或固定动作语义之上；把方法落到 LIBERO/RoboCasa/SIMPLE 上，当前路径仍是“定死本体控制量契约 → 逐个 Benchmark 写适配”（依据见[复现实测总览](../../reproductions/overview/)与[本体与控制量图谱](../../guides/robot-action-audit/)）。
 2. **开放词汇物理语义是全身人形评测的下一个缺口**：现有系统能组合 `Pick/Place/Open/Close`，但不能自动发明 `Strike`、`Scoop`、`Roll-through-gate` 这类接触/动力学 operator 并同步生成可执行的物理判据；本目录的全身任务（HumanoidBench、SIMPLE、Mimicking-Bench 等）也全部使用预定义任务集。
 3. **可复用的最确定的两条**：判据与本体解耦（官方 evaluator 可直接沿用）；server-client 架构与结果登记 schema（本目录的[四档结果口径](../../reproductions/overview/)就是按此实践）。
 

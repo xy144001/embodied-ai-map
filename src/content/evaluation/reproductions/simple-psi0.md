@@ -135,4 +135,4 @@ README 列为该任务 L0|L1|L2 各级别 10 集公开值；“—”表示未�
 3. 高并发负载使单集耗时 15–45 分钟，对超时敏感任务可能不利；争议结果应在低负载机器上复验。
 4. 未覆盖对象：另有 8 个任务（BendPickAndPlaceMP / BendPickAndPlaceOnSofaMP / BendPickAndPlaceTeleop / PickAndBendPlaceMP / PickNPlaceMP / TabletopHandoverMP / XMoveAndHandoverMP / XMoveAndPickMP）无公开 checkpoint，待发布权重后补测。
 
-SIMPLE 的任务结构、双模拟器设计与数据资产见 [SIMPLE Benchmark 条目](../../benchmarks/simple/)；运行时与扩展方式见 [SIMPLE 运行时与扩展指南](../../benchmarks/simple-runtime-guide/)。
+SIMPLE 的任务结构、双模拟器设计与数据资产见 [SIMPLE Benchmark 条目](../../benchmarks/simple/)；运行时与扩展方式见 [SIMPLE 运行时与扩展指南](../../guides/simple-runtime-guide/)。

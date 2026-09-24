@@ -82,4 +82,4 @@ Psi0 × SIMPLE 的复现中，XMovePick（0/15）经逐层排查后定位到两�
 | 5 | RoboCasa-GR1、HumanoidBench、SIMPLE 的全身本体适配 | 待本体与控制量确定后接入 |
 | 6 | 工程项：EGL 硬件渲染（OSMesa 是当前吞吐瓶颈）、复用模型服务端避免冷启动 | 待执行 |
 
-明细页：[UnifoLM-VLA × LIBERO](../unifolm-vla-libero/)、[Psi0 × SIMPLE](../simple-psi0/)、[四方法部署记录](../policy-deployment-records/)；结构性依据：[Benchmark 原生机器人本体与控制量图谱](../../benchmarks/robot-action-audit/)。
+明细页：[UnifoLM-VLA × LIBERO](../unifolm-vla-libero/)、[Psi0 × SIMPLE](../simple-psi0/)、[四方法部署记录](../policy-deployment-records/)；结构性依据：[Benchmark 原生机器人本体与控制量图谱](../../guides/robot-action-audit/)。

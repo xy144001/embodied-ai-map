@@ -61,7 +61,7 @@ HumanoidBench 的主要数据不是离线 demonstration archive，而是**每个
 
 ## 5. 评测时的数据集如何关联
 
-HumanoidBench 本身的 test score来自实时 MuJoCo rollout；AMASS、GRAB、OMOMO 等外部数据集可用于训练 low-level motion skill、human-contact prior 或 retarget，但它们**不改变 benchmark 的官方 success 定义**。报告应分别列：数据集版本/样本 split、retarget 方法、是否预训练，以及最终 HumanoidBench test seeds。详见[Benchmark—数据集关联总览](../overview/)。
+HumanoidBench 本身的 test score来自实时 MuJoCo rollout；AMASS、GRAB、OMOMO 等外部数据集可用于训练 low-level motion skill、human-contact prior 或 retarget，但它们**不改变 benchmark 的官方 success 定义**。报告应分别列：数据集版本/样本 split、retarget 方法、是否预训练，以及最终 HumanoidBench test seeds。详见[Benchmark—数据集关联地图](../../overview/benchmark-dataset-map/)。
 
 ## 6. 可运行性与最小复现
 
