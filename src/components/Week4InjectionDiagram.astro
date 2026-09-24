@@ -1,0 +1,37 @@
+---
+interface Props { video?: boolean }
+const { video = false } = Astro.props;
+const id = video ? "w4-video" : "w4-action";
+const boxes = video ? [
+  {x:20,y:20,w:380,h:76,a:"原 prefill：先形成 query",b:"当前输入 + 固定视频噪声"},
+  {x:20,y:138,w:380,h:76,a:"事件、检索、M6 只执行一次",b:"候选和 context 在此确定"},
+  {x:20,y:266,w:380,h:90,a:"有候选：同输入、同噪声再 prefill",b:"video blocks[27] 后接新 adapter"},
+  {x:510,y:266,w:390,h:90,a:"只改未来 240 tokens",b:"当前帧 120 tokens 保持原样"},
+  {x:510,y:138,w:390,h:76,a:"后续 video block / fusion",b:"只改变 condition layer 28 的未来 K/V"},
+  {x:510,y:20,w:390,h:76,a:"动作分支读取改过的条件",b:"保留原 action blocks[28] 后的 M7"},
+] : [
+  {x:20,y:20,w:380,h:70,a:"当前图像、指令、本体状态",b:"原 Faster-WAM 输入保持原接口"},
+  {x:20,y:135,w:380,h:78,a:"冻结视频 prefill 与动作前缀",b:"action blocks[0…28] → h [1,32,1024]"},
+  {x:20,y:265,w:380,h:76,a:"在此注入 memory 增量",b:"h + 单条增量 / 完整增量的均值"},
+  {x:20,y:395,w:380,h:76,a:"冻结 block 29、输出头与采样",b:"生成 32 步动作，通常执行前 28 步"},
+  {x:510,y:20,w:390,h:70,a:"此前已提交的本方法经验库",b:"当前回合的未来结果不可提前读取"},
+  {x:510,y:126,w:390,h:70,a:"M5：任务、对象、语义粗检索",b:"最多 5 条成功历史 → 展开 anchors"},
+  {x:510,y:232,w:390,h:76,a:"状态 / phase 硬筛 + M6 / 策略",b:"资格通过后，才决定选一条或多条"},
+  {x:510,y:350,w:390,h:88,a:"16×91 经验 tokens → M7",b:"每个候选独立生成最终 hidden residual"},
+  {x:255,y:512,w:430,h:66,a:"M8：执行后记录真实轨迹与结果",b:"单 prompt 回合结束 / 三 prompt 同 scene 完成后提交"},
+];
+---
+<figure class="w4-diagram">
+  <div class="w4-diagram-scroll" tabindex="0" role="region" aria-label={video ? "视频侧 V2 注入图，可横向滚动" : "动作侧 V1 注入图，可横向滚动"}>
+    <svg viewBox={video ? "0 0 940 395" : "0 0 960 602"} role="img" aria-labelledby={id+"-title "+id+"-desc"}>
+      <title id={id+"-title"}>{video ? "V2：先选候选，再修改未来条件" : "V1 / Mean：记忆进入动作隐藏状态，执行后写回"}</title>
+      <desc id={id+"-desc"}>{video ? "先做无视频 memory 的 prefill 并完成唯一一次检索。有候选时用同输入同噪声重做 prefill，仅修改未来 token，再产生最后一层未来 K/V 供动作分支读取。" : "左侧是冻结 Faster-WAM 路径，右侧是经验库、粗检索、硬筛与 M6、经验编码和 M7。M7 的最终残差注入动作第29个块之后；执行结果由 M8 写回。"}</desc>
+      <defs><marker id={id+"-arrow"} markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0 0 L8 4 L0 8" fill="#9ebeff" /></marker></defs>
+      <g stroke="#9ebeff" stroke-width="2" fill="none" marker-end={"url(#"+id+"-arrow)"}>
+        {video ? <><path d="M210 96 V138"/><path d="M210 214 V266"/><path d="M400 311 H510"/><path d="M705 266 V214"/><path d="M705 138 V96"/></> : <><path d="M210 90 V135"/><path d="M210 213 V265"/><path d="M210 341 V395"/><path d="M705 90 V126"/><path d="M705 196 V232"/><path d="M705 308 V350"/><path d="M510 393 H455 V303 H400"/><path d="M210 471 V545 H255"/><path d="M685 545 H934 V54 H900" stroke-dasharray="7 5"/></>}
+      </g>
+      {boxes.map((box,i)=><g><rect x={box.x} y={box.y} width={box.w} height={box.h} rx="7" fill={i === 2 ? "#292847" : "#142338"} stroke={i === 2 ? "#bcb2ff" : "#567197"}/><text x={box.x+box.w/2} y={box.y+29} fill="#e9f1ff" text-anchor="middle" font-size="17" font-weight="600">{box.a}</text><text x={box.x+box.w/2} y={box.y+54} fill="#b4c9e3" text-anchor="middle" font-size={i===8 ? "12" : "14"}>{box.b}</text></g>)}
+    </svg>
+  </div>
+  <figcaption>{video ? "无候选时直接复用第一次 prefill 的缓存。两侧 adapter 共享同一候选集合，分别平均自己的 residual；不重新抽噪声，也不循环重做路由。" : "图示为默认动作侧路径，层编号从 0 开始。当前 GT 相对状态、语言和 future 统计还参与路由与 context；每个动作块重规划时清除上一块 memory，再判断是否触发。"}</figcaption>
+</figure>

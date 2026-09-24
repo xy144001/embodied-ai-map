@@ -1,0 +1,13 @@
+---
+import tables from "../data/week4-memory.json";
+interface Props { id: keyof typeof tables; caption: string }
+const { id, caption } = Astro.props;
+const table = tables[id];
+---
+<div class="weekly-table-wrap" tabindex="0" role="region" aria-label={caption}>
+  <table class:list={["weekly-table", "w4-table", { "w4-wide": table.columns.length > 5 }]} data-source-table={id}>
+    <caption>{caption}</caption>
+    <thead><tr>{table.columns.map(col => <th scope="col">{col}</th>)}</tr></thead>
+    <tbody>{table.rows.map(row => <tr>{row.map((cell,i) => i === 0 ? <th scope="row">{cell}</th> : <td>{cell}</td>)}</tr>)}</tbody>
+  </table>
+</div>

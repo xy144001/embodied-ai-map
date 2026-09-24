@@ -1,0 +1,30 @@
+---
+import Week4Layout from "../../../../layouts/Week4Layout.astro";
+const root = import.meta.env.BASE_URL.replace(/\/$/, "") + "/model-architecture";
+---
+<Week4Layout title="Week 4 · 架构问题" description="从 Faster-WAM 上已经完成的 memory 实验出发，讨论经验该存什么、怎样筛选、在哪一层注入，以及怎样确认它真正帮助执行。">
+  <section class="weekly-question" id="question-one" aria-labelledby="week4-question">
+    <span class="question-number">QUESTION 01 · MEMORY & ACTION</span>
+    <h2 id="week4-question">Memory 模块该如何注入？架构该如何设计？</h2>
+    <p class="w4-lead">我们已经把 memory 接入冻结的 Faster-WAM，并完成了从单任务、语言混库、Mean 聚合，到视频侧注入和 Hanging Mug 复验的一系列实验。现在的问题进一步变成：<strong>在什么状态下，哪一段历史值得用，又该以什么方式改变当前动作？</strong></p>
+    <div class="w4-tags"><span>按任务分别训练</span><span>测试时冻结网络</span><span>经验库跨回合更新</span><span>成功与负迁移都保留</span></div>
+    <div class="w4-entries">
+      <a href={root+"/problems/week4/architecture/"}><span>01 / IMPLEMENTED ARCHITECTURE</span><strong>简化架构与注入方式</strong><p>对应第二份文档：实际启用的 M1–M8、状态与经验 token、动作侧 M7、视频侧 V2、训练监督和写入边界。</p><b>先看 memory 怎样进入模型 →</b></a>
+      <a href={root+"/problems/week4/experiments/"}><span>02 / EXPERIMENTS & EVIDENCE</span><strong>实验递进与结果</strong><p>对应第一份文档：每轮为什么做、改了什么、结果如何；保留订书机的正收益，也解释 Hanging Mug 的负结果与证据边界。</p><b>再看哪些设计得到支持 →</b></a>
+    </div>
+    <div class="weekly-callout"><p><strong>先记住一个实现细节：</strong>Mean-Memory 平均的是每条候选经过完整 M7 后产生的<strong>动作 hidden 增量</strong>，不是历史动作轨迹，也不是原始 memory token。它改变动作生成的中间过程，再由冻结的后续网络继续产生动作。</p></div>
+    <h3>三个结果，概括目前进展</h3>
+    <div class="w4-stats">
+      <div><b>75.00 → 79.67%</b><strong>订书机：首次 Mean 有收益</strong><p>三种 prompt、300 个场景—指令对；Mean-Utility 相对 Baseline 救回 26、损伤 12，净增 14 次成功。</p></div>
+      <div><b>+21 / 300</b><strong>挂杯：中间层比末端损伤少</strong><p>l16 比 l28 多成功 21 场，但仅比 Baseline 多 1 场；还不能说层位置已解决问题。</p></div>
+      <div><b class="negative">449 vs 448 / 900</b><strong>挂杯：状态 Top-3 未稳定改善</strong><p>无容量全量 Mean 与无容量 Top-3 几乎持平，均低于 Baseline 的 477/900。</p></div>
+    </div>
+    <p class="w4-muted">三项来自不同实验协议，不能横向当作同一模型的连续成绩。详细页面保留各自的 prompt、测试集、权重、容量与历史流定义。</p>
+  </section>
+  <section class="weekly-question" id="discussion">
+    <span class="question-number">DISCUSSION · 从结果回到设计</span><h2>本周真正要讨论的三件事</h2>
+    <ol class="w4-steps"><li><strong>什么片段才有资格提供动作建议？</strong><p>一条轨迹最后成功，不代表其中每一次停顿、试探或修正都适用于新的状态。保存经历与准许它指导动作，需要不同标准。</p></li><li><strong>“看起来相近”能否代表“现在用得上”？</strong><p>当前 phase 是粗几何标签，M6 的标签来自动作 loss 改善。它们都还不是可靠的接触状态、任务阶段或闭环成功增益。</p></li><li><strong>注入位置与聚合方式怎样分别验证？</strong><p>动作末端、中间层、视频未来条件、Top-1 与 Mean 都已有对照。下一步需要保持其他条件一致，确认收益来自适用片段、注入机制，还是历史流的后续变化。</p></li></ol>
+    <div class="w4-version-note"><p><strong>怎样与 Memory-WAM 模块一起读？</strong><a href={root+"/memory-wam/"}>09-19 的八模块图</a>保留长期设计目标；本周页面讲 09-24 已实现的简化分支。V1 只改动作侧，V2 已增加视频侧 adapter；之后的挂杯位置与 Top-3 实验仍回到动作侧 V1，不是一个覆盖所有实验的“最新 V3”。</p></div>
+    <p class="w4-source">来源：组内《Memory-WAM / Mean-Memory：实验递进、完整结果与当前认识》与《Memory-WAM：架构演变与实现记录》，均更新于 2026-09-24。本页整理已有结果，没有重新训练或启动 GPU 实验。</p>
+  </section>
+</Week4Layout>

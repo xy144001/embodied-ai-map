@@ -1,0 +1,110 @@
+---
+import Week4Layout from "../../../../../layouts/Week4Layout.astro";
+import Table from "../../../../../components/Week4Table.astro";
+const root=import.meta.env.BASE_URL.replace(/\/$/,"")+"/model-architecture/problems/week4/";
+const chapters=[["protocol","先弄清比较口径"],["early","从接入到 M7/M6 训练"],["language","三 prompt：分库与混库"],["mean","首次 Mean 的收益"],["multitask","推广到四类任务"],["video-results","视频侧 V2"],["mug-position","挂杯：注入位置"],["mug-history","挂杯：更长历史"],["mug-top3","挂杯：无容量 Top-3"],["audit","成功经历为什么有害"],["conclusions","结论与下一步"]];
+---
+<Week4Layout title="实验递进与结果" description="按照研究问题的推进，整理 Faster-WAM memory 已完成的设置、结果和解释边界：从空库旁路，到 Mean、视频侧注入与 Hanging Mug 的负迁移复验。" active="experiments" chapters={chapters}>
+  <section id="protocol" class="weekly-question"><span class="question-number">READ FIRST · 比较对象</span><h2>Memory 能带来收益，也会损伤原本成功的执行。</h2>
+    <p class="w4-lead">当前证据支持继续研究 memory，但还没有找到适用于所有任务的统一注入与选择方案。Mean 改善了首个订书机任务；Hanging Mug 的多轮负结果，则把问题进一步推向<strong>局部片段的适用性与收益监督</strong>。</p>
+    <div class="w4-cards"><div><h3>网络冻结，历史会变化</h3><p>Baseline/off 为官方 Faster-WAM。新增 memory 模块离线训练后冻结；正式测试不更新参数，各方法从独立空库开始，只积累自己的已完成经历。</p></div><div><h3>同时报告救回与损伤</h3><p>救回：对照失败、方法成功。损伤：对照成功、方法失败。二者相减是净成功次数；除以配对数后才是成功率变化，单位 pp（百分点）。</p></div></div>
+    <p>Task 是任务类别，scene 是物理初态，episode 是一次执行。三种 prompt 为官方 original、等义改写 rewrite、简写 concise；它们共享物理场景，不是三个独立任务。环境沿用官方 Randomized，没有额外物理扰动。</p>
+    <div class="weekly-callout note"><p><strong>不能直接累加表格里的样本：</strong>多轮复用固定测试集、旧对照和同 scene 的多个 prompt；同一 persistent stream 内还依赖前面的历史。成功率差不是自动成立的统计显著性，也不能一概当成单次记忆选择的因果效果。</p></div>
+    <details><summary>完整实验阶段与已完成规模</summary><div><Table id="r0" caption="原报告的十二阶段；评测数量含复用关系，不能相加作独立样本量" /></div></details>
+    <p><a href={root+"architecture/#selection"}>先读 Random / Learned / Mean / Top-3 的精确定义 →</a></p>
+  </section>
+  <section id="early" class="weekly-question"><span class="question-number">STAGES 1–4 · 建立可比较的起点</span><h2>先证明接入正确，再问记忆是否帮上忙。</h2>
+    <h3>阶段 1：为什么挑这些 Randomized 任务？</h3><p>先找官方模型已有基础能力、又保留失败空间的任务。六类各从 10 场扩到 30 场，再把订书机与微波炉扩到 100 场。初态按官方专家可行性协议构造，不按待测模型成败筛选。</p>
+    <Table id="r1" caption="难度子集：最终保留 320 场无 memory 结果" />
+    <p>早期订书机 Baseline 为 68%；阶段 A 起使用新构造的独立 100 场测试集，Baseline 为 71%。这两个数字来自不同场景，不能解释成主干能力提高。</p>
+    <h3>阶段 2 · V0：空库旁路与最小注入</h3><p>使用独立 24 条训练、8 条开发轨迹，训练 326,273 参数 adapter 300 步，验证选择 step 225。只在 episode 开始读取并作用于首个动作块；测试复用早期已查看的 20 场。</p>
+    <Table id="r2" caption="V0：接入验证，2 方法 × 20 场" />
+    <p>只有第 12、19、20 场调用 memory，三场在 Off 中也都成功；7 个失败场都没有调用。其余 17 场的预测动作、执行动作和状态逐元素一致。空库、零输出与冻结检查通过。</p>
+    <div class="w4-stage-result"><p><strong>这轮回答的是“接得对不对”。</strong>没有观察到救回失败，但调用覆盖不足，不能从 13/20 持平宣布 memory 无效。开发代理 loss 下降约 8.9%，也不能代替闭环结果。</p></div>
+    <h3>阶段 3 · 早期 V1：扩大调用范围</h3><p>加入开始、阶段变化、停滞事件，沿用 V0 adapter；M6、显式状态对齐和学习型 grounding 未启用。微波炉也沿用订书机 adapter，是早期迁移复验。</p>
+    <Table id="r3" caption="早期 V1：两任务各 100 场、三方法，共 600 次" />
+    <p>订书机简易筛选救回 9、损伤 10；Random 救回 12、损伤 6。微波炉对应为 8/9 与 9/7。早期 Random 的候选条件更宽，因此它的优势不能单独归因于随机排序。</p>
+    <h3>阶段 4 · A/B：训练 M7/M6，再增加开发数据</h3><p>先训练动作 M7，再冻结它，用同 query、同噪声的 off/on 动作 loss 比较给 M6 标注收益倾向。正式 Random 与 Learned 统一 hard 候选、权重和 0.5 门槛，区别在于先随机选一条还是先选最高分。</p>
+    <Table id="r4" caption="A/B 的数据与训练预算；两者共用新 100 场测试集" />
+    <Table id="r5" caption="A/B：更多数据＋更多优化后的结果，每轮 300 次评测" />
+    <details><summary>查看 A/B 的配对救回与损伤</summary><div><Table id="r6" caption="相对 Baseline；净变化为成功次数，不是百分比" /></div></details>
+    <p>Learned 从 A 的 76% 到 B 的 79%，比相同测试集 Baseline 高 8 pp。但数据量与优化步数同时增加约三倍，这不是固定计算量的数据规模消融，也不意味着继续扩容一定更好。</p>
+  </section>
+  <section id="language" class="weekly-question"><span class="question-number">STAGES 5–6 · 语言与历史组织</span><h2>三种表达能否共享经验？先分库，再混库。</h2>
+    <h3>C：共享模型，三种 prompt 各自积累历史</h3><p>160 训练、40 验证、原 100 测试物理场景，每场三种表达。开发池 600 条场景—指令轨迹，其中 200 条 original 复用。M7/M6 训练 12,000/6,000 步；三方法 × 三表达形成九条独立空库历史，共 900 次正式评测。</p>
+    <Table id="r7" caption="C：分库结果；overall 为 100 scene × 3 prompt" />
+    <p>Learned 总体只比 Baseline 多成功 1 次。original 提升，但 concise 低 5 pp；而 Baseline 的 rewrite、concise 本来就比 original 好，因此这轮不是“先造成语义退化，再由 memory 修复”。</p>
+    <h3>D：三种表达进入同一个因果历史库</h3><p>复用 C 的 600 条开发轨迹，重建混合候选并重训 M7/M6，预算相同。每方法一个 300-episode stream；同 scene 的三种表达都读取同一份此前历史，三次全部完成后才一起写入，防止当前场景答案泄漏。</p>
+    <Table id="r8" caption="D：混库结果；三个方法独立空库，共 900 次" />
+    <p>Random 由 C 的 223/300 升到 232/300；Learned 仍为 226/300。Learned 的 493/1,047 次注入来自另一种 prompt，占 47.1%，说明跨表达调用确实发生，却没有带来总体净提升。</p>
+    <div class="weekly-callout note"><p>C→D 同时改变离线候选、重新训练的权重、在线历史组织与分组写入；不能说成“同一模型只切换 memory bank”。下一轮于是冻结 D，单独改推理聚合。</p></div>
+  </section>
+  <section id="mean" class="weekly-question"><span class="question-number">STAGE 7 · 首次 MEAN</span><h2>不赌最高分的一条，让合格候选分别给建议再求均值。</h2>
+    <p>动机是检验：合格候选是否有共同的有益方向，Top-1 排序会不会丢掉这种信号？本轮冻结 D 的所有权重、阈值、容量、顺序与随机协议，不重新训练。旧三方法直接读取已有 900 条结果，两个 Mean 各新增 300 次独立空库执行。</p>
+    <Table id="r9" caption="本轮五种方法；Mean 平均完整单 memory 路径的最终 hidden residual" />
+    <Table id="r10" caption="订书机首次 Mean：固定 100 scene、三种 prompt；五方法比较共 1,500 条结果" />
+    <Table id="r11" caption="完整配对比较；救回、损伤和净变化均为执行次数" />
+    <div class="w4-stage-result"><p><strong>Mean-Utility：225/300 → 239/300，净增 14 次成功（+4.67 pp）。</strong>它救回 26 次，也损伤 12 次；比 Random 高 2.33 pp，比 Learned 高 4.33 pp。Mean-Hard 也超过旧三方法，但比 Mean-Utility 低 1 pp。</p></div>
+    <p>这与“Top-1 不稳定、候选存在共同信号”的假设相容，但没有单独证明该机制。K≥2 时抵消比中位数为 0.9824，没有普遍强抵消；829 次 K≥2 触发里，349 次只来自一个物理 scene，方向相近也可能与片段相关性或 adapter 响应相近有关。</p>
+    <details><summary>实现正确性：K=0/1/2、换序、旧路径与冻结回归</summary><div><Table id="r12" caption="报告已完成的正确性与回归核验；本次网站整理未重跑" /></div></details>
+    <details><summary>首轮 Mean：按 prompt 的全部配对计数</summary><div><Table id="r30" caption="仅属于首次订书机 Mean，不能套用到后续任务" /></div></details>
+    <details><summary>首轮 Mean：候选数、一致性、抵消与来源多样性</summary><div><p>Trigger、去噪调用与 episode 是不同层级；同一个 episode 可以进入多个 K 分组。表中的成功关联是描述统计，不能当作独立样本或因果证据。</p><Table id="r26" caption="按 trigger 统计的候选数分布" /><Table id="r27" caption="每个 trigger 内先汇总去噪步的一致性，再分组" /><Table id="r28" caption="完整 residual 的抵消比；重点看 K≥2，避免单候选恒等值掩盖差异" /><Table id="r29" caption="K≥2 trigger 的来源多样性；片段数不等于独立经历数" /></div></details>
+  </section>
+  <section id="multitask" class="weekly-question"><span class="question-number">STAGE 8 · 跨任务检查策略</span><h2>扩展之后，没有一种选择方法在所有任务上都最好。</h2>
+    <p>新增微波炉、罐子入篮、物体入篮、挂杯四类；每类 160/40/100 场景，各三 prompt，<strong>各自从零训练该任务的 M7/M6</strong>。五方法共享该任务的冻结权重，每方法 300 次，共新增 6,000 次正式评测。</p>
+    <Table id="r13" caption="四类任务分别训练后的结果；每单元格分母 300" />
+    <p>微波炉与罐子入篮是 Mean-Hard 最好；物体入篮是 Learned 最好。Hanging Mug 四种 memory 方法均低于 Baseline，Mean-Utility 的 concise 更降至 37%，对应 Baseline 为 47%。</p>
+    <p>新增四任务中，Mean-Hard 都高于 Mean-Utility，与首个订书机任务相反。说明阈值价值和聚合排序具有任务依赖；各方法历史会分叉，不能把差异直接当成拒绝某条候选的单次因果效果。</p>
+    <div class="weekly-callout note"><p>这不是订书机权重的零样本迁移，也不是统一跨五任务模型。原计划第五个新增任务 move_can_pot 已取消；早期无 memory 的 30 场容易任务，不能替代本轮缺失的容易任务负迁移对照。</p></div>
+    <h3>挂杯的负收益，是候选互相抵消了吗？</h3>
+    <Table id="r14" caption="仅对应 mixed-prompt 轮：K≥2 的 M7 去噪调用统计" />
+    <p>抵消比是 <code>‖mean(Δ)‖ / mean(‖Δᵢ‖)</code>。挂杯中位数 0.9936，方向大体一致，Mean 却低于 Baseline。因此“表现差一定因为方向相反、相互抵消”不符合这轮诊断；也可能是多条建议共同不适用，具体原因尚未分离。</p>
+    <details><summary>展开四任务 × 三 prompt 的完整结果与配对</summary><div><Table id="r31" caption="每任务、每 prompt、每方法 100 次；同 scene 三表达相关" /><Table id="r32" caption="每任务 300 个 scene—prompt 对的救回与损伤" /></div></details>
+  </section>
+  <section id="video-results" class="weekly-question"><span class="question-number">STAGE 9 · MEMORY-WAM V2</span><h2>把 memory 接入视频未来条件，仍然有任务收益差异。</h2>
+    <p>只用 original prompt，每类 160 训练、40 验证、固定 100 测试。重新训练 original-only 的动作 M7/M6（6,000/3,000 步），冻结后再训练视频 adapter 6,000 步。V1 与 V2 都使用 Mean-Utility，共享动作权重、M6、阈值及容量。</p>
+    <Table id="r15" caption="五类、三方法、各 100 场，共 1,500 次正式评测" />
+    <p>V2 相对 V1：订书机、微波炉各多成功 2、3 场；罐子入篮、物体入篮、挂杯各少成功 5、1、1 场。视频侧接入没有形成一致收益，也没有消除挂杯负迁移。</p>
+    <details><summary>展开 V2 相对 Baseline 与 V1 的配对比较</summary><div><Table id="r16" caption="每项比较 100 对；净变化为成功次数" /></div></details>
+    <div class="weekly-callout"><p>零初始化、当前帧保护、未来 hidden/head 与 action 的实际变化、训练路径与注入路径一致性均有既有审计。监督仍是动作 diffusion MSE；没有增加视频重建目标，所以不能把这些检查解释成“未来视频预测更准确”。</p></div>
+    <p class="w4-muted">本轮 V1 是重新训练的 original-only 对照，不能和前面 mixed-prompt 的 original 一列直接相减并只归因于视频 adapter。<a href={root+"architecture/#video"}>查看 V2 的实际数据流 →</a></p>
+  </section>
+  <section id="mug-position" class="weekly-question"><span class="question-number">STAGE 10A · 挂杯注入位置</span><h2>换到中间层可以减轻损伤，但还没稳定超过原模型。</h2>
+    <p>回到动作侧 V1，只用 original，不加视频 adapter。第 1 轮新的 300 场中，分别在 action blocks[8]、[16]、[28] 后使用 Mean-Hard；每个模型只接一个位置。前两位置各训练自己的 M7 6,000 步，末端复用原始 prompt 专用 M7。</p>
+    <Table id="r17" caption="同一轮 300 场的位置比较；l8/l16/l28 是从 0 编号的 block" />
+    <Table id="r18" caption="位置之间的配对比较；l16 对 Baseline 救回 29、损伤 28" />
+    <p>l16 比 l28 多成功 21 场，说明层位置可能影响损伤程度；但 l16 只比 Baseline 多 1 场。没有证据把它直接定为通用最优层，也不能说已解决挂杯。</p>
+    <p class="w4-muted">这里不是同一权重机械搬层，也不是同时注入三层。位置实验仅做这一轮 300 场；相同训练步数也不等于相同计算量。使用 Mean-Hard 是为了避免旧 M6 的标签依赖原注入位置。</p>
+  </section>
+  <section id="mug-history" class="weekly-question"><span class="question-number">STAGE 10B · 三轮更长历史</span><h2>多积累一些经历，或定期清库，能自然修复负迁移吗？</h2>
+    <p>三轮各 300 个新的物理 scene，共 900 个不同初态；每轮、每方法各自空库。固定末端动作 M7/M6，比较连续历史与每 100 场清活跃索引。三轮是三条独立历史，不是同一个 bank 连跑 900 场。</p>
+    <Table id="r19" caption="历史比较：5 方法 × 3 轮 × 300 场 = 4,500 次" />
+    <p>Random 清库合计 461/900，高于连续的 445/900；Mean-Utility 清库 450/900，高于连续的 442/900。两者仍低于 Baseline 477/900，而且 Mean 第 3 轮反而是连续历史更好。</p>
+    <details><summary>是不是开始有效，后来记忆越多越差？</summary><div><Table id="r20" caption="连续 Mean 相对同窗口 Baseline 的净成功次数" /><p>前三个首 100 场窗口分别是 −2、+3、−4，并非都有效。第 3 轮后段差距反而收窄。各窗口的场景不同，原始成功率随时间变化不能自动解释成学习或遗忘。</p></div></details>
+    <div class="weekly-callout note"><p>这轮仍有容量限制。连续 300 场表示持续更新库，不表示 300 条历史都能进入活跃检索。历史对照 4,500 次，加位置支线新增 900 次，整个阶段 5,400 次；位置 Baseline 复用，没有再额外运行一遍。</p></div>
+    <p>既有审计确认连续／reset 方法在前 100 场完整动作一致，分歧在清库协议开始生效后出现。更长运行仍未稳定消除负迁移，因此接着核查实际容量和候选片段数。</p>
+  </section>
+  <section id="mug-top3" class="weekly-question"><span class="question-number">STAGE 11 · 无容量与状态 TOP-3</span><h2>把候选压到最近的 3 个片段，整体仍未改善。</h2>
+    <p>旧三轮虽然各保存 300 条原始记录，最终活跃索引各只有 20 条；各有 280 次容量移除。3,955 次旧 Mean 注入中，58.53% 超过 3 个候选片段，但只有 9.84% 超过 3 条不同历史轨迹。因此本次 Top-3 明确作用于片段。</p>
+    <p>新建两组都取消容量淘汰，沿用三轮 900 场、末端 M7/M6、original prompt 和随机协议；不清库、不训练、不加视频分支。主要比较是<strong>无容量全量 Mean vs 无容量状态 Top-3</strong>，共新增 1,800 次，旧对照只读取文件。</p>
+    <Table id="r21" caption="同 900 场固定对照复验；前 3 行为复用的旧结果" />
+    <Table id="r22" caption="无容量方法的配对结果；Top-3 对全量 Mean 救回 99、损伤 100" />
+    <div class="w4-stage-result"><p><strong>Top-3 合计 448/900，全量 Mean 449/900，净少 1 场。</strong>三轮分别少 3、多 7、少 5，没有稳定整体收益。两组仍低于 Baseline 的 477/900。</p></div>
+    <p>干预确实生效：新六条 bank 各保留 300 条活跃记录，零容量淘汰、零重复合并；Top-3 的 2,313/3,763 次实际注入（61.47%）确实截取了原本超过 3 个的候选。</p>
+    <p>无容量 Mean 比旧有容量 Mean 多成功 7 场（+0.78 pp），仍比 Baseline 少 28 场，尚不能把容量淘汰视为负迁移的主要解释。旧 900 场已经查看过，这是固定对照复验；本轮没有验证其他 K、按独立轨迹取 Top-K 或学习式状态相似度。</p>
+    <div class="weekly-callout"><p>“全量”仅指本次 coarse/hard/utility 流程得到的全部合格片段，粗检索仍最多 5 条成功历史。状态 Top-3 不是全库 Top-3，不是 utility Top-3，也不要求来自三条不同轨迹。</p></div>
+  </section>
+  <section id="audit" class="weekly-question"><span class="question-number">STAGE 12 · 实现审查，不是新性能消融</span><h2>一段经历最后成功，为什么仍可能给出有害建议？</h2>
+    <Table id="r23" caption="当前实际能力与不能据此假定的能力" />
+    <p>成功与失败经历都会保存，但只有成功原型进入动作候选。anchor 后至少需要 28 个实际动作；writer 主要检查合法性、去重和归档，没有学到“这个局部片段对新状态有益”的资格判定。最近六个挂杯 bank 的局部收益字段也没有真实标签。</p>
+    <p>M6 的标签是同 query、同噪声／timestep 下 <code>loss_on &lt; loss_off</code>；它没有执行两条机器人分支比较最终成败，也没有直接观察候选后续动作、M7 residual 或本次噪声／时刻。在线复用成功率只是相关统计，还没有自动停用或降权规则。</p>
+    <details><summary>哪些具体诊断支持继续检查“适用性”？</summary><div><p><strong>以下证据全部来自阶段 C 的订书机三 prompt 分库，不能直接移作 Hanging Mug 的根因。</strong></p><ul><li>66,076 个状态的目标相对位置重算误差约 0.000307 mm；589 次 Learned utility 重放一致；600 个配对在首次注入前动作一致。已检查的几何和评分链路未显示对应实现错误。</li><li>一个候选 TCP 相对位置仅差约 2.5 mm，但目标向量差约 254.8 mm；总距离仍为 0.739，通过 1.2 门槛。这说明均值距离可能掩盖关键不匹配，但大差异本身不是有害真值。</li><li>同一粗 phase 可以混合初次抓取、目标附近精调、放下后重抓；现有表示未明确区分局部意图。</li><li>相同 M6 输入下，两次噪声采样的标签翻转率为训练 32.0%、验证 28.8%；三个验证 prompt 的 AUC 约 0.611/0.659/0.593。最高分选择受到代理标签噪声与判别能力限制。</li><li>改写／简写中受损的 13 个 Baseline 成功实例最终都姿态不合格，其中 9 个位置已合格；姿态同时也是 Baseline 的瓶颈，不能说成 memory 独有问题。</li></ul></div></details>
+    <p>当前无容量挂杯 Mean 既救回 86 场，也损伤 114 场。它表明帮助和伤害并存；不能把所有保存的 memory 都判为错误，也没有唯一定位某一个模块为原因。</p>
+  </section>
+  <section id="conclusions" class="weekly-question"><span class="question-number">DISCUSSION · 当前认识</span><h2>下一步先问“这段经验该不该用”，再问“多条怎么平均”。</h2>
+    <ol class="w4-steps"><li><strong>接入已经有效，但非空 memory 仍有负迁移。</strong><p>空库、零初始化和旧路径回归回答实现是否正确；成功率与双向翻转才回答训练后的经验是否有帮助。</p></li><li><strong>Mean、M6 阈值、视频注入都具有任务依赖。</strong><p>首个任务的正结果不能作为统一策略；需要保留其他任务、prompt 与独立历史的反例。</p></li><li><strong>注入位置、历史长度与容量都没有单独解决挂杯。</strong><p>l16 减轻负迁移，但只比 Baseline 多 1/300；无容量 Top-3 与全量 Mean 只差 1/900。仍需更有针对性的适用性与监督验证。</p></li><li><strong>保存全部经历，与允许局部片段指导动作可以分开。</strong><p>接下来讨论局部进展、接触／抓取状态和动作意图；在独立开发场景里，对同一初态做单片段 off/on 分支，是获取更贴近闭环收益证据的候选方式。</p></li></ol>
+    <details><summary>逐项查看：证据支持什么，还不能推到哪一步？</summary><div><Table id="r24" caption="研究问题、已完成证据与结论边界" /></div></details>
+    <div class="weekly-callout note"><p>这些是待讨论方向，不是新增已完成能力。预测—执行偏差驱动的恢复机制仍暂缓；当前结果没有以测试集失败重新训练或调阈值。原报告附录中的 DiT4DiT V2 是另一条语言微调研究，不纳入 Faster-WAM memory 的证据。</p></div>
+    <p class="w4-source">依据用户提供的《mean_memory_report(1).md》主文 §1–14、附录 A/B，以及《Memory_WAM_Architecture_Evolution.md》，更新于 2026-09-24。表格从这两份文档提取；原始逐集 CSV、服务器代码与审计文件未随本次附件提供，本页不声称重新核验了那些底层文件。</p>
+  </section>
+</Week4Layout>
