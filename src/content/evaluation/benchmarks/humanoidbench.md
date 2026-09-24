@@ -40,7 +40,7 @@ HumanoidBench 的主要数据不是离线 demonstration archive，而是**每个
 | tactile | 全身 MuJoCo tactile grid：论文描述共 448 个 taxels，每个给 3D contact force；手部更高分辨率 | 接触位置/力的离散化读数 | 接触感知或安全约束；报告 force clip/阈值与模态消融 |
 | episode log | action、reward、termination、contact、state trajectory、视频（由 evaluator 导出） | 一次闭环执行记录 | 诊断掉落、跌倒、卡死、误碰撞和任务失败 |
 
-**关键边界**：`qpos/qvel/object pose` 是 MuJoCo 在时刻 $t$ 的观测，不是 benchmark 提供的正确 action；policy 的输出仍是按当前 robot XML 定义的连续 actuator control。不同 hand/robot 的 action dimension 和语义不同，不能直接平均比较。
+**关键边界**：`qpos/qvel/object pose` 是 MuJoCo 在时刻 t 的观测，不是 benchmark 提供的正确 action；policy 的输出仍是按当前 robot XML 定义的连续 actuator control。不同 hand/robot 的 action dimension 和语义不同，不能直接平均比较。
 
 ## 3. 输入 → 输出 → 判分：一个具体 episode
 

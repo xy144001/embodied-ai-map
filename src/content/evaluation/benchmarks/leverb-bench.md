@@ -18,7 +18,7 @@ references:
 
 ## 1. Benchmark 卡片：它在考“看懂并动起来”
 
-[LeVERB](https://arxiv.org/abs/2506.13751)论文提出 LeVERB-Bench：10 个类别、150+ humanoid whole-body control 闭环任务。它的关键区分是：策略不能只获得“向前 $x$ 米”或“手到某 pose”的手工 action vocabulary，而要从**视觉观测和语言指令**选择一个可由低层 WBC 执行的全身行为。[论文 PDF](https://people.eecs.berkeley.edu/~sastry/pubs/Pdfs%20of%202025/XueLeVERB2025.pdf)
+[LeVERB](https://arxiv.org/abs/2506.13751)论文提出 LeVERB-Bench：10 个类别、150+ humanoid whole-body control 闭环任务。它的关键区分是：策略不能只获得“向前 x 米”或“手到某 pose”的手工 action vocabulary，而要从**视觉观测和语言指令**选择一个可由低层 WBC 执行的全身行为。[论文 PDF](https://people.eecs.berkeley.edu/~sastry/pubs/Pdfs%20of%202025/XueLeVERB2025.pdf)
 
 具象地说，指令可能要求 robot 看到某对象后走向特定区域、绕开障碍、转身或做全身姿态动作；评分要求它在视觉闭环中选对行为且低层动作不失稳。论文报告 LeVERB 方法在简单视觉导航子集为 80.0% success、跨任务总体为 58.5%；这些是**该论文方法与其设定**的结果，不是任何后续方法的默认分数。
 
