@@ -92,3 +92,8 @@ SIMPLE 自己含 task/scene assets 及两条 demonstration 生成 pipeline；外
 官方仓库提供 `pyproject.toml`、`uv.lock`、Dockerfile、docker-compose、`Makefile`/`make.bat`、examples 与 scripts；优先按其当前 README 的 lockfile/容器路径部署，而不是从论文手动拼依赖。仓库自述建立在 AMO/SONIC 上，并整合 Ψ0、π0.5、GR00T、DreamZero、Cosmos3 等路线；这表示多个 policy adapter 已存在，**不表示所有模型在每个 task 上公平可比**。
 
 SIMPLE 是目前四个 benchmark 中任务/场景规模最大的候选之一，但仍是近期项目。发布结果时必须锁定 commit、asset bundle、MuJoCo/Isaac Sim version、数据生成版本和 evaluator；并用独立真机协议验证 sim-to-real，不把仿真 success 写成硬件成功。
+
+## 8. 实测记录（本地复现）
+
+- **Psi0 × SIMPLE**：16 个可测任务 × 3 个 DR 级别 × 5 集 = 240 集闭环，总成功率 **46.2%**（与 README 公开值可比的 29 个级别为 48.3% vs 75.9%）。过程中定位并修复 8 项数据/代码/环境缺陷，其中 XMovePick 的材质 DR 与指令模板不一致直接导致该任务 15 集全败。明细、逐任务表与缺陷清单见 [Psi0 × SIMPLE 复现记录](../../reproductions/simple-psi0/)。
+- **扩展与排错**：运行时结构、自定义机器人/WBC 接入、成功判定的源码级说明见 [SIMPLE 运行时与扩展指南](../../guides/simple-runtime-guide/)。
