@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1100 1140" role="img" aria-labelledby="title desc">
+<title id="title">相同新 gate，只改变监督来源</title><desc id="desc">离线配对只来自开发集；终局结果是训练标签，绝不进入在线 gate 输入。</desc>
+<defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#97b8ee"/></marker></defs>
+<rect width="1100" height="1140" rx="12" fill="#091522"/>
+<g font-family="system-ui, Noto Sans SC, Microsoft YaHei, sans-serif">
+<text x="36" y="43" font-size="27" font-weight="700" fill="#f0f5ff">相同新 gate，只改变监督来源</text>
+<text x="36" y="76" font-size="17" fill="#a9bdd9">离线配对只来自开发集；终局结果是训练标签，绝不进入在线 gate 输入。</text>
+<path d="M 550,210 L 550,245 L 275,245 L 275,280" fill="none" stroke="#97b8ee" stroke-width="2" marker-end="url(#arrow)"/>
+<path d="M 550,210 L 550,245 L 825,245 L 825,280" fill="none" stroke="#97b8ee" stroke-width="2" marker-end="url(#arrow)"/>
+<path d="M 275,370 L 275,407.5 L 550,407.5 L 550,445" fill="none" stroke="#97b8ee" stroke-width="2" marker-end="url(#arrow)"/>
+<path d="M 825,370 L 825,407.5 L 550,407.5 L 550,445" fill="none" stroke="#97b8ee" stroke-width="2" marker-end="url(#arrow)"/>
+<path d="M 550,550 L 550,587.5 L 550,587.5 L 550,625" fill="none" stroke="#97b8ee" stroke-width="2" marker-end="url(#arrow)"/>
+<path d="M 550,725 L 550,762.5 L 275,762.5 L 275,800" fill="none" stroke="#97b8ee" stroke-width="2" marker-end="url(#arrow)"/>
+<path d="M 550,725 L 550,762.5 L 825,762.5 L 825,800" fill="none" stroke="#97b8ee" stroke-width="2" marker-end="url(#arrow)"/>
+<g data-node="q"><rect x="160" y="115" width="780" height="95" rx="8" fill="#33291c" stroke="#b69559" stroke-width="1.5"/>
+<text x="550" y="158" text-anchor="middle" font-size="20" font-weight="650" fill="#edf4ff">257 个非空 memory 决策点：恢复相同初态与真实动作前缀</text>
+<text x="550" y="184" text-anchor="middle" font-size="17" fill="#bdd0e9">核对物理状态和实际输入观测；固定同一个 Joint 父模型</text>
+</g>
+<g data-node="off"><rect x="40" y="280" width="470" height="90" rx="8" fill="#14253a" stroke="#577ba8" stroke-width="1.5"/>
+<text x="275" y="320.5" text-anchor="middle" font-size="20" font-weight="650" fill="#edf4ff">Off：当前 chunk 关闭 memory</text>
+<text x="275" y="346.5" text-anchor="middle" font-size="17" fill="#bdd0e9">后续所有 chunk 也关闭</text>
+</g>
+<g data-node="on"><rect x="590" y="280" width="470" height="90" rx="8" fill="#14253a" stroke="#577ba8" stroke-width="1.5"/>
+<text x="825" y="320.5" text-anchor="middle" font-size="20" font-weight="650" fill="#edf4ff">On：当前 chunk 开启原 Mean</text>
+<text x="825" y="346.5" text-anchor="middle" font-size="17" fill="#bdd0e9">后续所有 chunk 也关闭</text>
+</g>
+<g data-node="diff"><rect x="160" y="445" width="780" height="105" rx="8" fill="#33291c" stroke="#b69559" stroke-width="1.5"/>
+<text x="550" y="481" text-anchor="middle" font-size="20" font-weight="650" fill="#edf4ff">514 条闭环 → 比较官方终局成败</text>
+<text x="550" y="507" text-anchor="middle" font-size="17" fill="#bdd0e9">救回 28 → 标签 1；损伤 27 → 标签 0</text>
+<text x="550" y="531" text-anchor="middle" font-size="17" fill="#bdd0e9">202 个 tie 留档，但排除出两组训练</text>
+</g>
+<g data-node="data"><rect x="160" y="625" width="780" height="100" rx="8" fill="#152437" stroke="#647a97" stroke-width="1.5"/>
+<text x="550" y="658.5" text-anchor="middle" font-size="20" font-weight="650" fill="#edf4ff">两组相同的 55 个有效 query：38 训练 / 17 验证</text>
+<text x="550" y="684.5" text-anchor="middle" font-size="17" fill="#bdd0e9">相同固定 noise / timestep、132 维特征、结构与 g=0.5 初始化</text>
+<text x="550" y="708.5" text-anchor="middle" font-size="17" fill="#bdd0e9">仅新 gate 可训练；父 Joint 全部冻结</text>
+</g>
+<g data-node="proxy"><rect x="40" y="800" width="470" height="130" rx="8" fill="#12342f" stroke="#67bda4" stroke-width="1.5"/>
+<text x="275" y="836.5" text-anchor="middle" font-size="20" font-weight="650" fill="#edf4ff">Proxy-Gate：成功动作去噪 MSE</text>
+<text x="275" y="862.5" text-anchor="middle" font-size="17" fill="#bdd0e9">g × 固定 Mean residual</text>
+<text x="275" y="886.5" text-anchor="middle" font-size="17" fill="#bdd0e9">经冻结后缀预测动作 target</text>
+<text x="275" y="910.5" text-anchor="middle" font-size="17" fill="#bdd0e9">允许梯度通过后缀传回 gate</text>
+</g>
+<g data-node="outcome"><rect x="590" y="800" width="470" height="130" rx="8" fill="#12342f" stroke="#67bda4" stroke-width="1.5"/>
+<text x="825" y="836.5" text-anchor="middle" font-size="20" font-weight="650" fill="#edf4ff">Outcome-Gate：终局收益 BCE</text>
+<text x="825" y="862.5" text-anchor="middle" font-size="17" fill="#bdd0e9">同结构 gate 的 logit</text>
+<text x="825" y="886.5" text-anchor="middle" font-size="17" fill="#bdd0e9">标签：当前 chunk 开启能否救回</text>
+<text x="825" y="910.5" text-anchor="middle" font-size="17" fill="#bdd0e9">仅更新这一个 gate</text>
+</g>
+<text x="40" y="1000" font-size="17" fill="#a7bddb">已完成两组各 3000 步训练；正式评测仍进行中（报告截点 2026-09-30 11:08:39）。</text>
+<text x="40" y="1036" font-size="17" fill="#a7bddb">比较的是局部单 chunk 干预标签与代理监督；尚不是持续注入的全局收益或整网强化学习。</text>
+</g></svg>

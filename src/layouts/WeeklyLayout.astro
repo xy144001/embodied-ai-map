@@ -4,7 +4,7 @@ interface Props {
   title: string;
   description: string;
   section: "problems" | "tasks";
-  week: 1 | 2 | 3 | 4;
+  week: 1 | 2 | 3 | 4 | 5;
 }
 const { title, description, section, week } = Astro.props;
 const base = import.meta.env.BASE_URL.replace(/\/$/, "");
@@ -20,7 +20,7 @@ const weekRoot = root + "/" + section + "/";
     <meta name="description" content={description} />
     <title>{title} · 具身机器人技术地图</title>
     <link rel="stylesheet" href={root + "/module-sections.css?v=20260919-memory"} />
-    <link rel="stylesheet" href={root + "/weekly-sections.css?v=20260924-week4"} />
+    <link rel="stylesheet" href={root + "/weekly-sections.css?v=20260930-week5"} />
   </head>
   <body class="subpage weekly-page">
     <a class="weekly-skip" href="#main">跳转到正文</a>
@@ -36,6 +36,7 @@ const weekRoot = root + "/" + section + "/";
         <a class:list={{ active: week === 2 }} href={weekRoot + "week2/"} aria-current={week === 2 ? "page" : undefined}>Week 2</a>
         {section === "problems" && <a class:list={{ active: week === 3 }} href={weekRoot + "week3/"} aria-current={week === 3 ? "page" : undefined}>Week 3</a>}
         {section === "problems" && <a class:list={{ active: week === 4 }} href={weekRoot + "week4/"} aria-current={week === 4 ? "page" : undefined}>Week 4</a>}
+        {section === "problems" && <a class:list={{ active: week === 5 }} href={weekRoot + "week5/"} aria-current={week === 5 ? "page" : undefined}>Week 5</a>}
       </nav>
       <slot />
     </main>

@@ -1,0 +1,29 @@
+---
+interface Props { id: "evolution"|"relation"|"paths"|"candidate"|"joint"|"gate"|"supervision"; caption: string; compact?: boolean }
+const {id,caption,compact=false}=Astro.props;
+const src=import.meta.env.BASE_URL.replace(/\/$/,"")+"/model-architecture/week5/"+id+".svg";
+const titles={evolution:"架构分支总览",relation:"Relation 关系注意力",paths:"专属与共享输出通路",candidate:"候选间 Attention",joint:"局部 LoRA 与 M7 联合适配",gate:"最新 Gate 推理结构",supervision:"Proxy 与 Outcome 监督对照"};
+---
+<figure class:list={["w5-figure",{compact}]} data-week5-figure>
+  <div class="w5-figure-tools"><button type="button" data-figure-open hidden>放大查看架构图 ↗</button><a href={src} target="_blank" rel="noopener">打开矢量原图</a><a href={src} download={"Memory-WAM-"+id+".svg"}>下载 SVG</a></div>
+  <p class="w5-scroll-note">可左右滑动查看全图，或点击“放大查看架构图”。</p>
+  <div class="w5-figure-scroll" tabindex="0" role="region" aria-label={titles[id]+"，窄屏可横向滚动"}><img src={src} alt={titles[id]+"。"+caption} loading="lazy" decoding="async" /></div>
+  <figcaption>{caption} 窄屏可横向滑动；放大后可切换适应宽度与细节模式。</figcaption>
+  <dialog class="w5-modal" aria-label={titles[id]+"放大视图"}>
+    <div class="w5-modal-bar"><strong>{titles[id]}</strong><button type="button" data-figure-zoom aria-pressed="false">放大细节</button><button type="button" data-figure-close>关闭 ×</button></div>
+    <div class="w5-modal-canvas" tabindex="0"><img src={src} alt={titles[id]} loading="lazy" /></div>
+  </dialog>
+</figure>
+<script>
+  document.querySelectorAll<HTMLElement>("[data-week5-figure]").forEach(figure=>{
+    const open=figure.querySelector<HTMLButtonElement>("[data-figure-open]")!;
+    const dialog=figure.querySelector<HTMLDialogElement>("dialog")!;
+    const zoom=figure.querySelector<HTMLButtonElement>("[data-figure-zoom]")!;
+    const canvas=figure.querySelector<HTMLElement>(".w5-modal-canvas")!;
+    open.hidden=false;
+    open.addEventListener("click",()=>{canvas.classList.remove("zoomed");zoom.setAttribute("aria-pressed","false");zoom.textContent="放大细节";dialog.showModal();});
+    figure.querySelector("[data-figure-close]")!.addEventListener("click",()=>dialog.close());
+    zoom.addEventListener("click",()=>{const enlarged=canvas.classList.toggle("zoomed");zoom.setAttribute("aria-pressed",String(enlarged));zoom.textContent=enlarged?"适应宽度":"放大细节";});
+    dialog.addEventListener("close",()=>open.focus({preventScroll:true}));
+  });
+</script>

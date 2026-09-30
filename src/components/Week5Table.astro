@@ -1,0 +1,14 @@
+---
+import tables from "../data/week5-memory.json";
+interface Props { id: keyof typeof tables; caption: string }
+const {id,caption}=Astro.props; const table=tables[id];
+---
+<div class="w5-table-block">
+  <p class="w5-scroll-note">窄屏可左右滑动表格</p>
+  <div class="weekly-table-wrap" tabindex="0" role="region" aria-label={caption+"，可横向滚动"}>
+    <table class:list={["weekly-table","w5-table",{"w5-wide":table.columns.length>5}]} data-source-table={id}>
+      <caption>{caption}</caption><thead><tr>{table.columns.map(col=><th scope="col">{col}</th>)}</tr></thead>
+      <tbody>{table.rows.map(row=><tr>{row.map((cell,i)=>i===0?<th scope="row">{cell}</th>:<td>{cell}</td>)}</tr>)}</tbody>
+    </table>
+  </div>
+</div>

@@ -1,0 +1,43 @@
+---
+import Week5Layout from "../../../../layouts/Week5Layout.astro";
+import Figure from "../../../../components/Week5Figure.astro";
+const root=import.meta.env.BASE_URL.replace(/\/$/,"")+"/model-architecture/problems/week5/";
+const steps=[
+ ["routing","先确认：到底哪里没有迁移？","新场景、同类历史顺序与任务混合一起变了；先排查分类和串扰。"],
+ ["relation","一条经验怎样理解眼前状态？","Relation 首轮 71%→83%；放回混合集后，收益没有整体复现。"],
+ ["paths","哪些参数该专属，哪些该共享？","Hybrid 在五任务有收益，十任务没有复现；区分共享参数与共享经历。"],
+ ["candidate","多条建议该平均，还是加权？","候选 Attention 与单条内部 attention 不同；新场景上仍未稳定超过 Mean。"],
+ ["joint","冻结主干是否限制了 memory？","局部 LoRA 联合训练没有胜过 M7-only；用同权重开关 memory 分离效果。"],
+ ["gate","训练有没有教会“何时值得用”？","同结构 gate 对照去噪监督与终局收益监督；正式评测尚未完成。"],
+];
+---
+<Week5Layout title="Week 5 · 从单任务收益到多任务迁移" description="沿着“发现问题—排除解释—修改架构—检查证据”的顺序，讲清近期 Memory-WAM 的实验与设计演变。">
+  <section class="weekly-question" id="question-one">
+    <span class="question-number">QUESTION 01 · TRANSFER & GENERALIZATION</span>
+    <h2>如何将单任务的 memory 增益迁移到多任务里？</h2>
+    <p class="w5-lead">我们已经看见 memory 在部分场景中帮助动作，但还没有得到稳定的多任务收益。接下来要弄清：<strong>是路由错了、经验与当前状态不匹配、参数共享方式不合适，还是训练目标没有直接教会“这次该不该用 memory”？</strong></p>
+    <div class="w5-badges"><span>实验结果＋架构演变一起讲</span><span>已知任务内路由</span><span>参数共享 ≠ 跨类经历混用</span><span>进行中结果单独标记</span></div>
+    <div class="w5-entries">
+      <a href={root+"experiments/"}><small>01 / TALK THROUGH THE EVIDENCE</small><strong>按问题讲实验</strong><p>六个追问串起设计动机、架构改动、结果和下一步。先读主表，逐任务结果与诊断放在可展开的补充里。</p><b>进入讲解主线 →</b></a>
+      <a href={root+"architecture/"}><small>02 / SEE WHAT ACTUALLY CHANGED</small><strong>架构演变图解</strong><p>七张矢量图，分清 Relation、共享通路、候选 Attention、Joint 和最新 Gate 的接线、训练范围与监督来源。</p><b>切换、放大并下载架构图 →</b></a>
+    </div>
+    <div class="weekly-callout"><p><strong>开场先说清“多任务”的含义：</strong>近期系统先预测已知任务类别，再读该类 bank、调用对应 M6/M7 或输出通路。共享方案主要共享网络参数，<strong>没有直接把挂杯子的历史动作混给开微波炉任务</strong>，也尚未验证未知任务或逐类增量学习。</p></div>
+    <div class="w5-stats">
+      <div><b>71% → 83%</b><strong>关系建模：首轮单任务正收益</strong><p>旧 100 场复验救回 15、损伤 3；这不是新场景或多任务稳定提升的证明。</p></div>
+      <div><b>+2.2 / −1.2 pp</b><strong>Hybrid：五任务与十任务反转</strong><p>分别相对各自 Baseline；两套网络分别联合训练，不能只归因于推理时多插入任务。</p></div>
+      <div><b>74.9% / 69.8%</b><strong>M7-only 高于本轮 Joint</strong><p>另一批新场景上，冻结主干只续训 M7 更好；监督方式仍在继续验证。</p></div>
+    </div>
+    <p class="w5-muted">这三组数字对应不同场景、训练与评测协议，用来概括不同问题，不构成同一个模型逐版升级的成绩曲线。</p>
+  </section>
+  <section class="weekly-question" id="talk-order">
+    <span class="question-number">READING ORDER · 建议讲解顺序</span><h2>从“为什么没复现”，讲到“该怎样教它用记忆”。</h2>
+    <ol class="w5-route">{steps.map(([id,title,description])=><li><a href={root+"experiments/#"+id}><strong>{title}</strong><p>{description}</p></a></li>)}</ol>
+    <p>每一段都按同一顺序展开：<strong>怀疑什么 → 为什么这样设计对照 → 架构改在哪里 → 结果支持什么 → 接下来追问什么。</strong>这样听众能跟上问题的推进，而不必先记住所有方法名。</p>
+  </section>
+  <section class="weekly-question" id="evolution">
+    <span class="question-number">ARCHITECTURE MAP · 先看全局</span><h2>这些是并行验证，不是把所有模块越叠越多。</h2>
+    <Figure id="evolution" caption="从动作侧 V1 / Mean 出发，分别研究任务路由、关系建模、参数共享、候选聚合与主干适配。最新 Gate 接在固定 Joint 外，视频 V2 保留为独立分支。" />
+    <div class="w5-pending"><strong>最新不等于最好；进行中不等于已完成。</strong><p>结果报告截点为 2026-09-30 11:08:39（北京时间）。两种收益监督 gate 已训练，正式评测仅完成 165/1800；Week5 按这份快照展示，不推断最终排名。</p></div>
+    <p class="w5-source">依据《Memory_WAM_Recent_Experiments_Review.md》及《Memory_WAM_Methods_and_Latest_Architecture.md》（含 §14 的 09-30 追加内容）。本页与 Week4 分别保留各自实验快照，结论以对应比较条件为限。</p>
+  </section>
+</Week5Layout>

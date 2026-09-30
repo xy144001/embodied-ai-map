@@ -1,0 +1,66 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1100 1120" role="img" aria-labelledby="title desc">
+<title id="title">架构演变：从哪里分支，就回答哪一个问题</title><desc id="desc">箭头表示结构／实验来源，不表示全部权重或模块逐版累积。</desc>
+<defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#97b8ee"/></marker></defs>
+<rect width="1100" height="1120" rx="12" fill="#091522"/>
+<g font-family="system-ui, Noto Sans SC, Microsoft YaHei, sans-serif">
+<text x="36" y="43" font-size="27" font-weight="700" fill="#f0f5ff">架构演变：从哪里分支，就回答哪一个问题</text>
+<text x="36" y="76" font-size="17" fill="#a9bdd9">箭头表示结构／实验来源，不表示全部权重或模块逐版累积。</text>
+<path d="M 550,195 L 550,222.5 L 190,222.5 L 190,250" fill="none" stroke="#97b8ee" stroke-width="2" marker-end="url(#arrow)"/>
+<path d="M 550,195 L 550,222.5 L 730,222.5 L 730,250" fill="none" stroke="#97b8ee" stroke-width="2" marker-end="url(#arrow)"/>
+<path d="M 730,350 L 730,380 L 730,380 L 730,410" fill="none" stroke="#97b8ee" stroke-width="2" marker-end="url(#arrow)"/>
+<path d="M 730,510 L 730,550 L 200,550 L 200,590" fill="none" stroke="#97b8ee" stroke-width="2" marker-end="url(#arrow)"/>
+<path d="M 730,510 L 730,550 L 550,550 L 550,590" fill="none" stroke="#97b8ee" stroke-width="2" marker-end="url(#arrow)"/>
+<path d="M 730,510 L 730,550 L 900,550 L 900,590" fill="none" stroke="#97b8ee" stroke-width="2" marker-end="url(#arrow)"/>
+<path d="M 900,710 L 900,745 L 900,745 L 900,780" fill="none" stroke="#97b8ee" stroke-width="2" marker-end="url(#arrow)"/>
+<path d="M 900,870 L 900,910 L 550,910 L 550,950" fill="none" stroke="#97b8ee" stroke-width="2" marker-end="url(#arrow)"/>
+<path d="M 900,870 L 900,910 L 900,910 L 900,950" fill="none" stroke="#97b8ee" stroke-width="2" marker-end="url(#arrow)"/>
+<g data-node="v1"><rect x="360" y="115" width="380" height="80" rx="8" fill="#14253a" stroke="#577ba8" stroke-width="1.5"/>
+<text x="550" y="150.5" text-anchor="middle" font-size="20" font-weight="650" fill="#edf4ff">动作侧 V1 / Mean</text>
+<text x="550" y="176.5" text-anchor="middle" font-size="17" fill="#bdd0e9">旧 M7：逐候选修正，再等权平均</text>
+</g>
+<g data-node="video"><rect x="40" y="250" width="300" height="100" rx="8" fill="#152437" stroke="#647a97" stroke-width="1.5"/>
+<text x="190" y="283.5" text-anchor="middle" font-size="20" font-weight="650" fill="#edf4ff">视频 Memory-WAM V2</text>
+<text x="190" y="309.5" text-anchor="middle" font-size="17" fill="#bdd0e9">视频 adapter ＋动作 M7</text>
+<text x="190" y="333.5" text-anchor="middle" font-size="17" fill="#bdd0e9">独立保留；本周没有叠加</text>
+</g>
+<g data-node="auto"><rect x="400" y="250" width="660" height="100" rx="8" fill="#14253a" stroke="#577ba8" stroke-width="1.5"/>
+<text x="730" y="295.5" text-anchor="middle" font-size="20" font-weight="650" fill="#edf4ff">旧 Auto：先判断类别，再选择该类 bank / M6 / M7</text>
+<text x="730" y="321.5" text-anchor="middle" font-size="17" fill="#bdd0e9">已知任务的混合运行；仍按类别隔离经历</text>
+</g>
+<g data-node="relation"><rect x="400" y="410" width="660" height="100" rx="8" fill="#12342f" stroke="#67bda4" stroke-width="1.5"/>
+<text x="730" y="443.5" text-anchor="middle" font-size="20" font-weight="650" fill="#edf4ff">Relation：增强单条 memory 与当前场景的关系</text>
+<text x="730" y="469.5" text-anchor="middle" font-size="17" fill="#bdd0e9">单任务 Relation → 每任务独立 M7 的 Relation-Auto</text>
+<text x="730" y="493.5" text-anchor="middle" font-size="17" fill="#bdd0e9">当前 state / language / observation → 关系 query</text>
+</g>
+<g data-node="paths"><rect x="40" y="590" width="320" height="120" rx="8" fill="#292442" stroke="#a398df" stroke-width="1.5"/>
+<text x="200" y="621.5" text-anchor="middle" font-size="20" font-weight="650" fill="#edf4ff">改参数共享</text>
+<text x="200" y="647.5" text-anchor="middle" font-size="17" fill="#bdd0e9">Private / Hybrid</text>
+<text x="200" y="671.5" text-anchor="middle" font-size="17" fill="#bdd0e9">Shared-Small / Shared</text>
+<text x="200" y="695.5" text-anchor="middle" font-size="17" fill="#bdd0e9">5 类、10 类分别联合训练</text>
+</g>
+<g data-node="candidate"><rect x="390" y="590" width="320" height="120" rx="8" fill="#292442" stroke="#a398df" stroke-width="1.5"/>
+<text x="550" y="621.5" text-anchor="middle" font-size="20" font-weight="650" fill="#edf4ff">改候选聚合</text>
+<text x="550" y="647.5" text-anchor="middle" font-size="17" fill="#bdd0e9">冻结完整 Relation</text>
+<text x="550" y="671.5" text-anchor="middle" font-size="17" fill="#bdd0e9">只训练候选间 Q/K</text>
+<text x="550" y="695.5" text-anchor="middle" font-size="17" fill="#bdd0e9">单任务 · 新场景池与顺序</text>
+</g>
+<g data-node="adapt"><rect x="740" y="590" width="320" height="120" rx="8" fill="#292442" stroke="#a398df" stroke-width="1.5"/>
+<text x="900" y="621.5" text-anchor="middle" font-size="20" font-weight="650" fill="#edf4ff">改可训练范围</text>
+<text x="900" y="647.5" text-anchor="middle" font-size="17" fill="#bdd0e9">M7-only / LoRA-only / Joint</text>
+<text x="900" y="671.5" text-anchor="middle" font-size="17" fill="#bdd0e9">Joint：动作局部 LoRA＋M7</text>
+<text x="900" y="695.5" text-anchor="middle" font-size="17" fill="#bdd0e9">单任务；仍用 Mean</text>
+</g>
+<g data-node="fixed"><rect x="740" y="780" width="320" height="90" rx="8" fill="#14253a" stroke="#577ba8" stroke-width="1.5"/>
+<text x="900" y="820.5" text-anchor="middle" font-size="20" font-weight="650" fill="#edf4ff">固定 Joint 6000 步</text>
+<text x="900" y="846.5" text-anchor="middle" font-size="17" fill="#bdd0e9">父模型、M7、M6 全部冻结</text>
+</g>
+<g data-node="proxy"><rect x="390" y="950" width="320" height="90" rx="8" fill="#12342f" stroke="#67bda4" stroke-width="1.5"/>
+<text x="550" y="990.5" text-anchor="middle" font-size="20" font-weight="650" fill="#edf4ff">Proxy-Gate</text>
+<text x="550" y="1016.5" text-anchor="middle" font-size="17" fill="#bdd0e9">只训新 gate：动作去噪 MSE</text>
+</g>
+<g data-node="outcome"><rect x="740" y="950" width="320" height="90" rx="8" fill="#12342f" stroke="#67bda4" stroke-width="1.5"/>
+<text x="900" y="990.5" text-anchor="middle" font-size="20" font-weight="650" fill="#edf4ff">Outcome-Gate</text>
+<text x="900" y="1016.5" text-anchor="middle" font-size="17" fill="#bdd0e9">同结构新 gate：终局收益 BCE</text>
+</g>
+<text x="40" y="1090" font-size="17" fill="#a7bddb">候选 Attention、共享通路、Joint 是分支；最新 Gate 仅接在固定 Joint 外。</text>
+</g></svg>
