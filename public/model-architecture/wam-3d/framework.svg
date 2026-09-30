@@ -1,0 +1,21 @@
+<svg viewBox="0 0 920 580" role="img" aria-labelledby="flow-title flow-desc" xmlns="http://www.w3.org/2000/svg">
+<title id="flow-title">WAM＋3D 双位置条件注入框架</title><desc id="flow-desc">当前观测进入视觉编码和物体匹配；3D库提供候选物体。匹配并对齐得到几何token，分别增强观测条件和视频骨干。未来表示通过原有接口进入动作生成。</desc>
+<style>.svg-title{font:700 17px system-ui,sans-serif;fill:#213e52}.svg-sub{font:13px system-ui,sans-serif;fill:#526d7e}.svg-label{font:12px system-ui,sans-serif;fill:#677d8b}</style><defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#64788a"/></marker></defs>
+<g fill="none" stroke="#64788a" stroke-width="2" marker-end="url(#arrow)">
+<path d="M210 88V130"/><path d="M345 60H462V130"/><path d="M740 88V108H600V130"/>
+<path d="M555 204V250"/><path d="M210 204V296"/><path d="M420 315H345"/>
+<path d="M210 370V416"/><path d="M555 326V393H310V416"/><path d="M345 452H652"/>
+<path d="M777 492V532H575"/>
+</g>
+<g font-family="system-ui, sans-serif" text-anchor="middle">
+<rect x="75" y="20" width="270" height="68" rx="12" fill="#e7eff7"/><text x="210" y="48" class="svg-title">当前观测 O</text><text x="210" y="71" class="svg-sub">RGB / 可选 RGB-D</text>
+<rect x="600" y="20" width="280" height="68" rx="12" fill="#e1f2ec"/><text x="740" y="48" class="svg-title">已编码的 3D 物体库</text><text x="740" y="71" class="svg-sub">几何 · 语义 · 局部结构</text>
+<rect x="75" y="130" width="270" height="74" rx="12" fill="#e7eff7"/><text x="210" y="160" class="svg-title">原有视觉编码</text><text x="210" y="185" class="svg-sub">或首帧条件 token</text>
+<rect x="420" y="130" width="270" height="74" rx="12" fill="#e1f2ec"/><text x="555" y="160" class="svg-title">匹配 + 空间对齐</text><text x="555" y="185" class="svg-sub">候选、位姿、区域、置信度</text>
+<rect x="420" y="250" width="270" height="76" rx="12" fill="#e1f2ec"/><text x="555" y="280" class="svg-title">几何条件 token G</text><text x="555" y="305" class="svg-sub">固定数量 · 对象身份 · 坐标</text>
+<rect x="75" y="296" width="270" height="74" rx="12" fill="#fff2d8"/><text x="210" y="326" class="svg-title">A · 观测端条件增强</text><text x="210" y="351" class="svg-sub">可独立开关</text>
+<rect x="75" y="416" width="270" height="76" rx="12" fill="#fff2d8"/><text x="210" y="446" class="svg-title">B · Video backbone 注入</text><text x="210" y="472" class="svg-sub">预测未来 · 可独立开关</text>
+<rect x="652" y="416" width="250" height="76" rx="12" fill="#e7eff7"/><text x="777" y="446" class="svg-title">未来表示 / 预测</text><text x="777" y="472" class="svg-sub">原有 latent 接口</text>
+<rect x="335" y="505" width="240" height="56" rx="12" fill="#182f46"/><text x="455" y="539" font-size="17" font-weight="700" fill="white">原有动作生成</text>
+<text x="382" y="306" class="svg-label">读取</text><text x="430" y="385" class="svg-label">几何读取</text>
+</g></svg>
