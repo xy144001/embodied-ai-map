@@ -3,6 +3,7 @@ import Week4Layout from "../../../../layouts/Week4Layout.astro";
 const root = import.meta.env.BASE_URL.replace(/\/$/, "") + "/model-architecture";
 ---
 <Week4Layout title="Week 4 · 架构问题" description="从 Faster-WAM 上已经完成的 memory 实验出发，讨论经验该存什么、怎样筛选、在哪一层注入，以及怎样确认它真正帮助执行。">
+  <div class="weekly-callout"><p><strong>后续进展 · 2026-09-30：</strong><a href={root+"/problems/week5/"}>Week 5：单任务的 memory 增益怎样迁移到多任务？</a> 新增关系注意力、共享通路与收益监督实验；本周继续保留 09-24 的实现与结果快照。</p></div>
   <section class="weekly-question" id="question-one" aria-labelledby="week4-question">
     <span class="question-number">QUESTION 01 · MEMORY & ACTION</span>
     <h2 id="week4-question">Memory 模块该如何注入？架构该如何设计？</h2>

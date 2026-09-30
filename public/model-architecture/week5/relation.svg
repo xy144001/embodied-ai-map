@@ -1,0 +1,84 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1100 1090" role="img" aria-labelledby="title desc">
+<title id="title">Relation：先理解当前场景，再读一条历史</title><desc id="desc">离线训练：完整 M7 可训练；原 WAM 冻结。外层多个候选仍然 Mean。</desc>
+<defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#97b8ee"/></marker></defs>
+<rect width="1100" height="1090" rx="12" fill="#091522"/>
+<g font-family="system-ui, Noto Sans SC, Microsoft YaHei, sans-serif">
+<text x="36" y="43" font-size="27" font-weight="700" fill="#f0f5ff">Relation：先理解当前场景，再读一条历史</text>
+<text x="36" y="76" font-size="17" fill="#a9bdd9">离线训练：完整 M7 可训练；原 WAM 冻结。外层多个候选仍然 Mean。</text>
+<path d="M 190,188 L 190,211.5 L 550,211.5 L 550,235" fill="none" stroke="#97b8ee" stroke-width="2" marker-end="url(#arrow)"/>
+<path d="M 550,188 L 550,211.5 L 550,211.5 L 550,235" fill="none" stroke="#97b8ee" stroke-width="2" marker-end="url(#arrow)"/>
+<path d="M 910,188 L 910,211.5 L 550,211.5 L 550,235" fill="none" stroke="#97b8ee" stroke-width="2" marker-end="url(#arrow)"/>
+<path d="M 550,323 L 550,346.5 L 550,346.5 L 550,370" fill="none" stroke="#97b8ee" stroke-width="2" marker-end="url(#arrow)"/>
+<path d="M 300,415 L 350,415" fill="none" stroke="#97b8ee" stroke-width="2" marker-end="url(#arrow)"/>
+<path d="M 550,460 L 550,477.5 L 550,477.5 L 550,495" fill="none" stroke="#97b8ee" stroke-width="2" marker-end="url(#arrow)"/>
+<path d="M 790,540 L 750,540" fill="none" stroke="#97b8ee" stroke-width="2" marker-end="url(#arrow)"/>
+<path d="M 550,585 L 550,610 L 275,610 L 275,635" fill="none" stroke="#97b8ee" stroke-width="2" marker-end="url(#arrow)"/>
+<path d="M 550,585 L 550,610 L 825,610 L 825,635" fill="none" stroke="#97b8ee" stroke-width="2" marker-end="url(#arrow)"/>
+<path d="M 275,703 L 275,724 L 275,724 L 275,745" fill="none" stroke="#97b8ee" stroke-width="2" marker-end="url(#arrow)"/>
+<path d="M 825,703 L 825,724 L 825,724 L 825,745" fill="none" stroke="#97b8ee" stroke-width="2" marker-end="url(#arrow)"/>
+<path d="M 275,823 L 275,849 L 550,849 L 550,875" fill="none" stroke="#97b8ee" stroke-width="2" marker-end="url(#arrow)"/>
+<path d="M 825,823 L 825,849 L 550,849 L 550,875" fill="none" stroke="#97b8ee" stroke-width="2" marker-end="url(#arrow)"/>
+<path d="M 550,949 L 550,972 L 550,972 L 550,995" fill="none" stroke="#97b8ee" stroke-width="2" marker-end="url(#arrow)"/>
+<path d="M 40,415 L 18,415 L 18,912 L 220,912" fill="none" stroke="#97b8ee" stroke-width="2" marker-end="url(#arrow)"/>
+<path d="M 40,415 L 18,415 L 18,1026 L 220,1026" fill="none" stroke="#97b8ee" stroke-width="2" marker-end="url(#arrow)"/>
+<g data-node="state"><rect x="40" y="110" width="300" height="78" rx="8" fill="#33291c" stroke="#b69559" stroke-width="1.5"/>
+<text x="190" y="144.5" text-anchor="middle" font-size="20" font-weight="650" fill="#edf4ff">当前 state</text>
+<text x="190" y="170.5" text-anchor="middle" font-size="17" fill="#bdd0e9">[1,38] · GT 几何辅助</text>
+</g>
+<g data-node="lang"><rect x="400" y="110" width="300" height="78" rx="8" fill="#14253a" stroke="#577ba8" stroke-width="1.5"/>
+<text x="550" y="144.5" text-anchor="middle" font-size="20" font-weight="650" fill="#edf4ff">有效文本 tokens</text>
+<text x="550" y="170.5" text-anchor="middle" font-size="17" fill="#bdd0e9">[1,L,4096] · 冻结编码</text>
+</g>
+<g data-node="obs"><rect x="760" y="110" width="300" height="78" rx="8" fill="#14253a" stroke="#577ba8" stroke-width="1.5"/>
+<text x="910" y="144.5" text-anchor="middle" font-size="20" font-weight="650" fill="#edf4ff">当前首帧图像 tokens</text>
+<text x="910" y="170.5" text-anchor="middle" font-size="17" fill="#bdd0e9">[1,16,3072] · 4×4 池化</text>
+</g>
+<g data-node="ctx"><rect x="350" y="235" width="400" height="88" rx="8" fill="#12342f" stroke="#67bda4" stroke-width="1.5"/>
+<text x="550" y="262.5" text-anchor="middle" font-size="20" font-weight="650" fill="#edf4ff">多模态关系 context</text>
+<text x="550" y="288.5" text-anchor="middle" font-size="17" fill="#bdd0e9">投影到 128 维；self-attention＋FFN</text>
+<text x="550" y="312.5" text-anchor="middle" font-size="17" fill="#bdd0e9">1 状态＋L 文本＋16 图像 tokens</text>
+</g>
+<g data-node="h"><rect x="40" y="370" width="260" height="90" rx="8" fill="#14253a" stroke="#577ba8" stroke-width="1.5"/>
+<text x="170" y="398.5" text-anchor="middle" font-size="20" font-weight="650" fill="#edf4ff">动作 hidden h</text>
+<text x="170" y="424.5" text-anchor="middle" font-size="17" fill="#bdd0e9">block28 后 [1,32,1024]</text>
+<text x="170" y="448.5" text-anchor="middle" font-size="17" fill="#bdd0e9">＋位置／去噪时刻</text>
+</g>
+<g data-node="q"><rect x="350" y="370" width="400" height="90" rx="8" fill="#12342f" stroke="#67bda4" stroke-width="1.5"/>
+<text x="550" y="398.5" text-anchor="middle" font-size="20" font-weight="650" fill="#edf4ff">动作位置自己的 query q</text>
+<text x="550" y="424.5" text-anchor="middle" font-size="17" fill="#bdd0e9">hidden 对 context 做 cross-attention</text>
+<text x="550" y="448.5" text-anchor="middle" font-size="17" fill="#bdd0e9">[1,32,128]</text>
+</g>
+<g data-node="m"><rect x="790" y="495" width="270" height="90" rx="8" fill="#33291c" stroke="#b69559" stroke-width="1.5"/>
+<text x="925" y="523.5" text-anchor="middle" font-size="20" font-weight="650" fill="#edf4ff">历史片段 mᵢ</text>
+<text x="925" y="549.5" text-anchor="middle" font-size="17" fill="#bdd0e9">16×91 → memory encoder</text>
+<text x="925" y="573.5" text-anchor="middle" font-size="17" fill="#bdd0e9">仅已执行状态与动作</text>
+</g>
+<g data-node="read"><rect x="350" y="495" width="400" height="90" rx="8" fill="#12342f" stroke="#67bda4" stroke-width="1.5"/>
+<text x="550" y="523.5" text-anchor="middle" font-size="20" font-weight="650" fill="#edf4ff">q 读取该片段的 tokens</text>
+<text x="550" y="549.5" text-anchor="middle" font-size="17" fill="#bdd0e9">memory cross-attention → rᵢ</text>
+<text x="550" y="573.5" text-anchor="middle" font-size="17" fill="#bdd0e9">[1,32,128]</text>
+</g>
+<g data-node="f"><rect x="40" y="635" width="470" height="68" rx="8" fill="#12342f" stroke="#67bda4" stroke-width="1.5"/>
+<text x="275" y="664.5" text-anchor="middle" font-size="20" font-weight="650" fill="#edf4ff">fᵢ = concat(q, rᵢ)</text>
+<text x="275" y="690.5" text-anchor="middle" font-size="17" fill="#bdd0e9">256 维输出特征</text>
+</g>
+<g data-node="z"><rect x="590" y="635" width="470" height="68" rx="8" fill="#12342f" stroke="#67bda4" stroke-width="1.5"/>
+<text x="825" y="664.5" text-anchor="middle" font-size="20" font-weight="650" fill="#edf4ff">zᵢ = concat(q, rᵢ, q×rᵢ, |q−rᵢ|)</text>
+<text x="825" y="690.5" text-anchor="middle" font-size="17" fill="#bdd0e9">512 维关系特征</text>
+</g>
+<g data-node="out"><rect x="40" y="745" width="470" height="78" rx="8" fill="#12342f" stroke="#67bda4" stroke-width="1.5"/>
+<text x="275" y="779.5" text-anchor="middle" font-size="20" font-weight="650" fill="#edf4ff">residual 输出网络</text>
+<text x="275" y="805.5" text-anchor="middle" font-size="17" fill="#bdd0e9">256 → 128 → 1024</text>
+</g>
+<g data-node="g"><rect x="590" y="745" width="470" height="78" rx="8" fill="#12342f" stroke="#67bda4" stroke-width="1.5"/>
+<text x="825" y="779.5" text-anchor="middle" font-size="20" font-weight="650" fill="#edf4ff">关系系数 gᵢ = sigmoid(·)</text>
+<text x="825" y="805.5" text-anchor="middle" font-size="17" fill="#bdd0e9">[1,32,1] · 每动作位置一个数</text>
+</g>
+<g data-node="single"><rect x="220" y="875" width="660" height="74" rx="8" fill="#292442" stroke="#a398df" stroke-width="1.5"/>
+<text x="550" y="907.5" text-anchor="middle" font-size="20" font-weight="650" fill="#edf4ff">形成完整单条增量 Δᵢ = FP32(hᵢ) − FP32(h)</text>
+<text x="550" y="933.5" text-anchor="middle" font-size="17" fill="#bdd0e9">hᵢ = h ＋ cast(gᵢ × residual)；保留 dtype 舍入</text>
+</g>
+<g data-node="mean"><rect x="220" y="995" width="660" height="62" rx="8" fill="#292442" stroke="#a398df" stroke-width="1.5"/>
+<text x="550" y="1033.5" text-anchor="middle" font-size="20" font-weight="650" fill="#edf4ff">候选完整 Δᵢ 等权平均，加回同一个 h</text>
+</g>
+</g></svg>

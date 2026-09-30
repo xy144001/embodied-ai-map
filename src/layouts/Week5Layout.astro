@@ -1,0 +1,21 @@
+---
+import WeeklyLayout from "./WeeklyLayout.astro";
+import "../styles/model-week5.css";
+interface Props { title: string; description: string; active?: "overview" | "experiments" | "architecture"; chapters?: string[][] }
+const {title, description, active="overview", chapters=[]}=Astro.props;
+const root=import.meta.env.BASE_URL.replace(/\/$/,"")+"/model-architecture/problems/week5/";
+const pages=[["overview","本周问题",""],["experiments","按问题讲实验","experiments/"],["architecture","架构演变图解","architecture/"]];
+---
+<WeeklyLayout title={title+" · Week 5"} description={description} section="problems" week={5}>
+  <div class="w5-scope">
+    <p class="eyebrow">WEEK 5 · FROM SINGLE-TASK GAINS TO MULTI-TASK TRANSFER</p>
+    <h1>{title}</h1><p class="intro">{description}</p>
+    <p class="weekly-meta">资料截点：2026-09-30 11:08:39（北京时间） · 架构含 09-30 追加说明 · Gate 正式评测进行中</p>
+    <nav class="w5-subnav" aria-label="Week 5 内容">{pages.map(([id,label,path])=><a href={root+path} aria-current={id===active?"page":undefined}>{label}</a>)}</nav>
+    <div class:list={{"weekly-reading":chapters.length>0}}>
+      {chapters.length>0&&<nav class="weekly-toc" aria-label="本页讲解目录"><strong>讲解顺序</strong>{chapters.map(([id,label])=><a href={"#"+id}>{label}</a>)}</nav>}
+      <article class="weekly-article"><slot /></article>
+    </div>
+    <nav class="w5-bottom" aria-label="继续阅读">{pages.filter(([id])=>id!==active).map(([,label,path])=><a href={root+path}>{label} →</a>)}<a href={root.replace("week5/","week4/")}>← Week 4</a><a href="#main">返回页首 ↑</a></nav>
+  </div>
+</WeeklyLayout>

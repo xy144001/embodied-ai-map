@@ -1,0 +1,107 @@
+---
+import Week5Layout from "../../../../../layouts/Week5Layout.astro";
+import Table from "../../../../../components/Week5Table.astro";
+import Figure from "../../../../../components/Week5Figure.astro";
+import Formula from "../../../../../components/FlowFormula.astro";
+import "katex/dist/katex.min.css";
+const root=import.meta.env.BASE_URL.replace(/\/$/,"")+"/model-architecture/problems/week5/";
+const views=[["evolution","分支总览","先看继承关系"],["relation","Relation","单条经验怎样适用"],["paths","专属／共享通路","哪些参数跨任务共享"],["candidate","候选 Attention","多条建议怎样加权"],["joint","Joint 局部适配","主干哪一部分可训练"],["gate","最新 Gate 推理","聚合之后再缩放"],["supervision","两种监督来源","相同 gate，不同目标"]];
+---
+<Week5Layout title="架构演变图解" description="一次只看一个改动位置。切换七张图，区分单条关系建模、任务参数共享、候选聚合、局部主干适配与收益监督。" active="architecture">
+  <nav class="w5-diagram-menu" aria-label="选择架构图">{views.map(([id,title,desc],i)=><a href={"#view-"+id} data-view-link={id}><small>0{i+1} / {desc}</small>{title}</a>)}</nav>
+  <p class="w5-reading-key"><span>冻结／已有模块</span><span class="train">本分支离线可训练模块</span><span class="branch">改动位置／聚合输出</span><span class="data">经历、状态或监督数据</span></p>
+  <p class="w5-muted">图中训练范围指离线阶段。正式评测时全部权重固定，变化的是各方法自己的经历库；可放大、查看细节或下载矢量原图。</p>
+  <section id="view-evolution" class="weekly-question w5-panel" data-week5-view="evolution">
+    <div class="w5-panel-header"><div><span class="question-number">01 / BRANCH MAP</span><h2>最新实现是一组分支，不是一套全叠加网络。</h2></div><span class="w5-stage-tag">结构／实验来源</span></div>
+    <Figure id="evolution" caption="箭头不保证继承全部权重：通路模型从零输出联合训练；Candidate-Attention 冻结原 Relation；M7-only／Joint 从旧 Relation 继续训练。" />
+    <div class="w5-cards"><div><h3>五／十任务支线</h3><p>旧 Auto 与 Relation-Auto 按预测类别选择同类 bank 和每类完整 M7；Private／Hybrid／Shared 系列改为联合训练的共享编码器与不同输出通路。</p></div><div><h3>回到单任务做机制验证</h3><p>Candidate-Attention、Joint、两个 Gate 都只正式评测搬订书机。最新 Joint／Gate 保留 Relation＋Mean-Utility，没有叠候选 Attention、Hybrid 或视频 V2。</p></div></div>
+    <Table id="a15" caption="每个分支究竟训练哪里、怎样聚合，以及是否直接改视频网络" />
+    <p><a href={root+"experiments/#scope"}>对应讲解：先明确比较口径 →</a></p>
+  </section>
+  <section id="view-relation" class="weekly-question w5-panel" data-week5-view="relation">
+    <div class="w5-panel-header"><div><span class="question-number">02 / RELATION M7</span><h2>从“属于同一任务”，走向“理解眼前状态与这条经历的关系”。</h2></div><span class="w5-stage-tag">训练完整 M7 · WAM 冻结</span></div>
+    <Figure id="relation" caption="当前三种模态先形成 context，动作 query 再读单条 memory。gᵢ 对每动作位置的 1024 通道统一缩放；它不是候选之间的 softmax 权重。" />
+    <p>旧 M7 已有动作 hidden 读取 memory 的 cross-attention。Relation 新增当前状态、完整有效语言序列与当前首帧的关系交互，以及动作位置／去噪时刻条件化的 query 和关系系数。</p>
+    <Table id="a3" caption="在线 batch=1 的形状；L 为有效语言 token 数，K 为合格片段数" />
+    <Formula expression={String.raw`f_i=[q;r_i],\qquad z_i=[q;r_i;q\odot r_i;|q-r_i|],\qquad g_i=\sigma(\mathrm{Coeff}(z_i))`} caption="输出内容由 256 维 fᵢ 生成，注入强度由 512 维 zᵢ 生成；gᵢ 的形状为 [1,32,1]。" />
+    <Formula expression={String.raw`h_i=h+\operatorname{cast}_{h.\mathrm{dtype}}\!\bigl(g_i\odot\mathrm{Residual}(f_i)\bigr),\quad \Delta_i=\mathrm{FP32}(h_i)-\mathrm{FP32}(h)`} caption="完整 Δᵢ 已包含输出变换、内部系数与 dtype 舍入。K>1 时 FP32 求均值并加回一次；K=0 旁路，K=1 保留原单条输出。" />
+    <p>图像只取 video pre-DiT 的当前首帧，池化为 4×4 patches；不使用噪声未来帧作为当前观测，也不向视频网络注入 memory。旧 108 维 context 的 future 槽没有另接入关系 query；M2 的 4 维统计仍走旧 M6 接口，部分旧 checkpoint 按兼容策略置零。</p>
+    <p>Relation-Auto 是每类一套完整 M7，一次只调用预测类别的一套；Mean 平均这套网络处理的多条候选，不平均多个任务网络。Event／Chunk 只是同权重的检索频率变化。</p>
+    <p><a href={root+"experiments/#relation"}>对应结果：首轮 71%→83%，混合集未稳定复现 →</a></p>
+  </section>
+  <section id="view-paths" class="weekly-question w5-panel" data-week5-view="paths">
+    <div class="w5-panel-header"><div><span class="question-number">03 / TASK-SPECIFIC & SHARED PATHS</span><h2>共同理解场景，修正动作时保留多少任务专属参数？</h2></div><span class="w5-stage-tag">联合训练共享 M7</span></div>
+    <Figure id="paths" caption="预测类别决定专属输出和任务 embedding；共享 router 在每个候选／动作位置选两个网络专家。原同类检索规则、M6 与外层 Mean 不变。" />
+    <Table id="a1" caption="Baseline、独立 Relation 与四种输出通路的含义" />
+    <Formula expression={String.raw`d_i=\mathrm{Private}_{c}(f_i)+\sum_{e\in\mathrm{Top2}(p_i)}\bar p_{i,e}\,\mathrm{Shared}_{e}(f_i),\qquad h_i=h+\mathrm{cast}(g_i\odot d_i)`} caption="Hybrid／Shared-Small 使用两部分相加；Private 去掉共享项，Shared 去掉专属项。选中专家的权重重新归一。" />
+    <p>每条通路是 <code>256 → r → SiLU → 1024</code>，r 是瓶颈宽度；不是把原 1024 维 hidden 划成互不重叠的小块。所有通路都可以输出覆盖全部 hidden 通道的修正。</p>
+    <Table id="r10" caption="同一动作位置的激活宽度合计 32；总参数与计算量并不相等" />
+    <Table id="a8" caption="M7 参数随任务数的增长；不含 WAM、每类 M6 和分类器" />
+    <div class="weekly-callout"><p><strong>“共享”具体到哪一层：</strong>Shared 仍有每类 128 维 embedding、旧 M6 和同类 bank。共享专家是四组网络参数，既不是四条 memory，也没有预设为四种技能。每方法、每合集只有一个共享 M7 实例；TaskPathView 只是接口。</p></div>
+    <p>按任务轮转训练；未选任务的专属参数与 embedding 梯度为 None，AdamW 不因动量继续改它们，共享编码器仍更新。五类与十类分别训练，每类 6000 更新；共享专家版本另加 0.01 负载均衡目标。当前未做逐类增量学习。</p>
+    <p><a href={root+"experiments/#paths"}>对应结果：Hybrid 五任务 +2.2 pp，十任务 −1.2 pp →</a></p>
+  </section>
+  <section id="view-candidate" class="weekly-question w5-panel" data-week5-view="candidate">
+    <div class="w5-panel-header"><div><span class="question-number">04 / CANDIDATE ATTENTION</span><h2>保留每条建议的生成方式，只学习最后该信谁多一点。</h2></div><span class="w5-stage-tag">仅新 Q/K 可训练</span></div>
+    <Figure id="candidate" caption="权重沿候选维归一化，并随动作位置与去噪步改变。完整 Δᵢ 仍由冻结的原 Relation 生成，不按旧 M6 分数加权。" />
+    <Formula expression={String.raw`s_i=\frac{\langle W_q q,W_k r_i\rangle}{\sqrt{64}},\qquad w_i=\operatorname{softmax}_{i}(s),\qquad\Delta=\sum_i w_i\Delta_i`} caption="每个动作位置各有一组候选权重；沿候选维和为 1，不输入候选序号、memory ID 或 utility 分数。" />
+    <p>只训练两个无 bias 的 128→64 投影，共 16,384 参数。Wq 零初始化，让起点是均匀 Mean；实际用 <code>Δ_mean + Σ(wᵢ−1/K)Δᵢ</code> 保留初始浮点等价性。K=0 旁路，K=1 保留原单条输出，只有 K&gt;1 提供候选权重学习信号。</p>
+    <p>训练仍是成功动作去噪 MSE，6000 步。这个分支回到原完整 Relation，没有使用共享通路或局部 LoRA。同一候选集合重排不变；改变 episode 顺序则会改变经历、淘汰、候选和状态，性质不能混用。</p>
+    <p><a href={root+"experiments/#candidate"}>对应结果：Mean 73.1%，Attention 71.8%；未稳定改善顺序敏感性 →</a></p>
+  </section>
+  <section id="view-joint" class="weekly-question w5-panel" data-week5-view="joint">
+    <div class="w5-panel-header"><div><span class="question-number">05 / LOCAL JOINT ADAPTATION</span><h2>memory 插进来了，动作后缀是否也需要配合学习？</h2></div><span class="w5-stage-tag">新 LoRA＋完整 M7 可训练</span></div>
+    <Figure id="joint" caption="Joint 在动作 blocks[28]/[29] 的全部线性层和输出 head 新增 LoRA；原权重冻结，但有效变换已改变。层编号从 0 开始。" />
+    <p>每层计算 <code>Wx + B(Ax)</code>，rank8、α/rank=1、无 dropout；A 常规初始化、B 零初始化。新 LoRA 共 499,824 参数，Relation M7 为 1,626,957 参数。视频、文本、M6、分类器和其余动作主干保持冻结。</p>
+    <p>缓存不能继续停在 block28 之后，否则会切断 block28 LoRA 的训练。新缓存移到 block27，训练时实际经过 block28 → M7 → block29 → head，预测成功动作去噪目标；M7 不是单独输出最终控制指令的控制器。</p>
+    <Table id="a13" caption="五个对照：同一 Joint 的 on/off 才直接隔离推理时 memory 的作用" />
+    <div class="weekly-callout note"><p><strong>空 memory 的保证已改变：</strong>此时旁路等价的是同一个适配后 checkpoint 关闭 memory，不是原始官方 Baseline。Joint-off 和 LoRA-only 的 LoRA 分别训练，不能当作同权重。</p></div>
+    <p>各组 6000 步机会，同 query、噪声与样本顺序；固定每四步空 memory，另有自然空候选。M7-only 有 2451 个无梯度步。正式评测前统一登记使用 6000 步 last.pt，保留开发 best；这不是测试后选权。</p>
+    <p><a href={root+"experiments/#joint"}>对应结果：M7-only 74.9%，Joint 69.8%；同 Joint 开 memory 仍比关更好 →</a></p>
+  </section>
+  <section id="view-gate" class="weekly-question w5-panel" data-week5-view="gate">
+    <div class="w5-panel-header"><div><span class="question-number">06 / LATEST INFERENCE STRUCTURE</span><h2>建议已经形成，再判断这一次该注入多强。</h2></div><span class="w5-stage-tag">仅新 DecisionGate 可训练</span></div>
+    <Figure id="gate" caption="父 Joint 的完整 Mean 已产生实际增量，再由新 gate 统一缩放。旧 M6 仍只做准入；被拒绝的候选不会被新 gate 重新放进来。" />
+    <Formula expression={String.raw`\Delta=\mathrm{FP32}(h_{\mathrm{mean}})-\mathrm{FP32}(h),\qquad h_{\mathrm{out}}=\mathrm{cast}_{h.\mathrm{dtype}}\!\left(\mathrm{FP32}(h)+g\Delta\right)`} caption="Δ 从原 Mean 已完成聚合及 dtype 转换的输出中取得；g 每次去噪调用重新计算，是一个标量。" />
+    <p>132 维输入＝沿 32 动作位置平均的 128 维 q＋4 项统计（Δ RMS、h RMS、cos(Δ,h)、K/10）。输入 detach；网络是 LayerNorm132 → Linear64 → SiLU → Linear1 → sigmoid，共 8,841 参数。K/10 是特征缩放，不是 K≤10 的限制。</p>
+    <Table id="a14" caption="三种系数不在同一层：单条内部、候选之间、聚合之后" />
+    <p>新 gate 末层零初始化，初始 g=0.5，不是零注入，也不等于父 Joint 的 g=1。它只能把完整增量缩小到 0–1 范围，不能翻转方向、放大或重选候选。K=0 旁路；K=1 也会被缩放，不能沿用候选 Attention 分支的单条恒等说明。</p>
+    <div class="w5-pending"><strong>最新结构已实现，效果仍待正式完成。</strong><p>Proxy-Gate 和 Outcome-Gate 都冻结同一个 Joint-last；没有重训完整 M7，也没有改旧 M6 的收益标签。截至报告截点，正式 165/1800，不能定最终优劣。</p></div>
+    <p><a href="#view-supervision">下一张：结构完全相同，两组的监督到底差在哪里？ →</a></p>
+  </section>
+  <section id="view-supervision" class="weekly-question w5-panel" data-week5-view="supervision">
+    <div class="w5-panel-header"><div><span class="question-number">07 / SUPERVISION COMPARISON</span><h2>“更像成功动作”与“加了比不加更好”，分开监督。</h2></div><span class="w5-stage-tag">离线标签，不是在线输入</span></div>
+    <Figure id="supervision" caption="同一开发 query 恢复相同初态与真实前缀，只干预当前 chunk；两支后续都关 memory。相同有效 query 分别训练 MSE gate 与 BCE gate。" />
+    <div class="w5-cards"><div><h3>Proxy-Gate：动作去噪 MSE</h3><p>gate 缩放固定 Mean 增量，经过冻结的动作后缀，预测成功轨迹的去噪 target。后缀参数不更新，但允许梯度传回 gate。</p></div><div><h3>Outcome-Gate：成对收益 BCE</h3><p>Off 失败／On 成功记 1，Off 成功／On 失败记 0。以相同 gate 的 logit 拟合标签；终局结果不进入推理特征。</p></div></div>
+    <Table id="r23" caption="257 个决策点中，仅 55 个终局不同；两组同用 38 训练／17 验证 query" />
+    <p>两组都排除 202 个 tie，使用相同固定噪声样本、输入与 g=0.5 初始化，各训 3000 步，按各自开发 loss 选权。主要问题是同结构、同样本的两种监督哪种更好，不能仅与父 Joint 比较后就把变化归因于监督。</p>
+    <p>标签来自开发成功来源轨迹上的单 chunk 干预。它不覆盖广泛失败恢复，也不直接等价于后续多个 chunk 连续注入的全局收益；当前不是整网强化学习。</p>
+    <p><a href={root+"experiments/#gate"}>对应训练结果与进行中同场前缀快照 →</a></p>
+  </section>
+  <section class="weekly-question" id="shared-protocol">
+    <span class="question-number">COMMON PROTOCOL · 看完图再核对边界</span><h2>改的是哪一层，哪些规则始终没有改？</h2>
+    <details><summary>展开共同协议：类别、检索、时序与 bank</summary><div>
+      <Table id="a0" caption="任务类别、memory 经历与共享专家是三种不同对象" />
+      <p>分类头只读冻结文本的 4096 维 M1 语义向量，线性映射到 5／10 个已知类别；不使用真实评测类别作答案。M7 才联合 state、language、observation。十类准入阈值为 0，未验证未知任务可靠拒识；GT 对象绑定不合法就旁路，不用真实标签纠错。</p>
+      <p>检索依次为同预测类别／对象／成功原型 → 语义 ≥0.65 的最多 5 条历史 → 展开 anchors → phase／操作侧／夹爪兼容、状态距离 &lt;1.2 → 旧 M6 ≥0.5。一条历史可给多个片段，所以 K 可以大于 5。Top-5 历史、分组容量 10、专家 Top-2 互不等同。</p>
+      <Table id="a5" caption="episode、动作段、去噪步三个时间尺度；不是整场只使用一次 memory" />
+      <p>通常每块生成 32 动作、执行 28、动作去噪 10 步；事件包括开始、几何 phase 变化、停滞，冷却 28 动作。每块先清旧候选，没有事件或合格候选就旁路。规则 phase 不等于可靠接触／抓持成功检测。</p>
+      <Table id="a6" caption="保存失败不等于已有恢复策略；源成功也不保证每个局部片段有益" />
+      <p>按类别／对象／结果每组最多 10 活跃原型，去重覆盖距离 ≤0.05；按新颖性、覆盖和使用统计保留，不是简单 FIFO。正式不导入开发或其他方法历史，episode 结束后才提交。同类历史会因方法动作不同而分叉。</p>
+      <p>旧 M6 输入仍为 121 维：query 状态 38、anchor 状态 38、绝对差 38、距离／语义／源成功 3、future 统计 4。它在新 Relation、通路、Joint 后没有重新校准，预测的是旧注入网络的局部动作 loss 改善；不是闭环成功概率。</p>
+    </div></details>
+    <p class="w5-source">依据《Memory_WAM_Methods_and_Latest_Architecture.md》§1–12、§14；效果状态以《Memory_WAM_Recent_Experiments_Review.md》09-30 11:08:39 快照为准。原文前半部分 09-29 的“尚无结论”已由 09-30 追加内容及新结果快照补充。</p>
+  </section>
+</Week5Layout>
+<script>
+  const panels=Array.from(document.querySelectorAll<HTMLElement>("[data-week5-view]"));
+  const links=Array.from(document.querySelectorAll<HTMLAnchorElement>("[data-view-link]"));
+  function selectDiagram(){
+    const match=panels.find(p=>"#"+p.id===location.hash);
+    const active=match||panels[0];
+    panels.forEach(p=>p.hidden=p!==active);
+    links.forEach(a=>{if(a.hash==="#"+active.id)a.setAttribute("aria-current","true");else a.removeAttribute("aria-current");});
+  }
+  selectDiagram();
+  window.addEventListener("hashchange",()=>{selectDiagram();const target=document.getElementById(location.hash.slice(1));if(target)requestAnimationFrame(()=>target.scrollIntoView({block:"start"}));});
+</script>

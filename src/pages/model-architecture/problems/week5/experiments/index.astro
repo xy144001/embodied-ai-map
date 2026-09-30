@@ -1,0 +1,119 @@
+---
+import Week5Layout from "../../../../../layouts/Week5Layout.astro";
+import Table from "../../../../../components/Week5Table.astro";
+import Figure from "../../../../../components/Week5Figure.astro";
+const root=import.meta.env.BASE_URL.replace(/\/$/,"")+"/model-architecture/problems/week5/";
+const chapters=[["scope","开场：先固定比较口径"],["routing","01 排查分类与混合串扰"],["relation","02 改单条关系建模"],["paths","03 改专属／共享通路"],["candidate","04 改候选聚合"],["joint","05 让主干一起适配"],["gate","06 改收益监督"],["conclusions","收束：迁移前先稳定什么"]];
+---
+<Week5Layout title="按问题讲实验" description="不按实验目录逐项汇报，而是用六个追问串起证据：每次为什么改、改了哪里、看到了什么，以及还不能得出什么结论。" active="experiments" chapters={chapters}>
+  <section id="scope" class="weekly-question">
+    <span class="question-number">OPENING · 先解释“迁移”的对象</span><h2>单任务有收益，不代表换一批场景、换一种历史顺序后仍有收益。</h2>
+    <p class="w5-question">开场问题：我们要迁移的是一个正分数，还是一种在新状态下也知道如何使用经验的能力？</p>
+    <p>这里先把目标拆成两步：<strong>先让同类任务在新场景、新历史顺序中稳定受益，再检查共享参数能否扩展到更多任务。</strong>最初从单任务进入混合集时，物理场景和历史顺序也改变了；仅看到分数变化，还不能说是“多任务混合本身造成干扰”。</p>
+    <div class="w5-cards"><div><h3>近期主线固定什么？</h3><p>官方 Randomized、original/default prompt；通常每类 160 训练＋40 验证场景。各方法从独立空库开始，只写自己的已完成经历；正式评测固定全部网络权重。</p></div><div><h3>哪些是相关重复？</h3><p>100 个场景换三种顺序，是 300 次相关执行，仍只有 100 个物理初态。无 memory 的 Baseline 可复用；不能按表格行数累加独立样本，也不跨场景池直接比较原始成功率。</p></div></div>
+    <p>共同检索协议：语义 ≥0.65，状态距离 &lt;1.2，旧 M6 ≥0.5，先粗检索最多 5 条成功历史，再展开多个片段；活跃容量是<strong>每类别／对象／结果分组 10 条</strong>。默认在 action block28 后注入，外部 α=1。生成 32 步、执行 28 步后重规划；事件触发选好候选后，在本块 10 次去噪中反复计算修正。</p>
+    <p><strong>救回</strong>是对照失败而方法成功，<strong>损伤</strong>是对照成功而方法失败。净成功数＝救回−损伤，除以配对数才是百分点（pp）。历史会随动作自然分叉，因此后期分数反映整条持续记忆策略。</p>
+    <details><summary>方法速查：改网络、改聚合，还是改监督？</summary><div><Table id="r1" caption="不同层次的方法名称；旧 M7 本来就有读取 memory 的 cross-attention" /></div></details>
+    <details><summary>实验规模与完成状态原表</summary><div><Table id="r0" caption="截至 2026-09-30 11:08:39；含复用关系，不能相加作为独立场景总数" /><p>五任务通路新增 2,000 次；十任务重跑 Relation 1,000 次加四通路各 1,000 次，共新增 5,000 次。原报告中取消的合集 C 没有正式结果，不作为负结果。</p></div></details>
+  </section>
+  <section id="routing" class="weekly-question">
+    <span class="question-number">01 · 先排除最直接的解释</span><h2>是不是类别分错了，或者别的任务污染了这类历史？</h2>
+    <p class="w5-question">为什么先做这组对照？如果只是 bank 读写错位，就不该先靠更复杂的 M7 修补。</p>
+    <div class="w5-change"><b>架构变化：旧单任务 M7 外增加自动类别路由。</b><p>冻结文本语义 → 线性分类器 → 预测类别的状态绑定、bank、M6 与 M7。任务间经历隔离，旧单任务权重保持。</p></div>
+    <p>合集 A 是搬订书机、按压订书机、罐子入篮、物体入篮、开微波炉；B 是挂杯、盖章、鼠标入垫、拨开关、叠三碗。每类 100 个新场景，每合集三种顺序。用 <strong>Oracle（给正确类别）</strong>对照 Auto；再分别让读或写的一侧使用正确类别，定位是否有读写路由问题。</p>
+    <Table id="r3" caption="合集 A：每种顺序 500 场；旧 Auto 与 Oracle 的成败一致" />
+    <Table id="r4" caption="合集 B：每种顺序 500 场；旧 Auto 与 Oracle 的成败一致" />
+    <p>A 的 Auto 为 1151/1500（76.7%），Baseline 为 77.6%；B 为 1136/1500（75.7%），Baseline 为 75.8%。<strong>两组各 1500/1500 分类正确，错类写入、跨类注入为 0</strong>；顺序 0 的单边读写诊断成败也与 Auto 一致。A 有 110 个、B 有 104 个场景随历史顺序翻转成败。</p>
+    <details><summary>旧正收益来自哪里？查看旧单任务与新混合集的逐任务比较</summary><div><Table id="r2" caption="旧、新场景 seed 无重合；这张表不是只改变混合编排的消融" /><Table id="r5" caption="合集 B 的各任务：同类内也有正负差异" /><p>旧四类权重来自 original 专用动作 V1，按压订书机来自容量 10 复验；不是三 prompt 混库 checkpoint，也没有视频 adapter。按压订书机原本就持平，不能说所有单任务都曾稳定获益。</p></div></details>
+    <h3>更严格的一步：只去掉别的任务，其他条件完全保留。</h3>
+    <p>在后续 Relation 的 A 顺序 0 中，抽出搬订书机的 100 场，保留同类顺序、全局 ID、初态、指令、随机状态与五专家实现；两边都从空库开始。这样可以直接问：“如果不混着跑，这一类会不会恢复？”</p>
+    <Table id="r9" caption="同一 100 场、相同同类历史顺序；单／混等价性诊断在 Relation 阶段完成" />
+    <p>单任务和混合 Relation 都是 74/100；100/100 场保存的动作、状态、观测、候选、utility、系数／residual 统计及同类 bank 完全一致。两边都注入 216 个 chunk，其中 K&gt;1 为 111，同类淘汰 80 次。这里核对的是已保存输出，不包括未保存的完整 hidden 张量。</p>
+    <div class="w5-takeaway"><p><strong>本段结论：</strong>已测任务中，分类和读写分区正常；这个同场对照也未发现跨任务串扰。问题更应转向新场景与同类历史泛化，但结论只覆盖该任务、该顺序、该实现。</p></div>
+    <p class="w5-next"><strong>转场：</strong>既然“送到哪个任务”没错，下一步就问：<a href="#relation">被送来的这段经验，是否真的理解了眼前的状态？</a></p>
+  </section>
+  <section id="relation" class="weekly-question">
+    <span class="question-number">02 · 改单条 memory 的注入网络</span><h2>不仅知道“同一任务”，还要理解“此刻怎样用这条经历”。</h2>
+    <p class="w5-question">为什么这样设计？把“容量不足”“训练与 Mean 推理失配”“关系理解不足”分开比较，避免只加一个大网络就宣称找到了原因。</p>
+    <div class="w5-change"><b>架构变化：当前 state、语言 tokens、首帧图像先交互，再用动作 query 读取历史。</b><p>Relation 逐候选、逐动作位置、逐去噪步生成关系系数；候选之间仍然等权 Mean。旧 M7 已有 memory cross-attention，新增重点是当前多模态关系。</p></div>
+    <details><summary>展开 Relation 架构图：注意力和系数加在哪里？</summary><div><Figure id="relation" compact caption="状态／语言／当前图像产生 context；动作 hidden 形成 query，再读历史片段。关系系数控制单条建议的强度，外层候选仍 Mean。" /><p><a href={root+"architecture/#view-relation"}>查看完整形状、公式与训练范围 →</a></p></div></details>
+    <p>冻结 WAM 和旧 M6，用同一 160/40 开发数据、各 6000 步训练三种网络：原 M7 加宽（128→512）、按多候选均值训练的 Mean-Train、Relation。再用同一 Relation 权重比较事件检索与每 chunk 检索。</p>
+    <Table id="r6" caption="旧搬订书机 100 场固定集复验；旧 Baseline／Mean 复用，新增四组各 100 次" />
+    <p>Relation-Event 从 71% 到 83%，救回 15、损伤 3，是清晰的单批正结果。加宽为 78%，Mean-Train 为 76%；更频繁的 Chunk 为 79%，没有超过 Event。Event／Chunk 本轮平均每 chunk 延时为 428.7／478.1 ms。</p>
+    <h3>但“首轮更好”，还要过混合集与新场景这一关。</h3>
+    <p>搬订书机复用 83% 那份权重，其他九类分别训练完整 Relation；每类仍各有 M7。复用 A/B 的 1000 个物理场景和三种顺序，新增 3000 次评测。</p>
+    <Table id="r8" caption="Relation 扩展后：A 对 Baseline 接近持平，B 下降" />
+    <p>两组 Relation 合计 2290/3000，旧 Auto 为 2287/3000，仅多 3 次成功。A 的搬订书机为 74/70/78；与旧场景 83% 不是同场对照，不能把下降全归因于混合运行。</p>
+    <details><summary>展开十类任务的 Relation、旧 Auto 与 Baseline</summary><div><Table id="r7" caption="每任务每顺序 100 场；三顺序是同场景的相关重复" /></div></details>
+    <div class="w5-takeaway"><p><strong>本段结论：</strong>更充分的关系建模在局部有效，但没有稳定恢复整体收益。Relation 同时改变输入和结构，不能把首轮 +12 pp 全归因于某一个 attention 层。</p></div>
+    <p class="w5-next"><strong>转场：</strong>每类一套完整网络不易扩展。<a href="#paths">能不能共享“理解场景”的部分，同时保留任务自己的输出方式？</a></p>
+  </section>
+  <section id="paths" class="weekly-question">
+    <span class="question-number">03 · 改任务间的参数共享方式</span><h2>哪些变化可以共用，哪些应该留给每个任务？</h2>
+    <p class="w5-question">为什么保留专属通路？不同任务可能需要不同修正；为什么又加共享专家？希望共通变换不必为每类重复学习。</p>
+    <div class="w5-change"><b>架构变化：从每类完整 Relation，改成共享关系编码器＋专属／共享输出。</b><p>预测类别选专属通路；关系特征为每候选、每动作位置选 4 个共享专家中的 Top-2。跨类共享的是参数，同类 bank 规则不变。</p></div>
+    <Table id="r10" caption="激活瓶颈宽度合计 32；rank 是带 SiLU 的中间宽度，不等于固定线性矩阵的秩" />
+    <details><summary>展开共享通路图与参数规模</summary><div><Figure id="paths" compact caption="共享专家是网络参数，不是四条 memory，也没有预先命名为抓取或旋转技能。当前任务仍只检索同类经历。" /><Table id="a8" caption="仅新增 M7 的参数量；不含 WAM、分类器和每任务旧 M6" /></div></details>
+    <p>五任务是 A，十任务是 A+B，分别联合训练；每类 6000 更新，合计 30000／60000 步。各任务每类 100 场、一种混合顺序。总参数、计算量不相等，共享专家方案还加 0.01 负载均衡损失。</p>
+    <Table id="r11" caption="五任务：Hybrid 399/500，比 Baseline 净多 11 次成功" />
+    <Table id="r13" caption="十任务：Hybrid 755/1000，低于 Baseline；Private 为 771/1000" />
+    <details><summary>展开五／十任务逐类结果，定位收益与损伤来自哪里</summary><div><Table id="r12" caption="五任务各格分母 100；Relation 复用已有结果" /><Table id="r14" caption="十任务各格分母 100；Relation 专家权重复用，本轮重新评测" /></div></details>
+    <div class="w5-takeaway"><p><strong>本段结论：</strong>Hybrid 的五任务 +2.2 pp 没有在十任务复现（−1.2 pp），共享比例也没有单调规律。共享让 M7 参数增长更慢，但尚未证明稳定扩类、增量不遗忘或千类能力。</p></div>
+    <p>五／十任务同时改变联合训练任务组成与总更新数，不能说成同一个模型在推理时多插入五类 episode 就导致退化。Relation→Private 也同时改变编码器共享、输出宽度与训练方式，不是严格单变量对照。</p>
+    <p class="w5-next"><strong>转场：</strong>共享结构暂未给出稳定答案。下一条支线回到单任务，<a href="#candidate">检查“多条建议直接平均”是否丢掉了有用差异。</a></p>
+  </section>
+  <section id="candidate" class="weekly-question">
+    <span class="question-number">04 · 改多条候选之间的聚合</span><h2>一条经验内部会 attention，多条经验之间还要不要学权重？</h2>
+    <p class="w5-question">为什么只训练一个小聚合器？冻结原 Relation，可以更集中地观察候选加权带来的变化，而不把整套 M7 重训的影响混进来。</p>
+    <div class="w5-change"><b>架构变化：Mean → 候选 softmax 加权完整 residual。</b><p>仅训练两个 128→64 的 Q/K 投影，共 16,384 参数；没有使用 Hybrid 专家。起点严格等价 Mean，M6 只准入，不提供权重。</p></div>
+    <details><summary>展开候选 Attention 架构图</summary><div><Figure id="candidate" compact caption="新增 wᵢ 在多条完整 Δᵢ 之间分配比例；原 Relation 的内部 gᵢ 已包含在每条 Δᵢ 中，两者是不同层次。" /></div></details>
+    <p>只测搬订书机，三批全新场景各 100、每批三种顺序。训练 6000 步，开发最佳点 5900。这里多 seed 是物理场景池，未额外重复多个训练起点。</p>
+    <Table id="r16" caption="共 300 个新物理场景；Baseline 实测一次，两个 memory 方法各跑三顺序" />
+    <p>Attention 对 Mean 救回 65、损伤 77，净 −12/900。它在第一池均值稍高，第二、三池更低；顺序敏感性也有好有坏。</p>
+    <Table id="r17" caption="顺序极差与同场翻转：没有一致降低对历史顺序的敏感性" />
+    <details><summary>展开九组同场结果及对 Baseline 的配对收益</summary><div><Table id="r15" caption="每格分母 100；Attention 的救回／损伤以 Mean 为对照" /><Table id="r18" caption="对 Baseline 的相关配对共 900；Baseline 的 300 场结果按顺序复用" /></div></details>
+    <h3>不是候选普遍互相抵消，也不代表方向一致就一定正确。</h3>
+    <Table id="r19" caption="去噪调用的描述性诊断；按终局成败分组不构成因果解释" />
+    <p>候选 cosine 高、抵消比接近 1，失败组也如此。Attention 已学出非均匀权重，却仍未稳定胜过 Mean。加权范数比用未加权单条范数均值作分母，可能大于 1，并非计算错误。</p>
+    <div class="w5-takeaway"><p><strong>本段结论：</strong>这一轮 Mean 和 Attention 都高于同场 Baseline；未验证出 Attention 的额外稳定收益，不能说 memory 完全无用。候选集合重排不变，也不能保证改变 episode 顺序后 bank 仍一样。</p></div>
+    <p class="w5-next"><strong>转场：</strong>如果读法和平均方式都不是充分解法，<a href="#joint">是不是冻结的动作主干没有学会接住 memory 的修正？</a></p>
+  </section>
+  <section id="joint" class="weekly-question">
+    <span class="question-number">05 · 改可训练主干范围</span><h2>让主干与 M7 一起适配，能否解决这个问题？</h2>
+    <p class="w5-question">为什么需要五个对照？必须区分“微调主干本身的影响”“训练时共同适配的影响”和“同一模型推理时开关 memory 的影响”。</p>
+    <div class="w5-change"><b>架构变化：动作 blocks[28]/[29] 和 head 新增 rank8 LoRA。</b><p>原参数冻结，新增 LoRA 499,824 参数；Relation M7 为 1,626,957 参数。训练缓存边界前移到 block27，实际计算可训练后缀；仍 Mean-Utility，不叠候选 Attention。</p></div>
+    <details><summary>展开 Joint 接线与五个对照的训练差别</summary><div><Figure id="joint" compact caption="Joint 更新局部 LoRA 与完整 Relation；M7-only 只续训 M7；Joint-off 关闭同一 Joint 的 memory，不能与单独训练的 LoRA-only 混同。" /><Table id="a13" caption="哪些权重相同，哪些重新训练，是解释本轮结果的关键" /></div></details>
+    <p>再用另一批 300 个全新场景，各池三顺序；共 2700 次实际正式评测。三训练组共用对应初始化、query／噪声／样本顺序，各 6000 步机会；每四步空 memory，另有自然空候选，M7-only 有 2451 步无梯度，不能说有效参数更新次数完全一样。</p>
+    <div class="weekly-callout note"><p><strong>选权方式在正式 rollout 前已登记：</strong>开发 MSE 把 M7-only、Joint 的最佳点选在 0 步，LoRA-only 为 300 步。主比较在正式测试为 0 时统一改用固定 6000 步 last.pt，保留旧 best。这不是测试后挑最好权重，也不是调优后的 LoRA 能力上限。</p></div>
+    <Table id="r20" caption="另一批场景：冻结主干、只续训 M7 最好；Joint 没有优于原始 Baseline" />
+    <Table id="r22" caption="配对数 900 包含三顺序；原始 Baseline、LoRA-only、Joint-off 各实测 300 场后复用" />
+    <details><summary>展开三个场景池：平均改善是否每池都成立？</summary><div><Table id="r21" caption="每顺序 100 场；M7-only 在第三池仍低于 Baseline" /></div></details>
+    <p>Joint 为 69.8%，低于原始 Baseline 72.7% 和 M7-only 74.9%；但同一 Joint 关闭 memory 是 68.0%，开 memory 仍净多 16/900（+1.78 pp）。因此 Joint 整体下降与 memory 在同一适配模型内有收益，可以同时成立。</p>
+    <div class="w5-takeaway"><p><strong>本段结论：</strong>本轮局部共同微调没有解决问题，LoRA-only 本身也退化。它不排除其他层位、数据或预算；开发 loss 偏爱早期权重是警讯，还不能单独证明唯一原因是过拟合或代理监督不对。</p></div>
+    <p class="w5-next"><strong>转场：</strong>这些训练大多在拟合成功动作。<a href="#gate">“更像成功轨迹”与“这次加 memory 比不加更好”，是否是两个不同目标？</a></p>
+  </section>
+  <section id="gate" class="weekly-question">
+    <span class="question-number">06 · 改监督来源，正式结果待完成</span><h2>直接比较开／关 memory 的结果，能否教会“什么时候值得用”？</h2>
+    <p class="w5-question">为什么用同结构、同数据的两种 gate？如果只加一个缩放器就变好，收益可能来自减小注入强度，未必来自终局收益监督。</p>
+    <div class="w5-change"><b>架构变化：固定 Joint 外新增 8,841 参数的标量 gate。</b><p>父 Joint、LoRA、完整 M7、旧 M6 全冻结；只缩放原 Mean 后的实际增量。Proxy-Gate 用动作去噪 MSE，Outcome-Gate 用成对终局收益 BCE。</p></div>
+    <details><summary>展开最新推理图与离线监督图</summary><div><Figure id="gate" compact caption="新 g 每次去噪调用给一个 0–1 系数，缩放整个 [1,32,1024] 增量；初始 g=0.5，不等于父 Joint 的 g=1。" /><Figure id="supervision" compact caption="开发集恢复相同初态与动作前缀，当前 chunk 开／关 memory，后续全部关闭；终局成败只用于离线标签。" /></div></details>
+    <p>父模型固定为上轮 Joint-last，没有按正式测试表现换父模型。对开发集 257 个非空 memory 决策点配对：当前 chunk 一支开、一支关，后续两支都关，用官方终局成败差标注。</p>
+    <Table id="r23" caption="257 对／514 条闭环：55 个成败不同的 query，202 个 tie 排除出两组训练" />
+    <p>两组都使用同样的 55 个有效 query（38 训练、17 验证）和相同噪声样本；新 gate 结构、输入和初始化一致。只改变监督目标，分别按各自开发 loss 选权。</p>
+    <Table id="r24" caption="两组训练均完成；不同 loss 量纲不能直接比大小" />
+    <p>Outcome 最佳点在第 1 步，BCE 约 0.693，接近常数 0.5 的 0.6931，不能提前说已经学会稳定预测收益。标签只覆盖开发成功来源轨迹上的单 chunk 干预；不等于广泛失败恢复、整场持续注入的因果收益或整网强化学习。</p>
+    <div class="w5-pending"><strong>正式评测仅为快照：165 / 1800，尚无最终结论。</strong><p>截至 2026-09-30 11:08:39（北京时间），514 次采集、两组各 3000 步训练、24 场开发检查已完成；正式评测运行中。以下只比两 gate 共同完成的同场景前缀，未完成行不作 0% 处理。</p></div>
+    <Table id="r25" caption="进行中同场前缀；共同 N 是该行所有成功率和配对的比较分母" />
+    <details><summary>采集故障与当前快照的边界</summary><div><p>文档记载，9 月 30 日曾因动态随机光照的取图调用次数不一致暂停两条采集分片；恢复原取图顺序并复用经精确检查的 anchor 首次输入后，物理状态、图像及正常样本完整轨迹回归通过，采集已完成。未放宽容差、未改变 seed；不影响已完成的 Joint 第一阶段结果。这是附件中的审计记录，本页未访问实验服务器重跑。</p></div></details>
+    <div class="w5-takeaway"><p><strong>本段结论：</strong>“监督是否贴近真实收益”已进入直接对照，但还不能确认为根因，更不能说已经解决多任务迁移。Candidate-Attention、Joint、Gate 都只在搬订书机上评测，多任务有效性仍待后续验证。</p></div>
+  </section>
+  <section id="conclusions" class="weekly-question">
+    <span class="question-number">CLOSING · 带着证据收束</span><h2>先让“什么时候适用”稳定，再扩大任务数。</h2>
+    <div class="w5-cards"><div><h3>现在能说什么</h3><p>memory 能在部分场景和新场景池提供收益；分类与同类 bank 隔离在已测集合里正常；Relation、共享参数、候选加权及局部 LoRA 都已形成可对照的实现。</p></div><div><h3>现在还不能说什么</h3><p>没有一种方案稳定覆盖不同任务、场景池与历史顺序；尚未找到统一最佳共享比例；收益监督正在验证，不是已确认的唯一原因或成熟解决方案。</p></div></div>
+    <h3>讨论时聚焦三个问题</h3>
+    <ol><li><strong>怎样定义一段经验“适用于当前状态”？</strong>任务分类与规则 phase 太粗；成功来源也不能保证局部片段有益。</li><li><strong>监督怎样跟上注入网络的变化？</strong>旧 M6 在 Relation、通路与 LoRA 后未重新校准；本轮新 gate 不等于重训 M6 或完整 M7。</li><li><strong>怎样证明迁移，而不是某一批场景碰巧有效？</strong>先固定同场、同类历史与可比较权重，再检查新场景池和顺序；单任务监督有收益后，还需多任务复验。</li></ol>
+    <details><summary>查看“最初怀疑—已有证据—结论边界”完整对照</summary><div><Table id="r26" caption="依据附件原表；未排除的假设不等于已证明的原因" /></div></details>
+    <p class="w5-source">结果依据《Memory_WAM_Recent_Experiments_Review.md》§1–11；接线依据《Memory_WAM_Methods_and_Latest_Architecture.md》§1–12、§14。已完成结果与进行中快照严格分开；表格转录附件，底层服务器 CSV／代码未在本次网站更新中重新运行核验。</p>
+    <p><a href={root+"architecture/"}>回到架构演变图：逐个确认修改位置与训练边界 →</a></p>
+  </section>
+</Week5Layout>
