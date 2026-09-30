@@ -1,0 +1,185 @@
+---
+import ModelSectionNav from "../../../components/ModelSectionNav.astro";
+import "../../../styles/wam-3d.css";
+const base = import.meta.env.BASE_URL.replace(/\/$/, "");
+const root = base + "/model-architecture";
+const chapters = [['overview', '项目概览'], ['background', '为什么需要 3D'], ['related', '可借鉴的路线'], ['questions', '要验证的假设'], ['framework', '总体架构'], ['modules', '三个实现模块'], ['data', '数据与首版边界'], ['execution', '分阶段推进'], ['evaluation', '怎么设计实验'], ['goals', '四级成果目标'], ['open', '待决定事项'], ['references', '参考文献']];
+---
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="WAM+3D：物体级几何先验、匹配与空间对齐、观测和视频双位置注入，以及 P0–P5 实验计划、四组消融与成果目标。" />
+  <title>WAM+3D · 物体几何与未来预测 · 具身机器人技术地图</title>
+  <link rel="stylesheet" href={root + "/module-sections.css?v=20260930-wam3d"} />
+</head>
+<body class="subpage wam3d-page">
+  <a class="w3-skip" href="#main">跳转到正文</a>
+  <header class="top"><div class="brand">MODEL<b>/</b>ATLAS</div><a class="home-link" href={base + "/"}>← 返回技术地图</a><div class="status">@xy144001 · WAM+3D</div></header>
+  <ModelSectionNav active="wam-3d" />
+  <div class="w3-layout">
+    <nav class="w3-toc" aria-label="WAM+3D 阅读目录"><strong>WAM+3D <span>研究路线</span></strong>{chapters.map(([id, label], i) => <a href={"#" + id}><span>{String(i).padStart(2,"0")}</span>{label}</a>)}<p>设计与实验规划<br />与 Memory-WAM 并行推进</p></nav>
+    <main id="main" class="w3-main">
+
+<header class="hero" id="overview"><span class="eyebrow">OUR RESEARCH / OBJECT GEOMETRY PRIORS</span><h1>WAM+3D</h1><p class="subtitle">让机器人看到一个物体时，能借助它的三维形状理解眼前的场景，预测接下来会怎样变化，再检验这些信息能否帮助动作执行。</p><div class="meta"><span class="pill fixed">已确定：与 Memory-WAM 并行</span><span class="pill pending">待验证：双位置注入</span><span class="pill pending">待选择：表示、基座与接口</span><span class="pill">设计与实验规划 · 2026-09-29</span></div><div class="hero-grid"><div><b>一个核心问题</b><span>已知物体 3D 先验能带来什么增量？</span></div><div><b>两个候选位置</b><span>观测理解 / 未来预测</span></div><div><b>四级成果目标</b><span>运行 → 利用几何 → 自动调用 → 可靠方法</span></div></div></header>
+<p class="overview-note">依据 2026-09-29《WAM_3D_执行大纲》整理。当前是研究设计，尚无本路线的性能结果；基座、表示与接口仍待选择。</p>
+<div class="start-here"><span>先读这句话</span><p><strong>先证明“给对了形状，模型确实受益”，再研究“模型自己能否找对形状”。</strong>首个原型优先只向视频分支注入，先用当前时刻的正确物体身份和位姿排除识别误差。等这一步成立，再逐步加入自动匹配、观测端增强和泛化测试。</p><a href="#execution">查看 P0–P5 推进条件 →</a></div>
+
+<section id="background" class="section">
+<header class="section-head"><span class="section-number">01</span><div><h2>研究背景：为什么给 WAM 增加物体级 3D 先验</h2><p class="lead">从当前图像中唤起合适的几何表示，帮助理解当前场景，并约束未来预测。</p></div></header><p>我们的起点是：当前图像只呈现物体的局部表面与特定视角，但操作需要理解形状、朝向、遮挡和相对空间关系。希望模型看到一个“认识”的物体时，能够调用与其匹配的 3D 表示，补充观测中不充分的几何信息，再用于预测后续场景变化。</p>
+        <p>这里的“认识”需要落实为可计算的匹配关系：不仅知道它属于“杯子”这一类别，还需要判断候选几何是否适合当前物体，以及它在当前场景中如何放置。物体表示可以粗略、局部和带不确定性，但应保留支持当前任务的关键结构。</p>
+<div class="cards"><article class="card"><span class="eyebrow">PERCEPTION</span>
+<h3>理解当前观测</h3><p>在视角变化、部分遮挡和信息不充分时，利用匹配的物体几何增强观测特征。</p></article><article class="card"><span class="eyebrow">PREDICTION</span>
+<h3>改善未来预测</h3><p>在保持物体形状的同时，允许位姿、可见性和交互状态发生变化，减少几何漂移。</p></article><article class="card"><span class="eyebrow">CONTROL</span>
+<h3>验证动作收益</h3><p>沿基座原有的未来表示—动作接口，检验几何预测的改善能否传递为闭环任务收益。</p></article></div>
+<aside class="callout note"><strong>灵感与科学判断的边界</strong><div>“无红色像素却感到红色”的可乐罐图给了我们感知补全的启发，但它主要涉及颜色上下文与颜色恒常性，不能单独证明人脑预存了每个物体的 3D 模型。“介于点云与 3DGS 之间”保留为工程类比：有空间结构、细节不完整、能绑定身份与语义。<a href="#ref-illusion">[R11]</a></div></aside>
+<aside class="callout scope"><strong>当前项目边界 · 已确定</strong><div>WAM+3D 与 <a href={root + "/memory-wam/"}>Memory-WAM</a> 是两条并行研究线。本模块只研究几何表示、物体匹配、观测端增强和视频端条件注入。现有 memory 主要在 action 生成时注入；两条线各自形成可靠结论后，再评估组合。当前实验不加入跨轮次经验检索或联合 memory 训练。</div></aside></section>
+<section id="related" class="section">
+<header class="section-head"><span class="section-number">02</span><div><h2>现有路线与相对局限</h2><p class="lead">这些工作分别提供几何预测、物体定位或条件注入的思路。这里的“局限”只针对我们的研究目标，不是对论文整体能力的评价。</p></div></header>
+<div class="table-wrap" tabindex="0" role="region" aria-label="对照表，可横向滚动"><table><thead><tr><th scope="col">路线与代表工作</th><th scope="col">现有做法</th><th scope="col">与本项目的关系</th></tr></thead><tbody><tr><td><strong>几何感知的未来视频</strong><br><a href="#ref-4dgen">4D Video Generation</a> / <a href="#ref-xwam">X-WAM</a></td><td>对未来 RGB-D、跨视角点图或深度分支进行建模，增强几何一致性。</td><td>支持“几何能参与未来预测”这一方向；仍需单独验证从物体库检索已知 3D 表示、再作为条件注入的价值。</td></tr><tr><td><strong>几何骨干上的策略</strong><br><a href="#ref-geometric">Geometric Action Model</a></td><td>复用几何基础模型，将未来几何特征预测和动作解码接入共享骨干。</td><td>可参考几何特征与未来表示接口；本项目优先在现有视频 WAM 上增加模块，是否更换骨干尚未决定。</td></tr><tr><td><strong>紧凑的未来表示</strong><br><a href="#ref-pointworld">PointWorld</a> / <a href="#ref-modar">ModAR</a></td><td>预测 3D 点流，或依次预测点轨迹、DINO 特征和深度等模态。</td><td>可借鉴几何与运动的监督目标；首版仍围绕现有 video 分支验证，不预先决定替换整个未来表示。</td></tr><tr><td><strong>语义与物体几何绑定</strong><br><a href="#ref-concept">ConceptGraphs</a> / <a href="#ref-grounded">Grounded Action Model</a></td><td>建立带语义的 3D 对象及关系，或将语言、点和框提示解析为对象视觉与度量几何特征。</td><td>可参考“画面里的哪个对象对应哪份表示”；不能把对象定位成功直接等同于几何先验适用。</td></tr><tr><td><strong>在线几何感知</strong><br><a href="#ref-stream">StreamVGGT</a></td><td>对流式图像进行增量几何重建。</td><td>是可选的几何获取前端；重建当前场景和调用已有物体先验是两个不同模块。</td></tr><tr><td><strong>条件适配接口</strong><br><a href="#ref-ip">IP-Adapter</a> / <a href="#ref-control">ControlNet</a></td><td>通过独立 cross-attention 或空间残差分支注入额外条件。</td><td>可借鉴轻量条件接口；它们本身并不证明 3D 物体条件对视频 WAM 或机器人任务有效。</td></tr></tbody></table></div>
+<aside class="callout note"><strong>当前研究机会 · 待验证</strong><div>围绕“匹配到的物体级 3D 先验 → 当前观测增强 / 未来预测约束 → 动作收益”形成完整证据链。注入位置、门控和双分支组合都属于待检验设计，不将“3D＋WAM”或“增加 cross-attention”单独表述为已成立的创新。</div></aside></section>
+<section id="questions" class="section">
+<header class="section-head"><span class="section-number">03</span><div><h2>研究动机与关键挑战</h2><p class="lead">把“熟悉物体的形状应该有帮助”拆成四个可以通过实验回答的问题。</p></div></header>
+<aside class="callout question"><strong>核心研究问题</strong><div>给定当前观测和一组已编码的 3D 物体表示，能否通过可靠匹配、空间对齐与可控注入，让现有 WAM 更准确地预测任务相关的未来几何，并在闭环操作中获得可重复的收益？</div></aside>
+<div class="table-wrap" tabindex="0" role="region" aria-label="对照表，可横向滚动"><table><thead><tr><th scope="col">研究假设</th><th scope="col">预期现象</th><th scope="col">可能推翻它的证据</th></tr></thead><tbody><tr><td><strong>H1 · 物体几何有增量价值</strong></td><td>正确 3D 条件优于同预算的语义／2D 特征条件。</td><td>只给类别或外观特征同样有效；替换几何后性能几乎不变。</td></tr><tr><td><strong>H2 · 视频端能利用几何</strong></td><td>未来深度、关键点或相对位姿预测更准确，并改善困难交互。</td><td>视频更清晰但几何误差不降；动作接口不使用被增强的表示。</td></tr><tr><td><strong>H3 · 两处注入有可解释差异</strong></td><td>观测端改善当前状态理解，视频端改善后续一致性；双位置可能互补。</td><td>双位置完全冗余，或重复条件导致过强约束、训练不稳定。</td></tr><tr><td><strong>H4 · 调用在不确定条件下仍可靠</strong></td><td>遮挡和视角变化时有效；陌生物体或匹配失败时能降低影响。</td><td>模板错配使网络无视观测，或对新形状出现系统性退化。</td></tr></tbody></table></div>
+<div class="cards"><article class="card"><span class="eyebrow">CHALLENGE 01</span>
+<h3>匹配与对齐</h3><p>区分类别相同、形状相似、实例对应；处理尺度、位姿、对称性及遮挡带来的多解。</p></article><article class="card"><span class="eyebrow">CHALLENGE 02</span>
+<h3>稳定形状与动态位姿</h3><p>几何先验应支持物体运动；不能把当前投影位置锁死到所有未来帧。</p></article><article class="card"><span class="eyebrow">CHALLENGE 03</span>
+<h3>真实利用与因果验证</h3><p>区分几何收益、额外参数收益和训练数据收益；确认未来分支确实影响动作。</p></article></div></section>
+<section id="framework" class="section">
+<header class="section-head"><span class="section-number">04</span><div><h2>总体框架：匹配、对齐与双位置调用</h2><p class="lead">A 帮助看懂现在，B 帮助预测未来。两处各有独立开关，先分别验证，再检查一起使用是否值得。</p></div></header>
+<figure class="diagram"><div class="diagram-toolbar"><strong>候选总体架构 · A / B 可独立开关</strong><a href={root + "/wam-3d/framework.svg"} target="_blank" rel="noopener">打开完整架构图 ↗</a></div><div class="diagram-scroll" tabindex="0" role="region" aria-label="WAM+3D 总体架构图，可横向滚动"><svg viewBox="0 0 920 580" role="img" aria-labelledby="flow-title flow-desc" xmlns="http://www.w3.org/2000/svg">
+<title id="flow-title">WAM＋3D 双位置条件注入框架</title><desc id="flow-desc">当前观测进入视觉编码和物体匹配；3D库提供候选物体。匹配并对齐得到几何token，分别增强观测条件和视频骨干。未来表示通过原有接口进入动作生成。</desc>
+<defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#64788a"/></marker></defs>
+<g fill="none" stroke="#64788a" stroke-width="2" marker-end="url(#arrow)">
+<path d="M210 88V130"/><path d="M345 60H462V130"/><path d="M740 88V108H600V130"/>
+<path d="M555 204V250"/><path d="M210 204V296"/><path d="M420 315H345"/>
+<path d="M210 370V416"/><path d="M555 326V393H310V416"/><path d="M345 452H652"/>
+<path d="M777 492V532H575"/>
+</g>
+<g font-family="system-ui, sans-serif" text-anchor="middle">
+<rect x="75" y="20" width="270" height="68" rx="12" fill="#e7eff7"/><text x="210" y="48" class="svg-title">当前观测 O</text><text x="210" y="71" class="svg-sub">RGB / 可选 RGB-D</text>
+<rect x="600" y="20" width="280" height="68" rx="12" fill="#e1f2ec"/><text x="740" y="48" class="svg-title">已编码的 3D 物体库</text><text x="740" y="71" class="svg-sub">几何 · 语义 · 局部结构</text>
+<rect x="75" y="130" width="270" height="74" rx="12" fill="#e7eff7"/><text x="210" y="160" class="svg-title">原有视觉编码</text><text x="210" y="185" class="svg-sub">或首帧条件 token</text>
+<rect x="420" y="130" width="270" height="74" rx="12" fill="#e1f2ec"/><text x="555" y="160" class="svg-title">匹配 + 空间对齐</text><text x="555" y="185" class="svg-sub">候选、位姿、区域、置信度</text>
+<rect x="420" y="250" width="270" height="76" rx="12" fill="#e1f2ec"/><text x="555" y="280" class="svg-title">几何条件 token G</text><text x="555" y="305" class="svg-sub">固定数量 · 对象身份 · 坐标</text>
+<rect x="75" y="296" width="270" height="74" rx="12" fill="#fff2d8"/><text x="210" y="326" class="svg-title">A · 观测端条件增强</text><text x="210" y="351" class="svg-sub">可独立开关</text>
+<rect x="75" y="416" width="270" height="76" rx="12" fill="#fff2d8"/><text x="210" y="446" class="svg-title">B · Video backbone 注入</text><text x="210" y="472" class="svg-sub">预测未来 · 可独立开关</text>
+<rect x="652" y="416" width="250" height="76" rx="12" fill="#e7eff7"/><text x="777" y="446" class="svg-title">未来表示 / 预测</text><text x="777" y="472" class="svg-sub">原有 latent 接口</text>
+<rect x="335" y="505" width="240" height="56" rx="12" fill="#182f46"/><text x="455" y="539" font-size="17" font-weight="700" fill="white">原有动作生成</text>
+<text x="382" y="306" class="svg-label">读取</text><text x="430" y="385" class="svg-label">几何读取</text>
+</g></svg></div><figcaption>候选架构：一次观测匹配得到几何条件，两处按不同职责读取。语言、机器人状态等原有条件继续沿基座自身接口输入，图中省略。实际未来—动作依赖关系须在 P0 核查。</figcaption></figure>
+<h3>4.1 物体表示：先统一接口，再选择载体</h3><p>候选载体包括稀疏带特征点、表面元素（surfel）、少量高斯及对象级 latent。首版选一种能从仿真资产稳定获得、容易检查空间对应的表示，其他载体作为后续替换项。描述的是几何与语义，不把颜色、标签或完整外观当成全部 3D 信息。</p><div class="formula">物体先验 P<sub>i</sub> = (z<sub>i</sub>, G<sub>i</sub><sup>local</sup>, a<sub>i</sub>)<br>当前调用 C<sub>i,t</sub> = (T<sub>i,t</sub>, m<sub>i,t</sub>, q<sub>i,t</sub>)</div><p class="small">z：身份／语义特征；G<sup>local</sup>：物体自身坐标系中的几何；a：可选部件／属性；T：当前位姿与尺度；m：图像对应区域；q：匹配、对齐和可见性置信度。先验形状与当前实例状态分开保存。高斯的空间协方差不自动等于模型对认知错误的不确定性。</p>
+<h3>4.2 调用前端：识别对象 → 找到候选 → 对齐实例</h3>
+<div class="table-wrap" tabindex="0" role="region" aria-label="对照表，可横向滚动"><table><thead><tr><th scope="col">步骤</th><th scope="col">输出</th><th scope="col">首版执行方式</th></tr></thead><tbody><tr><td>对象定位</td><td>区域 mask / box、对象身份候选</td><td>先用仿真标注排除识别误差，再换可部署的检测／分割前端。</td></tr><tr><td>候选匹配</td><td>形状与语义候选、匹配分数</td><td>优先小型物体库；可从多视角渲染特征检索开始。类别相同仍需检查几何适用性。</td></tr><tr><td>空间对齐</td><td>尺度、位姿或软对应关系</td><td>oracle 阶段用当前时刻真值；自动阶段用 RGB-D、相机信息或学习式对齐。对称物体保留等价姿态或多候选。</td></tr><tr><td>条件编码</td><td>有限数量的几何 token、对象与坐标标记</td><td>固定 token 数与特征维度，明确坐标系、单位和 padding mask。匹配不可靠时降低注入强度。</td></tr></tbody></table></div>
+<h3>4.3 观测端：增强当前状态表示</h3><p>在原有图像编码之后、送入未来预测之前增加几何读取模块；如果基座直接使用首帧 VAE latent，则在首帧条件 token 处定义这个接口。保留原始观测路径，采用可训练残差补充几何。对象区域用于约束“哪份几何对应哪些观测 token”。</p><div class="formula">H̃<sub>obs</sub> = H<sub>obs</sub> + g<sub>obs</sub> ⊙ F<sub>obs</sub>(H<sub>obs</sub>, G)</div>
+<h3>4.4 视频端：给未来预测提供可读取的几何条件</h3><p>将几何条件接入 Video backbone 的若干选定 block。优先比较独立 cross-attention：视频 token 提供 Query，几何 token 提供 Key / Value；文本与其他原有条件仍由原接口处理。观测端与视频端可共享几何编码器，但初期使用独立适配器和门控，便于解释作用。</p><div class="formula">H̃<sub>vid</sub><sup>ℓ,τ</sup> = H<sub>vid</sub><sup>ℓ,τ</sup> + g<sub>vid</sub><sup>ℓ,τ</sup> ⊙ F<sub>vid</sub><sup>ℓ</sup>(H<sub>vid</sub><sup>ℓ,τ</sup>, G)</div><p class="small">ℓ 表示网络层，τ 表示扩散／流匹配采样时间；它们不同于视频帧时间。层位置与时间门控均为候选设计，首版使用少量固定位置与简单门控，不预先假定早层或晚层更优。</p>
+<aside class="callout note"><strong>保持几何，允许运动</strong><div>物体自身形状可在未来预测中持续读取；当前 T 和 m 仅描述起始状态。不能把当前二维区域或当前位姿硬锁到所有未来帧。未来位姿、遮挡和交互变化由模型预测，必要时后续增加动态对应模块。静态几何也不能直接提供真实质量、摩擦或材料动力学。</div></aside>
+<aside class="callout warning"><strong>动作接口核查是前置条件</strong><div>必须画出实际基座推理时的依赖：被增强的 video hidden / future latent 是否进入 action head？若未来预测仅是训练辅助目标，几何可能只通过训练共享表示起作用，此时需要另立假设，不能声称完成了“推理时 3D → video → action”的验证。</div></aside></section>
+<section id="modules" class="section">
+<header class="section-head"><span class="section-number">05</span><div><h2>三个候选实现模块</h2><p class="lead">先把形状存好，再把它与画面里的物体对上，最后让模型按需读取。这三个模块是候选设计，是否构成研究贡献还需要证据。</p></div></header>
+<div class="cards"><article class="card"><span class="eyebrow">M1 · REPRESENTATION</span>
+<h3>物体级几何先验编码</h3><p>把“物体本身长什么样”存成模型可读取的几何特征；把它与“此刻放在哪里、朝向哪里”分开。</p></article><article class="card"><span class="eyebrow">M2 · GROUNDING</span>
+<h3>置信度控制的匹配与对齐</h3><p>确认画面里的对象对应库中哪份形状，再估计位置、尺度和朝向；对不确定或不匹配的候选降低影响。</p></article><article class="card"><span class="eyebrow">M3 · CONDITIONING</span>
+<h3>面向观测与视频的条件读取</h3><p>让当前观测和未来预测分别读取几何；检查它们各自帮了什么、是否互补，以及动作有没有因此改善。</p></article></div>
+<h3>网络比较：按机制比较，不进行无约束组合搜索</h3>
+<div class="table-wrap" tabindex="0" role="region" aria-label="对照表，可横向滚动"><table><thead><tr><th scope="col">接口候选</th><th scope="col">具体做法</th><th scope="col">适合回答的问题</th><th scope="col">优先级</th></tr></thead><tbody><tr><td>Token 拼接</td><td>线性投影几何特征，增加类型／坐标编码后拼到条件序列。</td><td>只增加条件信息是否足够？</td><td>基准对照</td></tr><tr><td>独立 cross-attention</td><td>图像或视频 token 查询几何 token，输出经残差分支注入。</td><td>按需读取能否更好利用对象几何？</td><td>首选原型</td></tr><tr><td>空间残差分支</td><td>在已知／估计视角下生成深度、法线或特征图，按空间位置注入。</td><td>显式投影对齐是否比 token 读取更有价值？</td><td>前两者稳定后比较</td></tr></tbody></table></div>
+<h3>训练与实现约束</h3><ul><li>先冻结几何前端和基座的大部分权重，训练投影器与小型适配器；若确有欠拟合证据，再逐步开放选定 video 层或 LoRA。</li><li>可用零初始化残差输出层保持初始行为接近基线。避免让相乘的门控与残差输出同时以零初始化而阻断学习。</li><li>先保留基座原有目标；几何辅助损失仅在有可靠深度、点轨迹或位姿监督时加入，并用独立消融衡量贡献。</li><li>按基座原本的条件方向使用语言、状态或动作，不因增加 3D 分支而引入未来真值动作作为推理输入。</li><li>比较接口时固定物体库、数据、token 数、更新步数与采样设置，并报告额外参数量和训练／推理预算。</li><li>相同观测下可复用已计算的几何条件，避免每个去噪步重复识别和编码；这是计算复用，不引入跨轮次经验机制。</li></ul>
+<aside class="callout note"><strong>可形成贡献的证据</strong><div>只有当正确几何相较于语义条件、错误几何及同预算适配器表现出稳定差异，且该差异能解释未来预测或操作收益时，才将相应设计上升为研究结论。</div></aside></section>
+<section id="data" class="section">
+<header class="section-head"><span class="section-number">06</span><div><h2>现有基础、待补资源与首版边界</h2><p class="lead">把已讨论的方向和仍待核查的工程事实分开，不虚构数据准备或实验完成状态。</p></div></header>
+<div class="two-col"><article class="panel">
+<h3>已有讨论与可复用经验</h3><ul><li>已有 WAM 实验、动作生成接口和几何相关文献调研经验。</li><li>确定了 Observation 与 Video backbone 两个候选注入位置。</li><li>明确先验证仿真中的机制，再逐步评估真实输入误差。</li><li>已讨论点云、surfel、Gaussian 与对象 latent 等候选表示。</li></ul><p class="small">这些是项目起点，不代表本项目代码、数据管线或性能结果已经完成。</p></article><article class="panel">
+<h3>启动前需要确认</h3><ul><li>基座名称、权重与版本，video → action 的真实推理路径。</li><li>仿真任务、物体资产和轨迹数据的可用性及许可。</li><li>深度、分割、相机参数、当前位姿和未来几何标签的导出能力。</li><li>可分配 GPU、显存、运行窗口与端到端时延预算。</li></ul><p class="small">本方案不将已有 memory 基座自动指定为 3D 线基座。</p></article></div>
+<div class="table-wrap" tabindex="0" role="region" aria-label="对照表，可横向滚动"><table><thead><tr><th scope="col">数据项</th><th scope="col">用途</th><th scope="col">约束</th></tr></thead><tbody><tr><td>物体模型／局部几何与可选语义</td><td>建立候选库并离线编码</td><td>测试几何是否预先入库须公开；已知对象新姿态与未见对象是不同设定。</td></tr><tr><td>当前 RGB / 可选 RGB-D、机器人状态</td><td>匹配、对齐和原有策略条件</td><td>自动阶段只使用运行时可获得的信息；明确深度来自传感器还是估计。</td></tr><tr><td>当前对象 mask、位姿、相机真值</td><td>oracle 实验和前端诊断</td><td>仅代表受控上限，不作为最终自动部署结果。</td></tr><tr><td>未来视频与可选深度／轨迹／位姿</td><td>训练监督与离线评估</td><td>只作标签；不能进入推理条件、候选筛选或置信度计算。</td></tr><tr><td>动作、任务结果与扰动配置</td><td>闭环比较与误差归因</td><td>训练／验证／测试分开；确定种子、场景和失败类型记录。</td></tr></tbody></table></div>
+<div class="two-col"><article class="panel">
+<h3>首版范围</h3><ul><li>小型、可检查的物体库与刚性物体操作。</li><li>一个推理时使用 video 表示的 WAM 基座。</li><li>一个轻量几何编码接口与一种主注入方式。</li><li>先 oracle 条件，再自动匹配／对齐。</li><li>至少覆盖形状差异、遮挡或视角变化中的明确困难。</li></ul></article><article class="panel">
+<h3>后续扩展</h3><ul><li>大规模开放物体库与未知对象适配。</li><li>可变形物体、关节物体与更复杂接触。</li><li>动态局部几何细化与物理属性学习。</li><li>跨基座迁移、真机和全身机器人验证。</li><li>两条独立路线成熟后再评估与 memory 的组合。</li></ul></article></div></section>
+<section id="execution" class="section">
+<header class="section-head"><span class="section-number">07</span><div><h2>执行阶段与推进条件</h2><p class="lead">每一阶段都有进入下一步的条件。Oracle 指先用当前时刻的真实物体身份与位姿，排除前端识别误差；它是受控实验，不代表已经实现自动调用。</p></div></header>
+<div class="table-wrap" tabindex="0" role="region" aria-label="对照表，可横向滚动"><table><thead><tr><th scope="col">阶段</th><th scope="col">要做什么</th><th scope="col">交付物</th><th scope="col">进入下一阶段的条件</th></tr></thead><tbody><tr><td><strong>P0</strong><br>基线与接口</td><td>复现一组代表任务；审查 video–action 计算图；选定评估指标与数据划分。</td><td>基座版本记录、计算图、基线结果、运行配置。</td><td>基线稳定可复现；明确被改动表示如何影响动作；完成无泄漏检查。</td></tr><tr><td><strong>P1</strong><br>最小 3D 编码</td><td>用少量仿真物体建立几何库，统一坐标系和尺度；输出固定 token。</td><td>几何库清单、编码器、投影可视化、接口说明。</td><td>已知位姿下能对齐到当前观测；物体身份和几何配对可检查。</td></tr><tr><td><strong>P2</strong><br>仅视频端的 oracle 验证</td><td>使用当前时刻真值匹配／对齐，训练轻量 video 适配器；对比无 3D、正确几何和关键对照。</td><td>受控实验报告、未来预测对比、失败案例。</td><td>正确几何对预先指定的几何指标呈可重复改善；动作收益单独报告。若无效，先诊断接口和监督。</td></tr><tr><td><strong>P3</strong><br>自动匹配与对齐</td><td>将真值前端替换成运行时可用的识别、检索与位姿／软对齐模块，加入可靠性控制。</td><td>前端准确率、对齐误差、置信度评估及端到端结果。</td><td>自动调用相对 oracle 的差距可量化；低置信度与未知对象有可测试的处理路径。</td></tr><tr><td><strong>P4</strong><br>双位置与接口比较</td><td>完成四组位置消融；在优先位置比较拼接与 cross-attention，必要时再做空间分支。</td><td>位置／接口消融表、参数和时延对照、可视化。</td><td>可以解释每处作用；双位置若无收益，则保留更简洁方案。</td></tr><tr><td><strong>P5</strong><br>泛化与成果整理</td><td>增加遮挡、视角、形状、尺度与布局扰动；验证闭环任务和未见对象设定。</td><td>完整结果、置信区间、失败分类、可复现包与论文方法草稿。</td><td>形成几何利用证据和稳健任务收益；所有性能陈述与实际实验范围一致。</td></tr></tbody></table></div>
+<aside class="callout note"><strong>遇到负结果时的分流</strong><div>P2 无收益：先检查条件是否被使用、几何是否对齐、训练梯度是否通畅及任务是否需要几何。P2 有效但 P3 失效：优先查匹配／对齐和置信度。未来预测改善但动作不改善：查 video–action 接口、动作头适配和评估任务。双位置退化：检查重复注入、强度和条件冲突。</div></aside>
+<h3>首次启动清单</h3><p class="small">以下均为启动前待完成事项；是否完成，以后续实验记录为准。</p><ul class="checklist"><li><span class="pending-mark">待完成</span><span>锁定基座版本，画出 video hidden 到 action 的实际依赖。</span></li><li><span class="pending-mark">待完成</span><span>选出少量需要几何判断的任务，确定训练／验证／测试物体划分。</span></li><li><span class="pending-mark">待完成</span><span>导出当前 RGB-D、mask、相机和物体位姿，验证坐标变换。</span></li><li><span class="pending-mark">待完成</span><span>建立小型 3D 先验库，保存每个物体的来源、尺度与编码版本。</span></li><li><span class="pending-mark">待完成</span><span>先打通仅 video 注入的 oracle 原型，与相同预算基线比较。</span></li><li><span class="pending-mark">待完成</span><span>记录正确几何、语义条件和错误几何的配对结果。</span></li></ul></section>
+<section id="evaluation" class="section">
+<header class="section-head"><span class="section-number">08</span><div><h2>实验评估：区分几何收益与其他收益</h2><p class="lead">先固定要验证的假设，再选择指标与场景；所有对照使用一致的数据划分和评估条件。</p></div></header>
+<h3>8.1 四组位置消融</h3>
+<div class="table-wrap" tabindex="0" role="region" aria-label="对照表，可横向滚动"><table><thead><tr><th scope="col">组别</th><th scope="col">Observation 注入</th><th scope="col">Video 注入</th><th scope="col">回答的问题</th></tr></thead><tbody><tr><td>B0 · 原基线</td><td>无</td><td>无</td><td>原有能力和失败模式。</td></tr><tr><td>B1 · 观测增强</td><td>有</td><td>无</td><td>更好的当前状态表示是否足够？</td></tr><tr><td>B2 · 视频增强</td><td>无</td><td>有</td><td>直接约束未来预测是否有效？</td></tr><tr><td>B3 · 双位置</td><td>有</td><td>有</td><td>两者互补、冗余还是冲突？</td></tr></tbody></table></div>
+<h3>8.2 必须解释的混淆因素</h3>
+<div class="table-wrap" tabindex="0" role="region" aria-label="对照表，可横向滚动"><table><thead><tr><th scope="col">对照</th><th scope="col">控制方式</th><th scope="col">解释目的</th></tr></thead><tbody><tr><td>参数与训练预算</td><td>加入同等规模适配器、使用相同训练步数；报告额外 token 和 FLOPs。</td><td>排除仅因模型变大或训练更久而改善。</td></tr><tr><td>语义／2D 信息</td><td>保留对象身份与近似特征预算，用类别或 2D 外观特征替代 3D。</td><td>判断收益是否确实需要几何。</td></tr><tr><td>错误几何</td><td>在语义相同的候选间替换形状；检查实际注入强度，单独记录门控拒绝率。</td><td>区分几何敏感性与“错误输入被门控全部关闭”。</td></tr><tr><td>错误对齐</td><td>对正确模型施加可控位姿／尺度误差。</td><td>建立性能随对齐误差变化的曲线。</td></tr><tr><td>oracle 与自动前端</td><td>保持后端一致，仅替换匹配、位姿与 mask 来源。</td><td>量化调用前端造成的损失。</td></tr><tr><td>条件移除与训练消融</td><td>训练期有／无几何分别比较；测试期移除或替换仅作为补充诊断。</td><td>避免把测试期分布外扰动当成唯一因果证据。</td></tr></tbody></table></div>
+<h3>8.3 指标与场景</h3>
+<div class="table-wrap" tabindex="0" role="region" aria-label="对照表，可横向滚动"><table><thead><tr><th scope="col">维度</th><th scope="col">建议指标</th><th scope="col">场景要求</th></tr></thead><tbody><tr><td>匹配与对齐</td><td>候选召回、几何匹配准确率、位姿／尺度误差、拒绝率；对称性等价处理。</td><td>同类别不同形状、遮挡、多个相似对象、未知物体。</td></tr><tr><td>未来几何与运动</td><td>深度误差、3D 关键点／点轨迹误差、对象相对位姿和形状保持；按可见性与预测时距分组。</td><td>杯柄／挂钩对齐、容器放置、绕障、物体运动后再显露。</td></tr><tr><td>视频质量</td><td>感知质量与时序一致性作为辅助；结合几何指标查看。</td><td>防止“复制当前帧”在静态部分取得好分数；同时检查运动与任务进展。</td></tr><tr><td>闭环操作</td><td>任务成功率、接触／对齐失败率、子任务完成率与恢复情况。</td><td>同场景同评估种子配对；动作采样预算一致。</td></tr><tr><td>效率</td><td>端到端新增时延、p50/p95、显存、参数、几何前端与视频分支耗时。</td><td>包含检测、检索、对齐、编码和注入；单独说明可缓存部分。</td></tr></tbody></table></div><p>建议先用小规模试验估计方差，再确定正式评估 episode 数；在资源允许时使用多个独立训练种子，优先报告至少 3 个。成功率报告置信区间，配对比较保留场景与随机种子关联，不把一个 episode 的不同帧当成独立样本。仅有 RGB 时，不能把同一几何教师对生成视频的打分等同于独立真值验证。</p>
+<aside class="callout note"><strong>数据划分必须标注两类“未见”</strong><div>① 物体已在 3D 库中，但任务演示未见该姿态／布局：验证先验复用。② 物体形状未进入先验库和训练：验证陌生对象的泛化或可靠回退。二者分开报告；不能把完整测试物体预先入库的结果描述为开放世界识别能力。</div></aside></section>
+<section id="goals" class="section">
+<header class="section-head"><span class="section-number">09</span><div><h2>最终希望做到什么程度</h2><p class="lead">将目标分成可运行原型、可靠机制和完整研究成果；当前阶段没有已完成的性能结论。</p></div></header>
+<div class="goal-stack"><article class="goal"><span class="goal-index">L0</span><div>
+<h3>可运行的最小闭环</h3><p>一个现有 WAM 基座、一个小型物体库、一个明确的几何编码接口和视频注入模块，能够完成训练、未来预测和闭环任务评估。</p><p><strong>验收：</strong>输入与坐标可检查；前向和训练稳定；基线可复现；几何条件只来自当前可用信息；完成一组正确／错误几何对照。该层级证明工程可行性，不宣称有效性。</p></div></article>
+        <article class="goal"><span class="goal-index">L1</span><div>
+<h3>证明模型真正利用几何</h3><p>在受控条件下，正确的物体 3D 信息稳定改善预先指定的未来几何指标，且效果不能被语义条件、参数增加或简单复制当前帧解释。</p><p><strong>验收：</strong>oracle 对比、关键反事实和失败归因齐全；明确收益出现在哪些物体、预测时距与任务条件下。动作收益仍独立检验。</p></div></article>
+        <article class="goal"><span class="goal-index">L2</span><div>
+<h3>自动调用且能改善操作</h3><p>机器人从当前观测自动识别可调用的几何、完成空间对应，在观测端和／或视频端读取，并在几何敏感任务中提高闭环成功率。</p><p><strong>验收：</strong>自动前端结果与 oracle 差距可解释；多个任务和独立种子结果稳定；正确条件优于主要对照；未知物体与低置信度时不出现明显系统性退化；端到端开销满足预设预算。</p></div></article>
+        <article class="goal accent"><span class="goal-index">L3</span><div>
+<h3>形成可复现的 3D＋WAM 方法</h3><p>在已知对象的新姿态／布局、遮挡／视角扰动及合理的新形状设定上形成清晰的适用范围；能解释采用哪个位置和接口，以及为什么。</p><p><strong>交付：</strong>完整方法、数据与划分说明、训练／评估配置、主要消融、统计结果、时延与失败案例；条件允许时增加第二基座或真机验证。达到该层级后，再启动与 memory＋WAM 的组合研究。</p></div></article></div>
+<aside class="callout note"><strong>目标措辞与数值门槛</strong><div>方向目标是“可重复、可解释的未来几何与操作收益”，不预先承诺 SOTA、全身控制或固定百分点。正式实验前根据基线方差和资源，预先登记最小有意义提升 Δ<sub>min</sub>、最大新增时延 B<sub>lat</sub>、未知物体最大允许退化 ε，以及评估样本数；避免看到结果后再改标准。</div></aside>
+<h3>理想演示应当展示的四种能力</h3>
+<div class="cards"><article class="card"><span class="eyebrow">DEMO A</span>
+<h3>识别并对齐已知物体</h3><p>同一物体换位置、旋转或部分遮挡后，能调用适合的几何并在画面中显示对应关系。</p></article><article class="card"><span class="eyebrow">DEMO B</span>
+<h3>预测运动中的几何</h3><p>杯子移动或转动时保持合理形状，未来位置随任务变化；不会因先验强约束而冻结物体。</p></article><article class="card"><span class="eyebrow">DEMO C</span>
+<h3>在困难操作中获益</h3><p>对杯柄／挂钩、放置间隙等关键几何条件表现出更可靠的未来预测与动作结果。</p></article></div><p><strong>DEMO D · 能识别自己的不确定性：</strong>面对库外对象、形变物体或错配模型时，显示低置信度并减弱先验影响，依靠原有观测路径继续工作；将该行为与实际失败率对应报告。</p></section>
+<section id="open" class="section">
+<header class="section-head"><span class="section-number">10</span><div><h2>待决定事项与研究笔记</h2><p class="lead">把候选选择保留为决策，而不是提前写成确定方案。</p></div></header>
+<div class="table-wrap" tabindex="0" role="region" aria-label="对照表，可横向滚动"><table><thead><tr><th scope="col">事项</th><th scope="col">当前倾向</th><th scope="col">决定所需证据</th></tr></thead><tbody><tr><td>基座</td><td>选择推理时 video 表示进入动作路径的模型；具体名称待定。</td><td>代码计算图、权重可用性、训练资源、任务覆盖。</td></tr><tr><td>3D 表示</td><td>先选容易从资产生成和对齐的稀疏几何＋对象特征。</td><td>编码成本、局部结构保留、坐标对应质量。</td></tr><tr><td>是否需要完整模型库</td><td>首版小库验证；之后比较模板检索与当前观测几何提取。</td><td>库外泛化、检索代价、几何的实际增量价值。</td></tr><tr><td>首个注入位置</td><td>优先仅 video 端验证核心假设，观测端保留独立开关。</td><td>P2 效果和 P4 位置消融；不预设双位置必须最好。</td></tr><tr><td>网络接口</td><td>cross-attention 主原型，简单拼接作基线。</td><td>同预算结果、空间对应能力、训练稳定性。</td></tr><tr><td>注入层与时机</td><td>少量固定 block；层位置和去噪时间调度后续研究。</td><td>几何影响位置、时延和受控消融。</td></tr><tr><td>几何监督</td><td>原有 WAM 目标起步；可用可靠几何标签时增加辅助监督。</td><td>是否忽略几何、标签质量、损失权重敏感性。</td></tr><tr><td>与 memory 融合</td><td>待两条路线分别形成结论后再评估。</td><td>独立收益、接口稳定性和组合后的干扰分析。</td></tr></tbody></table></div>
+<details class="details"><summary>实验记录模板 · 每次迭代记录什么</summary><div class="details-body"><p><strong>假设：</strong>本轮只改变哪一个因素？</p><p><strong>配置：</strong>基座与编码版本、数据划分、物体库范围、注入位置、参数预算、训练种子、采样设置。</p><p><strong>证据：</strong>匹配／对齐质量、未来几何、任务结果、时延和置信区间。</p><p><strong>解释：</strong>支持或不支持哪条假设？是否有替代解释？</p><p><strong>决策：</strong>保留、简化、回退或进一步排查；给下一轮一个明确问题。</p></div></details></section>
+<section id="references" class="section">
+<header class="section-head"><span class="section-number">11</span><div><h2>参考文献与技术连接</h2><p class="lead">按在本项目中的作用组织，不按论文热度排列。</p></div></header><p>下列文献解读与链接沿用 09-29 执行大纲，按“研究问题、方法、证据范围、可复用点”展开。它们为设计提供参照，不代表 WAM+3D 已复现这些论文或已经获得相同收益。</p>
+<div class="reference-tools"><button id="expand-refs" type="button">展开全部文献</button><button id="collapse-refs" type="button">收起全部文献</button></div>
+<details class="reference" id="ref-xwam"><summary><span class="ref-number">R1</span><span><span class="ref-tag">视频 WAM 增加几何</span><strong>X-WAM · Unified 4D World Action Modeling from Video Priors with Asynchronous Denoising</strong></span><span class="plus">+</span></summary><div class="details-body"><dl><dt>01 · 研究了什么问题</dt><dd>如何在一个框架中兼顾未来视频／3D 信息与动作解码。</dd><dt>02 · 怎么解决</dt><dd>在预训练视频 DiT 上增加深度预测分支，预测多视角 RGB-D，并采用不同模态的异步去噪调度。</dd><dt>03 · 证据与适用范围</dt><dd>论文报告视觉、几何与策略评估；这里仅引用其结构思路，不将其结果作为本方案已有效的证据。</dd><dt>04 · 局限与可复用点</dt><dd>参考视频内部的几何接口与效率取舍。深度输出分支不同于检索物体模型作为输入条件。</dd></dl><a class="source-link" href="https://arxiv.org/abs/2604.26694" target="_blank" rel="noopener noreferrer">论文 / 官方项目页 ↗</a></div></details>
+<details class="reference" id="ref-4dgen"><summary><span class="ref-number">R2</span><span><span class="ref-tag">几何监督的未来生成</span><strong>Geometry-aware 4D Video Generation for Robot Manipulation</strong></span><span class="plus">+</span></summary><div class="details-body"><dl><dt>01 · 研究了什么问题</dt><dd>未来视频如何跨视角保持空间与时间一致性。</dd><dt>02 · 怎么解决</dt><dd>用跨视角点图对齐监督学习共享 3D 场景表示，预测未来 RGB-D 序列。</dd><dt>03 · 证据与适用范围</dt><dd>支持几何监督可以进入视频生成这一技术路线；与对象模型检索的收益仍需分开验证。</dd><dt>04 · 局限与可复用点</dt><dd>参考几何评价与监督信号。其输入和监督设置不能未经说明直接迁移为我们的部署条件。</dd></dl><a class="source-link" href="https://arxiv.org/abs/2507.01099" target="_blank" rel="noopener noreferrer">论文 / 官方项目页 ↗</a></div></details>
+<details class="reference" id="ref-geometric"><summary><span class="ref-number">R3</span><span><span class="ref-tag">几何作为骨干</span><strong>Geometric Action Model for Robot Policy Learning</strong></span><span class="plus">+</span></summary><div class="details-body"><dl><dt>01 · 研究了什么问题</dt><dd>如何复用几何基础模型进行感知、未来预测和动作生成。</dd><dt>02 · 怎么解决</dt><dd>在几何模型中间插入因果未来预测器，再利用后续层解码未来深度和动作。</dd><dt>03 · 证据与适用范围</dt><dd>项目展示未来深度与机器人任务评估；说明另一种把几何和策略结合的结构选择。</dd><dt>04 · 局限与可复用点</dt><dd>参考当前几何／未来 latent／动作的接口。与下一条 Grounded Action Model 同简称 GAM，不能混淆。</dd></dl><a class="source-link" href="https://cvlab-kaist.github.io/Geometric-Action-Model/" target="_blank" rel="noopener noreferrer">论文 / 官方项目页 ↗</a></div></details>
+<details class="reference" id="ref-grounded"><summary><span class="ref-number">R4</span><span><span class="ref-tag">对象绑定</span><strong>Grounded Action Model: 3D Grounding as a Foundation for Robotics</strong></span><span class="plus">+</span></summary><div class="details-body"><dl><dt>01 · 研究了什么问题</dt><dd>策略如何明确哪些对象相关以及它们的度量几何。</dd><dt>02 · 怎么解决</dt><dd>将语言、点或框提示转换为共享的对象中心视觉与几何表示，再结合机器人状态历史预测动作。</dd><dt>03 · 证据与适用范围</dt><dd>论文报告多种扰动与机器人任务结果；其作用点主要是对象 grounding 与策略输入。</dd><dt>04 · 局限与可复用点</dt><dd>参考对象身份、视觉特征与几何的绑定；不能据此推断给视频分支注入必然有效。</dd></dl><a class="source-link" href="https://arxiv.org/abs/2609.23863" target="_blank" rel="noopener noreferrer">论文 / 官方项目页 ↗</a></div></details>
+<details class="reference" id="ref-pointworld"><summary><span class="ref-number">R5</span><span><span class="ref-tag">3D 动态预测</span><strong>PointWorld: Scaling 3D World Models for In-The-Wild Robotic Manipulation</strong></span><span class="plus">+</span></summary><div class="details-body"><dl><dt>01 · 研究了什么问题</dt><dd>如何从局部 RGB-D 观测和机器人动作预测场景的 3D 变化。</dd><dt>02 · 怎么解决</dt><dd>将场景变化与机器人动作都表示为 3D 点流，并与模型预测控制结合。</dd><dt>03 · 证据与适用范围</dt><dd>项目展示场景点流预测和真实操作案例；适合参考几何与动作关系的评价。</dd><dt>04 · 局限与可复用点</dt><dd>参考点轨迹／点流目标。它的动作条件世界模型接口不一定与所选 WAM 相同。</dd></dl><a class="source-link" href="https://point-world.github.io/" target="_blank" rel="noopener noreferrer">论文 / 官方项目页 ↗</a></div></details>
+<details class="reference" id="ref-modar"><summary><span class="ref-number">R6</span><span><span class="ref-tag">预测什么未来</span><strong>ModAR: Modality-Autoregressive World-Action Models</strong></span><span class="plus">+</span></summary><div class="details-body"><dl><dt>01 · 研究了什么问题</dt><dd>不同未来模态及其生成顺序怎样影响动作学习。</dd><dt>02 · 怎么解决</dt><dd>依次生成未来点轨迹、DINO 特征、深度等模态，后续预测依赖先前生成内容，最后生成动作。</dd><dt>03 · 证据与适用范围</dt><dd>在其评估范围内，轨迹、DINO 和深度有益，额外未来 RGB 未提供稳定收益。不能推广为所有任务都不需要 RGB。</dd><dt>04 · 局限与可复用点</dt><dd>参考任务相关几何与运动指标；首版不因此重写整个 video backbone。</dd></dl><a class="source-link" href="https://adamhung60.github.io/ModAR/" target="_blank" rel="noopener noreferrer">论文 / 官方项目页 ↗</a></div></details>
+<details class="reference" id="ref-concept"><summary><span class="ref-number">R7</span><span><span class="ref-tag">语义与几何绑定</span><strong>ConceptGraphs: Open-Vocabulary 3D Scene Graphs for Perception and Planning</strong></span><span class="plus">+</span></summary><div class="details-body"><dl><dt>01 · 研究了什么问题</dt><dd>如何把多视角视觉语义转成可查询的 3D 对象与关系。</dd><dt>02 · 怎么解决</dt><dd>对带位姿 RGB-D 图像分割、提取特征，再跨视角关联到 3D 对象，并构建关系。</dd><dt>03 · 证据与适用范围</dt><dd>展示对象查询、定位与规划用途；是语义绑定的参考，不是我们视频注入机制的验证。</dd><dt>04 · 局限与可复用点</dt><dd>参考物体关联与描述组织；本项目当前不扩展为跨轮次经验或长期场景图系统。</dd></dl><a class="source-link" href="https://concept-graphs.github.io/" target="_blank" rel="noopener noreferrer">论文 / 官方项目页 ↗</a></div></details>
+<details class="reference" id="ref-stream"><summary><span class="ref-number">R8</span><span><span class="ref-tag">几何获取前端</span><strong>StreamVGGT: Streaming 4D Visual Geometry Transformer</strong></span><span class="plus">+</span></summary><div class="details-body"><dl><dt>01 · 研究了什么问题</dt><dd>如何在连续图像输入时增量获取几何，减少重复计算。</dd><dt>02 · 怎么解决</dt><dd>使用因果注意力及缓存历史表示，支持流式几何重建。</dd><dt>03 · 证据与适用范围</dt><dd>项目提供几何重建和深度等评价；不直接回答物体先验适用性和动作收益。</dd><dt>04 · 局限与可复用点</dt><dd>可作为未来自动几何前端。首版先用仿真几何隔离其估计误差。</dd></dl><a class="source-link" href="https://wzzheng.net/StreamVGGT/" target="_blank" rel="noopener noreferrer">论文 / 官方项目页 ↗</a></div></details>
+<details class="reference" id="ref-ip"><summary><span class="ref-number">R9</span><span><span class="ref-tag">条件读取接口</span><strong>IP-Adapter: Text Compatible Image Prompt Adapter for Text-to-Image Diffusion Models</strong></span><span class="plus">+</span></summary><div class="details-body"><dl><dt>01 · 研究了什么问题</dt><dd>如何给预训练扩散模型增加可与文本共存的图像条件。</dd><dt>02 · 怎么解决</dt><dd>采用解耦的 cross-attention，分别处理文本特征和图像特征。</dd><dt>03 · 证据与适用范围</dt><dd>证据来自图像生成；对几何 token 和视频 WAM 的适用性是我们的迁移假设。</dd><dt>04 · 局限与可复用点</dt><dd>借鉴独立条件分支、Query / Key / Value 接口和轻量适配思路。</dd></dl><a class="source-link" href="https://ip-adapter.github.io/" target="_blank" rel="noopener noreferrer">论文 / 官方项目页 ↗</a></div></details>
+<details class="reference" id="ref-control"><summary><span class="ref-number">R10</span><span><span class="ref-tag">空间条件接口</span><strong>ControlNet: Adding Conditional Control to Text-to-Image Diffusion Models</strong></span><span class="plus">+</span></summary><div class="details-body"><dl><dt>01 · 研究了什么问题</dt><dd>如何向预训练扩散模型加入空间条件控制。</dd><dt>02 · 怎么解决</dt><dd>使用额外条件分支和零初始化连接，使新增条件逐步参与生成。</dd><dt>03 · 证据与适用范围</dt><dd>其图像生成结果支持条件适配的可行性，不提供本项目机器人任务的直接结论。</dd><dt>04 · 局限与可复用点</dt><dd>借鉴残差注入与初始化；具体 Video DiT 的实现需按其注意力和 token 结构改造。</dd></dl><a class="source-link" href="https://openaccess.thecvf.com/content/ICCV2023/html/Zhang_Adding_Conditional_Control_to_Text-to-Image_Diffusion_Models_ICCV_2023_paper.html" target="_blank" rel="noopener noreferrer">论文 / 官方项目页 ↗</a></div></details>
+<details class="reference" id="ref-illusion"><summary><span class="ref-number">R11</span><span><span class="ref-tag">概念澄清</span><strong>Akiyoshi Kitaoka · Research on visual illusions and its applications</strong></span><span class="plus">+</span></summary><div class="details-body"><p>原作者说明，同类颜色错觉也能让可乐罐显现非典型颜色，因此记忆中的品牌颜色并非主要解释。保留“上下文会改变感知”的启发，不把错觉作为物体 3D 模型存储机制的直接证据。</p><a class="source-link" href="https://www.psy.ritsumei.ac.jp/akitaoka/SARMAC2023.html" target="_blank" rel="noopener noreferrer">原作者说明 ↗</a></div></details></section>
+
+      <nav class="w3-next" aria-label="相关内容"><a href={root + "/memory-wam/"}>并行路线 · Memory-WAM →</a><a href={root + "/problems/week3/"}>问题背景 · WAM 与 3D 信息 →</a><a href="#overview">返回页首 ↑</a></nav>
+      <footer class="w3-footer">WAM+3D · 模型架构组 · 依据《WAM_3D_执行大纲》v1.0（2026-09-29）整理</footer>
+    </main>
+  </div>
+</body>
+</html>
+<script>
+  const references = Array.from(document.querySelectorAll<HTMLDetailsElement>(".reference"));
+  document.getElementById("expand-refs")?.addEventListener("click", () => references.forEach(ref => ref.open = true));
+  document.getElementById("collapse-refs")?.addEventListener("click", () => references.forEach(ref => ref.open = false));
+  function openReference() {
+    const target = document.getElementById(location.hash.slice(1));
+    if (target instanceof HTMLDetailsElement) target.open = true;
+  }
+  window.addEventListener("hashchange", openReference);
+  openReference();
+  const tocLinks = Array.from(document.querySelectorAll<HTMLAnchorElement>(".w3-toc a"));
+  function updateReadingPosition() {
+    let current = "overview";
+    for (const link of tocLinks) {
+      const section = document.getElementById(link.hash.slice(1));
+      if (section && section.getBoundingClientRect().top <= 150) current = section.id;
+    }
+    tocLinks.forEach(link => {
+      const active = link.hash === "#" + current;
+      link.classList.toggle("active", active);
+      if (active) link.setAttribute("aria-current", "location");
+      else link.removeAttribute("aria-current");
+    });
+  }
+  let scheduled = false;
+  window.addEventListener("scroll", () => {
+    if (scheduled) return;
+    scheduled = true;
+    requestAnimationFrame(() => { updateReadingPosition(); scheduled = false; });
+  }, { passive: true });
+  updateReadingPosition();
+</script>

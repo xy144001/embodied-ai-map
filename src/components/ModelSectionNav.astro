@@ -1,6 +1,6 @@
 ---
 interface Props {
-  active: "architecture" | "problems" | "tasks" | "robots" | "breakdown" | "routes" | "memory-wam";
+  active: "architecture" | "problems" | "tasks" | "robots" | "breakdown" | "routes" | "memory-wam" | "wam-3d";
   detail?: boolean;
 }
 const { active, detail = false } = Astro.props;
@@ -13,6 +13,7 @@ const sections = [
   { id: "breakdown", label: "拆解模型", path: "/breakdown/", className: "breakdown-tab" },
   { id: "routes", label: "宏观路线", path: "/routes/", className: "macro-tab" },
   { id: "memory-wam", label: "Memory-WAM", path: "/memory-wam/", className: "memory-tab" },
+  { id: "wam-3d", label: "WAM+3D", path: "/wam-3d/", className: "wam3d-tab" },
 ];
 ---
 <nav class="module-tabs" aria-label="模型架构组版块">
