@@ -1,0 +1,11 @@
+---
+interface Props { id: "architecture" | "training"; caption: string }
+const {id,caption}=Astro.props;
+const src=import.meta.env.BASE_URL.replace(/\/$/,"")+"/model-architecture/week6/"+id+".svg";
+const title=id==="architecture"?"Memory-WAM V2：码本调用与反馈更新闭环":"码本如何训练：表示、调用与更新分开验证";
+---
+<figure class="w6-figure">
+  <div class="w6-figure-tools"><a href={src} target="_blank" rel="noopener">打开并放大架构图 ↗</a><a href={src} download={"Memory-WAM-V2-"+id+".svg"}>下载 SVG</a></div>
+  <div class="w6-figure-scroll" tabindex="0" role="region" aria-label={title+"，窄屏可横向滚动"}><a href={src} target="_blank" rel="noopener" aria-label={title+"，打开矢量原图"}><img src={src} width="1120" height={id==="architecture"?1040:1110} alt={title+"。"+caption} loading="lazy" decoding="async" /></a></div>
+  <figcaption>{caption}</figcaption>
+</figure>

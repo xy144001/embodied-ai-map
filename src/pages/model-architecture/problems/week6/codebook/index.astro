@@ -1,0 +1,63 @@
+---
+import Week6Layout from "../../../../../layouts/Week6Layout.astro";
+import Figure from "../../../../../components/CodebookFigure.astro";
+const root=import.meta.env.BASE_URL.replace(/\/$/,"")+"/model-architecture/";
+const chapters=[["goal","为什么换成码本"],["existing","已有工作怎么用"],["path","与去噪的关系"],["training","怎样训练"],["update","怎样改内容"],["validation","怎样验证"]];
+---
+<Week6Layout title="让 codebook 成为可以更新的记忆" description="把经历提炼成有限的行为表示；既学习如何使用它，也为部署后根据反馈修改它设计明确的接口。" active="codebook" chapters={chapters}>
+  <section id="goal" class="weekly-question">
+    <span class="question-number">01 / 研究目标</span><h2>记忆能否从“翻旧经历”，变成“积累熟练的做法”？</h2>
+    <p>第一版主要保存已经发生的经验片段，在新情境中检索、筛选，再通过 M7 影响动作。第二版希望把多次经历提炼为一个有限的 <strong>codebook（码本）</strong>：每个条目是一段学到的向量表示，能够与当前状态结合，帮助生成动作。</p>
+    <p>可以把它想成一组可以组合、可以改进的“做法”。同一个码在不同位置和姿态下不必输出相同动作；一个码也不必天然对应“抓取”“旋转”这样的完整技能。“肌肉记忆”是设计动机，具体能力仍要由实验检验。</p>
+    <div class="w6-plan"><strong>我们的核心目标有两半：把码本训练好，并让部署后的经验能够改变码本内容。</strong><p>近期先验证静态码本是否有用，长期再验证反馈更新。只改选码概率或调用次数，可以改变用法，却不能代替“码本内容真的被修改”。</p></div>
+  </section>
+  <section id="existing" class="weekly-question">
+    <span class="question-number">02 / 近期讨论的关键澄清</span><h2>已有模型可以用码本教模型，同时继续输出连续动作。</h2>
+    <p>“扩散去噪路径建模”的近期讨论先追问了一个必要问题：<strong>主流 VLA / WAM 是否已经用 codebook 提供监督？</strong>答案是有这样的先例，但各模型中码本扮演的角色不同，不能把“离散 token”“码本监督”“推理时读码本”混为一谈。</p>
+    <div class="w6-table-wrap" tabindex="0" role="region" aria-label="已有码本用法对照，可横向滚动"><table><caption>与本次讨论直接相关的两种接法</caption><thead><tr><th scope="col">工作</th><th scope="col">训练时教什么</th><th scope="col">推理时做什么</th><th scope="col">给我们的提醒</th></tr></thead><tbody>
+      <tr><th scope="row"><a href="https://arxiv.org/html/2605.30877v1">Wall-OSS-0.5 [1]</a></th><td>视觉对齐 RVQ 编码动作片段；离散动作标签通过交叉熵参与主干训练。</td><td>默认走连续 flow 动作分支；离散与连续动作 token 在前向中相互不可见。</td><td>辅助码本监督已有先例；不能据此画成“先选码，再把码喂给连续动作专家”。</td></tr>
+      <tr><th scope="row"><a href="https://arxiv.org/pdf/2608.24882v2">LAWA [2]</a></th><td>视频 tokenizer 将观测变化映射为码本目标；冻结 tokenizer 后，训练潜动作与动作专家。</td><td>潜动作在连续向量空间与动作联合去噪；不逐步投影回最近码，推理不生成未来视频。</td><td>码本可规定学习目标，而推理变量仍连续；生成过程里 latent 在变，不等于码本参数在学习。</td></tr>
+    </tbody></table></div>
+    <p>两者都说明：<strong>离散表示与连续控制可以配合。</strong>但它们在上述方法中给出的接口，并不直接等同于我们希望研究的“根据部署成败更新记忆内容”。后者仍需单独设计，也需继续查新，不能仅凭这两篇就宣称首次提出。</p>
+    <details><summary>动作码与视频潜动作码，有什么区别？</summary><div><p>动作码通常从真实控制序列学习，回答“机器人怎样动”；视频潜动作码从前后观测变化学习，回答“场景发生了怎样的变化”。后者不天然包含关节、力矩或末端控制命令，仍要有动作专家把它转成可执行动作。</p><p>我们尚未最终选定码表示：原始动作片段、状态条件行为 latent、可观测变化或中间层调制原型，都需要比较。离散动作 token 也不一概等于 VQ：例如 FAST 使用的是另一种动作压缩与编码机制，不能直接视作可训练 VQ 码本。</p></div></details>
+  </section>
+  <section id="path" class="weekly-question">
+    <span class="question-number">03 / 码本与扩散去噪怎样连接？</span><h2>要分清“动作在被生成”和“记忆在被改变”。</h2>
+    <p>连续生成器从带噪动作逐步得到动作块。这里的<strong>去噪路径是生成算法内部的过程</strong>；机器人在物理世界执行的动作轨迹，是生成后的输出。码可以作为条件影响这个过程，也可以提供一个需要预测的紧凑目标；这不要求先把每一步去噪方向都量化成码。</p>
+    <div class="w6-cards"><article><h3>接法 A：码作为可读取条件</h3><p>当前观测决定使用哪些码，再把码向量交给小型条件接口，影响连续动作生成。推理计算显式依赖码值，因此修改码有一条可检查的影响路径。</p></article><article><h3>接法 B：码本提供潜目标</h3><p>参考联合潜动作去噪，从码本目标学习一个连续 latent 分支。若码本只在训练时生成标签，部署时完全不读它，单独修改码本不会自动改变输出。</p></article></div>
+    <div class="w6-note"><strong>第二版要回答的接口问题：</strong><p>如果选择 B，还必须说明更新后的码如何重新进入推理——例如显式读取新码、重新训练相应的小接口，或另行设计依赖码本的连续潜变量机制。仅在图上添加一个“更新码本”箭头，不足以形成适应闭环。</p></div>
+    <p>当前架构图用 A 展示一个可审查的候选闭环；B 保留为待比较路线。它们不是最新讨论已经确定的唯一实现。<a href={root+"memory-wam/#architecture"}>查看完整第二版架构 →</a></p>
+  </section>
+  <section id="training" class="weekly-question">
+    <span class="question-number">04 / 最关键的研究问题：怎么训？</span><h2>学会压缩经历，还不等于学会帮助行动。</h2>
+    <Figure id="training" caption="训练方案草图：先让码能表示行为，再学习当前情境如何使用码，最后单独验证反馈更新。码表示、注入层和更新算法尚未定稿。" />
+    <ol class="w6-steps">
+      <li><strong>先训练“这本字典”</strong><p>从离线动作片段或状态变化得到 latent，量化到有限码，再重建相应目标。标准 VQ 可用重建、码本与承诺损失；RVQ 用多层码逐步补残差。选何种对象、是否需要多层码，先做小规模对照。</p></li>
+      <li><strong>再训练“现在该怎么用”</strong><p>训练阶段可用真实后续片段产生标签；部署时选择器只能看到当前可用信息。保留连续动作目标，检查选码与小接口有没有真正改善闭环执行。不能只凭重建更准宣称控制更好。</p></li>
+      <li><strong>最后训练或设计“得到反馈后怎么改”</strong><p>具体更新哪个向量、用哪个损失、反馈怎样到达它，都要明确。成功轨迹重放、价值估计或有限扰动比较是候选，不把“加 RL”当成已经写好的算法。</p></li>
+    </ol>
+    <details><summary>一个容易忽略的训练细节：loss 不一定会更新你想改的张量。</summary><div><p>标准 VQ 直通写法里，重建梯度传给编码器与解码器；码向量通常靠独立码本项或 EMA 更新。冻结其它模块、照搬计算图，不保证重建 loss 能训练码内容。</p><p>同样，如果“选中哪个编号”的概率并不依赖码值，只奖励这个编号，主要训练到的是选码策略。若要声称码内容在学习，需要展示梯度或明确的非梯度更新规则确实抵达码向量。LAWA 使用 noise-substitution quantization，也说明并非所有量化方法都照搬标准 VQ 三项损失。[2][3]</p></div></details>
+  </section>
+  <section id="update" class="weekly-question">
+    <span class="question-number">05 / 怎样利用成功与失败？</span><h2>反馈告诉我们结果好坏，却没有直接给出正确的改法。</h2>
+    <p>一次成功可能涉及多个码；失败也不告诉我们哪段动作本来应该怎么做。新的训练方案需要解决<strong>贡献归因、修改方向、共享码对旧任务的影响</strong>，而不仅是把失败标记写进表里。</p>
+    <div class="w6-cards"><article><h3>内容更新的候选组织</h3><p>直接改码向量；固定基础码加可更新增量；较稳定的选择 key 配可更新 value。后两种有助于限制修改范围，但能否保持技能含义仍需实验。</p></article><article><h3>更新的候选时机</h3><p>可先在回合结束、可靠反馈到达后更新，再切换码本版本。一个动作块内保持版本一致。若要同回合适应，必须另行明确阶段反馈和延迟。</p></article></div>
+    <p>部署时改变 bank 条目、调用统计或去噪 latent，和更新可训练码本内容是不同的事。是否称为测试时训练，要看部署阶段是否真的用反馈优化了参数；无需把第一阶段包装成已经完成 TTT。</p>
+  </section>
+  <section id="validation" class="weekly-question">
+    <span class="question-number">06 / 下一轮怎样判断是否值得继续？</span><h2>分别证明：表示有用、调用有用、更新有用。</h2>
+    <ol>
+      <li><strong>静态增益：</strong>对比修正后的 Full-only、预算相近的连续小模块、码本方案，以及同权重真正绕过码分支的 Off。</li>
+      <li><strong>修改可控：</strong>固定路由，检查改变某个码是否产生有规律的动作变化；同时看旧任务是否受损。</li>
+      <li><strong>在线增益：</strong>相同初始模型和交互预算下，比较固定码本、只改路由、真正改内容。新增采样与重放都计入预算。</li>
+    </ol>
+    <p>继续报告成功率与救回 / 损伤，同时检查码利用率、模型是否绕过码、后续回合的改善、旧任务遗忘和控制延迟。相同任务重复、同任务新摆放与跨任务迁移分别统计。</p>
+    <div class="w6-plan"><strong>当前状态：计划研究，尚无新模型成绩。</strong><p>表示类型、码本大小、单码 / 多码、注入位置、冻结范围与更新算法都未最终确定。第一轮不需要同时做完动态扩容和在线强化学习，但应从一开始保留真实的内容更新接口。</p></div>
+  </section>
+  <section class="w6-sources" aria-label="资料来源"><h2>原始资料</h2><ol>
+    <li id="ref-wall"><a href="https://arxiv.org/html/2605.30877v1">Wall-OSS-0.5 Technical Report</a>，§2.1–2.2：RVQ、离散监督与连续执行路径。</li>
+    <li id="ref-lawa"><a href="https://arxiv.org/pdf/2608.24882v2">LAWA · Latent Action as Intention Enables Efficient Future Imagination for World Action Models</a>，§3.1–3.3：tokenizer、连续潜动作联合去噪与训练目标。</li>
+    <li><a href="https://proceedings.neurips.cc/paper/7210-neural-discrete-representation-learning.pdf">Neural Discrete Representation Learning</a>：标准 VQ 的训练与梯度路径。此处只用作方法基础。</li>
+    <li><a href="https://arxiv.org/abs/2501.09747">FAST 原论文</a>：动作压缩与 tokenization；离散 token 不一概等于 VQ 码本。</li>
+  </ol><p class="w6-meta">团队资料：《Memory_WAM_Adaptive_Codebook_Discussion_for_Codex.md》（10-07）及“扩散去噪路径建模”（10-08）近期可检索讨论。以上架构与验证安排是基于讨论的候选整理，不作为已实现系统或完整查新结论。</p></section>
+</Week6Layout>
