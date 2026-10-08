@@ -30,11 +30,11 @@ references:
 
 ## 1. 先统一符号：一个 benchmark episode 是什么
 
-第 $i$ 条 evaluation episode 从固定 reset state $s_0^{(i)}$ 开始。策略在每个控制时刻接收观测 $o_t$，输出 action $a_t$，物理环境推进到 $s_{t+1}$；直到成功、失败或最大时长 $H$。最终任务分数不是训练 loss，而是 evaluator 对完整轨迹 $	au_i$ 的判定。
+第 i 条 evaluation episode 从固定 reset state s_0^(i) 开始。策略在每个控制时刻接收观测 o_t，输出 action a_t，物理环境推进到 s_{t+1}；直到成功、失败或最大时长 H。最终任务分数不是训练 loss，而是 evaluator 对完整轨迹 τ_i 的判定。
 
-$$
-\mathrm{SuccessRate}=\frac{1}{N}\sum_{i=1}^{N}\mathbb{1}[\mathrm{predicate}(\tau_i)=\mathrm{true}]
-$$
+```text
+SuccessRate = (1/N) × Σ_{i=1..N} 1[predicate(τ_i) = true]
+```
 
 其中 `predicate` 必须由 benchmark/task 明确实现，例如“箱子被抬起且机器人未跌倒”，而不是“reward 超过某个未公开阈值”。
 
@@ -42,21 +42,21 @@ $$
 
 | Benchmark | 必须或可选输入 | 输入中最容易被误用的字段 | 输出 action | 不能混淆的对照 |
 |---|---|---|---|---|
-| [HumanoidBench](../humanoidbench/) | 必须：robot proprioception、任务条件；可选：task-relevant object state、头部双相机 RGB、448-taxel tactile | object pose 是 privileged state；RGB 与 tactile 的频率、延迟和分辨率会改变难度 | 当前 robot XML actuator 对应的连续 control | state oracle、vision、vision+tactile 三套结果分表 |
-| [Mimicking-Bench](../mimicking-bench/) | human reference motion、scene/object geometry、robot state；视觉字段以发布 runner 为准 | human motion 是参考，不是 robot joint command；未见 object mesh 不可用于训练 | retargeted reference 或 position/velocity/torque 型全身 control | 仅 retarget、tracking policy、scene-aware generation+tracking 分开 |
-| [LeVERB-Bench](../leverb-bench/) | image history、language instruction、robot proprioception；task metadata 可含 objective/verb category | 图片/语言属于高层输入；真值 state 只能作 oracle | 高层 latent behavior + 低层 dynamics-level WBC action | image vs state、with/without language、不同 camera view 分开 |
-| [SIMPLE](../simple/) | Isaac Sim visual stream、MuJoCo state/proprioception、task language/config；可选 demonstration context | 必须检查 render state 与 physics state 同步；不允许用 object GT 偷看 | whole-body action 或 action chunk，经 AMO/SONIC/adapter 落到 controller | state policy、vision policy、VLA/WAM、不同 data source 分开 |
+| [HumanoidBench](../../benchmarks/humanoidbench/) | 必须：robot proprioception、任务条件；可选：task-relevant object state、头部双相机 RGB、448-taxel tactile | object pose 是 privileged state；RGB 与 tactile 的频率、延迟和分辨率会改变难度 | 当前 robot XML actuator 对应的连续 control | state oracle、vision、vision+tactile 三套结果分表 |
+| [Mimicking-Bench](../../benchmarks/mimicking-bench/) | human reference motion、scene/object geometry、robot state；视觉字段以发布 runner 为准 | human motion 是参考，不是 robot joint command；未见 object mesh 不可用于训练 | retargeted reference 或 position/velocity/torque 型全身 control | 仅 retarget、tracking policy、scene-aware generation+tracking 分开 |
+| [LeVERB-Bench](../../benchmarks/leverb-bench/) | image history、language instruction、robot proprioception；task metadata 可含 objective/verb category | 图片/语言属于高层输入；真值 state 只能作 oracle | 高层 latent behavior + 低层 dynamics-level WBC action | image vs state、with/without language、不同 camera view 分开 |
+| [SIMPLE](../../benchmarks/simple/) | Isaac Sim visual stream、MuJoCo state/proprioception、task language/config；可选 demonstration context | 必须检查 render state 与 physics state 同步；不允许用 object GT 偷看 | whole-body action 或 action chunk，经 AMO/SONIC/adapter 落到 controller | state policy、vision policy、VLA/WAM、不同 data source 分开 |
 
 ### 2.1 每次论文都应把 input 写成字段表
 
 | 字段 | 需要报告的具体信息 | 示例 |
 |---|---|---|
 | proprioception | joint/root/IMU/contact 是否包含、shape、归一化、历史帧数 | `qpos,qvel,base angular velocity`，不包含 object GT |
-| visual | camera name、RGB/RGB-D/segmentation、resolution、FPS、delay、randomization | head RGB 2 views，$128\times128$，10 Hz，2-step delay |
-| tactile | taxel 数、每个 taxel 内容、clip/normalize、采样频率 | 448×3 contact force，按 $	au_f$ clip |
+| visual | camera name、RGB/RGB-D/segmentation、resolution、FPS、delay、randomization | head RGB 2 views，128×128，10 Hz，2-step delay |
+| tactile | taxel 数、每个 taxel 内容、clip/normalize、采样频率 | 448×3 contact force，按 τ_f clip |
 | language/task | 原始文本、模板数量、tokenizer、是否有目标类别/pose oracle | “把红箱子搬到门边”；不输入目标 6D pose |
 | human reference | pose representation、fps、future window、retarget mapping | SMPL-X root+hands，30 Hz，未来 20 帧 |
-| action | control mode、维数、关节顺序、Hz、chunk、clip | joint-position target，$d_a=...$，50 Hz，chunk=4 |
+| action | control mode、维数、关节顺序、Hz、chunk、clip | joint-position target，d_a = …，50 Hz，chunk=4 |
 
 没有这些字段，两个“success rate”并不具有可比性。
 
@@ -81,14 +81,14 @@ $$
 
 | 量化指标 | 定义/单位 | 适合回答什么 | 不足以单独证明什么 |
 |---|---|---|---|
-| episode return $R=\sum_t r_t$ | reward 累加，无单位且依 reward scale | 训练是否收敛、reward shaping 是否工作 | 不同 task/method 的真实任务完成能力 |
+| episode return R = Σ_t r_t | reward 累加，无单位且依 reward scale | 训练是否收敛、reward shaping 是否工作 | 不同 task/method 的真实任务完成能力 |
 | completion time / steps | 成功 episode 的控制步数或秒数；失败样本如何处理须说明 | 成功后谁更快 | 未成功时的能力，或安全性 |
-| fall rate | $\#\mathrm{fall}/N$；须公开 fall threshold/termination | 双足稳定性 | 手部操作质量 |
+| fall rate | #fall / N；须公开 fall threshold/termination | 双足稳定性 | 手部操作质量 |
 | foot slip | 支撑脚接触期间的切向位移/速度积分，m 或 m/s | 行走/站立是否真实稳定 | 物体是否被正确操作 |
 | drop rate | 已抓取后物体掉落的 episode 比例 | carry/hold 稳定性 | 是否拿到正确对象或完成最终放置 |
 | collision / contact violation | 非允许 link/contact 或超过力阈的次数/比例 | 安全/场景交互质量 | 高层语义是否正确 |
 | tracking error | root/hand/foot position error（m）、orientation error（rad/deg） | retarget 和 WBC 跟踪 | 完成实际家具/物体任务 |
-| action jerk / energy proxy | $\|a_t-a_{t-1}\|$ 或力矩/功的明确公式 | 平滑、控制代价 | 任务成功；不同 action mode 下不可直接比 |
+| action jerk / energy proxy | ‖a_t-a_{t-1}‖ 或力矩/功的明确公式 | 平滑、控制代价 | 任务成功；不同 action mode 下不可直接比 |
 
 ## 4. Benchmark 专属指标模板
 
@@ -136,7 +136,7 @@ SIMPLE 的 MuJoCo physics 与 Isaac Sim rendering 同步错误会污染所有视
 
 ## 5. 统计、随机种子与不确定性
 
-- 报 `N_eval`、evaluation seed 列表和 $\hat p \pm$ 置信区间或多训练 seed 均值/标准差；不可只展示最佳 checkpoint 一次运行。
+- 报 `N_eval`、evaluation seed 列表和 p̂ ± 置信区间或多训练 seed 均值/标准差；不可只展示最佳 checkpoint 一次运行。
 - 对失败 episode，completion time、energy、tracking error 是丢弃、截断还是记为 horizon，必须写明。
 - OOD 分数不要与 IID 混平均；object、scene、instruction、camera、physics 参数分别是不同泛化问题。
 - 若输入包含 external dataset pretraining，主表旁报告 `no-pretrain / dataset-pretrain / target-finetune` 消融，否则 benchmark 提升无法归因。

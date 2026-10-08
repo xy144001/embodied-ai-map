@@ -29,3 +29,8 @@ AlphaBrain 的公开适配通过 policy server 与 RoboCasa365 simulation client
 ## 4. 与全身人形的边界
 
 默认 RoboCasa/RoboCasa365 本体是 Panda/移动操作平台。迁移到双足人形时需新增下身 controller、支撑与跌倒 predicate、foot slip 和全身碰撞日志；厨房任务成功本身不等于 humanoid loco-manipulation 成功。
+
+## 5. 实测与本体边界
+
+- **GR-1 扩展可跑通**：DiT4DiT 在 RoboCasa-GR1 上完成部署验证（注册 197 个 Gym 环境 ID）与单任务闭环 smoke：`PnPMilkToMicrowaveClose` 1/1 成功（seed 7，720 步上限，官方判定要求 `door_state ≤ 0.005`）。
+- **两套本体不可互换**：GR-1 为 29 维关节级动作（双臂 + 灵巧手 + 腰部），365 默认 PandaOmron 为 12D；把 GR1 checkpoint 放进 PandaOmron 的 RoboCasa365 是无效组合。逐维拆解见[本体与控制量图谱](../../guides/robot-action-audit/)，部署细节见[方法部署记录](../../reproductions/policy-deployment-records/)。
