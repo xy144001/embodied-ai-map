@@ -1,0 +1,62 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1120 1110" role="img" aria-labelledby="title desc">
+<title id="title">码本怎么训练：先学表示，再学调用，最后检验更新</title><desc id="desc">三项能力分别验证；真实未来只用于离线目标。静态码本是第一阶段，不替代可更新记忆的目标。</desc>
+<defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" fill="#95b9ed"/></marker><marker id="update" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" fill="#dfbc7d"/></marker></defs>
+<rect width="1120" height="1110" rx="12" fill="#0b1422"/>
+<g font-family="system-ui, Noto Sans SC, Microsoft YaHei, sans-serif">
+<text x="36" y="47" font-size="29" font-weight="700" fill="#f0f4ff">码本怎么训练：先学表示，再学调用，最后检验更新</text>
+<text x="36" y="83" font-size="17" fill="#b3c5df">三项能力分别验证；真实未来只用于离线目标。静态码本是第一阶段，不替代可更新记忆的目标。</text>
+<path d="M 320,217 L 420,217" fill="none" stroke="#95b9ed" stroke-width="2.4" marker-end="url(#arrow)"/>
+<path d="M 700,217 L 800,217" fill="none" stroke="#95b9ed" stroke-width="2.4" marker-end="url(#arrow)"/>
+<path d="M 320,500 L 420,500" fill="none" stroke="#95b9ed" stroke-width="2.4" marker-end="url(#arrow)"/>
+<path d="M 700,500 L 800,500" fill="none" stroke="#95b9ed" stroke-width="2.4" marker-end="url(#arrow)"/>
+<path d="M 560,625 L 560,555" fill="none" stroke="#dfbc7d" stroke-width="2.4" stroke-dasharray="8 6" marker-end="url(#update)"/>
+<path d="M 320,910 L 420,910" fill="none" stroke="#dfbc7d" stroke-width="2.4" stroke-dasharray="8 6" marker-end="url(#update)"/>
+<path d="M 700,910 L 800,910" fill="none" stroke="#dfbc7d" stroke-width="2.4" stroke-dasharray="8 6" marker-end="url(#update)"/>
+<rect x="40" y="165" width="280" height="105" rx="9" fill="#15283f" stroke="#799bcb" stroke-width="1.6"/>
+<text x="180.0" y="190.5" text-anchor="middle" font-size="21" font-weight="700" fill="#f0f4ff">离线经验</text>
+<text x="180.0" y="220.5" text-anchor="middle" font-size="17" fill="#c0d0e7">动作片段 / 可观测变化</text>
+<text x="180.0" y="246.5" text-anchor="middle" font-size="17" fill="#c0d0e7">具体表示待比较</text>
+<rect x="420" y="165" width="280" height="105" rx="9" fill="#2a2444" stroke="#b7a3ff" stroke-width="1.6"/>
+<text x="560.0" y="190.5" text-anchor="middle" font-size="21" font-weight="700" fill="#f0f4ff">编码 + VQ / RVQ</text>
+<text x="560.0" y="220.5" text-anchor="middle" font-size="17" fill="#c0d0e7">连续 latent → 有限码</text>
+<text x="560.0" y="246.5" text-anchor="middle" font-size="17" fill="#c0d0e7">学习行为表示</text>
+<rect x="800" y="165" width="280" height="105" rx="9" fill="#14362f" stroke="#8ad2b7" stroke-width="1.6"/>
+<text x="940.0" y="190.5" text-anchor="middle" font-size="21" font-weight="700" fill="#f0f4ff">重建 / 预测接口</text>
+<text x="940.0" y="220.5" text-anchor="middle" font-size="17" fill="#c0d0e7">重建选定目标</text>
+<text x="940.0" y="246.5" text-anchor="middle" font-size="17" fill="#c0d0e7">检验信息是否被保留</text>
+<rect x="40" y="445" width="280" height="110" rx="9" fill="#15283f" stroke="#799bcb" stroke-width="1.6"/>
+<text x="180.0" y="473.0" text-anchor="middle" font-size="21" font-weight="700" fill="#f0f4ff">当前部署可用条件</text>
+<text x="180.0" y="503.0" text-anchor="middle" font-size="17" fill="#c0d0e7">视觉 / 语言 / 状态</text>
+<text x="180.0" y="529.0" text-anchor="middle" font-size="17" fill="#c0d0e7">不能看真实后续动作</text>
+<rect x="420" y="445" width="280" height="110" rx="9" fill="#14362f" stroke="#8ad2b7" stroke-width="1.6"/>
+<text x="560.0" y="473.0" text-anchor="middle" font-size="21" font-weight="700" fill="#f0f4ff">选择器 + 码条件接口</text>
+<text x="560.0" y="503.0" text-anchor="middle" font-size="17" fill="#c0d0e7">预测码，读取码值</text>
+<text x="560.0" y="529.0" text-anchor="middle" font-size="17" fill="#c0d0e7">学习如何影响动作</text>
+<rect x="800" y="445" width="280" height="110" rx="9" fill="#15283f" stroke="#799bcb" stroke-width="1.6"/>
+<text x="940.0" y="473.0" text-anchor="middle" font-size="21" font-weight="700" fill="#f0f4ff">连续动作生成器</text>
+<text x="940.0" y="503.0" text-anchor="middle" font-size="17" fill="#c0d0e7">正确加权的动作目标</text>
+<text x="940.0" y="529.0" text-anchor="middle" font-size="17" fill="#c0d0e7">检查闭环控制效果</text>
+<rect x="420" y="625" width="280" height="85" rx="9" fill="#2a2444" stroke="#b7a3ff" stroke-width="1.6"/>
+<text x="560.0" y="653.5" text-anchor="middle" font-size="21" font-weight="700" fill="#f0f4ff">离线构造的码标签</text>
+<text x="560.0" y="683.5" text-anchor="middle" font-size="17" fill="#c0d0e7">只作训练监督</text>
+<rect x="40" y="855" width="280" height="110" rx="9" fill="#32291c" stroke="#ddbc7c" stroke-width="1.6"/>
+<text x="180.0" y="883.0" text-anchor="middle" font-size="21" font-weight="700" fill="#f0f4ff">执行后的可用反馈</text>
+<text x="180.0" y="913.0" text-anchor="middle" font-size="17" fill="#c0d0e7">结果与已执行经历</text>
+<text x="180.0" y="939.0" text-anchor="middle" font-size="17" fill="#c0d0e7">终局结果不直接给梯度</text>
+<rect x="420" y="855" width="280" height="110" rx="9" fill="#32291c" stroke="#ddbc7c" stroke-width="1.6"/>
+<text x="560.0" y="883.0" text-anchor="middle" font-size="21" font-weight="700" fill="#f0f4ff">待设计的内容更新</text>
+<text x="560.0" y="913.0" text-anchor="middle" font-size="17" fill="#c0d0e7">明确更新哪个张量</text>
+<text x="560.0" y="939.0" text-anchor="middle" font-size="17" fill="#c0d0e7">明确优化信号从哪里来</text>
+<rect x="800" y="855" width="280" height="110" rx="9" fill="#32291c" stroke="#ddbc7c" stroke-width="1.6"/>
+<text x="940.0" y="883.0" text-anchor="middle" font-size="21" font-weight="700" fill="#f0f4ff">新码本的后续评测</text>
+<text x="940.0" y="913.0" text-anchor="middle" font-size="17" fill="#c0d0e7">固定 / 只改路由 / 改内容</text>
+<text x="940.0" y="939.0" text-anchor="middle" font-size="17" fill="#c0d0e7">同时检查旧能力与成本</text>
+<text x="40" y="131" font-size="21" fill="#bba9ff">01 / 离线学表示：码能否保留行动所需的信息？</text>
+<text x="40" y="309" font-size="17" fill="#acbfdc">标准 VQ：重建 + 码本项 + 承诺项，或采用 EMA 等更新；检查实际梯度路径。</text>
+<text x="40" y="342" font-size="17" fill="#acbfdc">重建误差下降只是表示指标，不能直接替代任务成功率。</text>
+<text x="40" y="408" font-size="21" fill="#90d9be">02 / 学会调用：只看当前情境，能否选对并用好这些码？</text>
+<text x="40" y="753" font-size="17" fill="#acbfdc">分别检查选码是否正确、生成器是否绕过码，以及同权重 Off 的净差异。</text>
+<text x="40" y="819" font-size="21" fill="#e3c48d">03 / 部署适应：有了反馈，改变码本能否让后续表现更好？</text>
+<text x="40" y="1020" font-size="17" fill="#acbfdc">候选：反馈重放、价值估计或有限扰动比较；算法尚未选定，交互与训练预算必须匹配。</text>
+<text x="40" y="1064" font-size="17" fill="#acbfdc">研究目标：表示有用 → 调用有用 → 更新有用。不能用前一项的成功替代后一项的证据。</text>
+</g></svg>

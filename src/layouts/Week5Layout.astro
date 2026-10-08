@@ -11,6 +11,7 @@ const pages=[["overview","本周问题",""],["experiments","按问题讲实验",
     <p class="eyebrow">WEEK 5 · FROM SINGLE-TASK GAINS TO MULTI-TASK TRANSFER</p>
     <h1>{title}</h1><p class="intro">{description}</p>
     <p class="weekly-meta">资料截点：2026-09-30 11:08:39（北京时间） · 架构含 09-30 追加说明 · Gate 正式评测进行中</p>
+    <p class="w5-change"><b>后续进展：</b>本周保留 09-30 快照。<a href={root.replace("week5/","week6/")}>Week 6 已补充训练修正后的结果、退化诊断与码本第二版计划 →</a></p>
     <nav class="w5-subnav" aria-label="Week 5 内容">{pages.map(([id,label,path])=><a href={root+path} aria-current={id===active?"page":undefined}>{label}</a>)}</nav>
     <div class:list={{"weekly-reading":chapters.length>0}}>
       {chapters.length>0&&<nav class="weekly-toc" aria-label="本页讲解目录"><strong>讲解顺序</strong>{chapters.map(([id,label])=><a href={"#"+id}>{label}</a>)}</nav>}

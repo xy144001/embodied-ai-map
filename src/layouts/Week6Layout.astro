@@ -1,0 +1,22 @@
+---
+import WeeklyLayout from "./WeeklyLayout.astro";
+import "../styles/model-week6.css";
+import "katex/dist/katex.min.css";
+interface Props { title: string; description: string; active?: "overview" | "finetuning" | "codebook"; chapters?: string[][] }
+const { title, description, active="overview", chapters=[] }=Astro.props;
+const root=import.meta.env.BASE_URL.replace(/\/$/,"")+"/model-architecture/";
+const pages=[["overview","本周问题",""],["finetuning","01 · 微调退化复盘","finetuning/"],["codebook","02 · 码本记忆计划","codebook/"]];
+---
+<WeeklyLayout title={title+" · Week 6"} description={description} section="problems" week={6}>
+  <div class="w6-scope">
+    <p class="eyebrow">WEEK 6 · TRAINING DIAGNOSIS & ADAPTIVE CODEBOOK</p>
+    <h1>{title}</h1><p class="intro">{description}</p>
+    <p class="w6-meta">更新：2026-10-08 · 实验截至 10-04，10-07 复核 · 码本第二版为拟议方案</p>
+    <nav class="w6-subnav" aria-label="Week 6 内容">{pages.map(([id,label,path])=><a href={root+"problems/week6/"+path} aria-current={id===active?"page":undefined}>{label}</a>)}</nav>
+    <div class:list={{"weekly-reading":chapters.length>0}}>
+      {chapters.length>0&&<nav class="weekly-toc" aria-label="本页讲解目录"><strong>讲解顺序</strong>{chapters.map(([id,label])=><a href={"#"+id}>{label}</a>)}</nav>}
+      <article class="weekly-article"><slot /></article>
+    </div>
+    <nav class="w6-bottom" aria-label="继续阅读">{pages.filter(([id])=>id!==active).map(([,label,path])=><a href={root+"problems/week6/"+path}>{label} →</a>)}<a href={root+"memory-wam/"}>Memory-WAM 第二版架构 →</a><a href={root+"problems/week5/"}>← Week 5</a></nav>
+  </div>
+</WeeklyLayout>

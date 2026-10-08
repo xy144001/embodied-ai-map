@@ -1,0 +1,58 @@
+---
+import Week6Layout from "../../../../../layouts/Week6Layout.astro";
+import Table from "../../../../../components/Week6Table.astro";
+import Formula from "../../../../../components/FlowFormula.astro";
+const chapters=[["finding","先看结论"],["loss","平均 loss 的误导"],["recipe","训练配方的问题"],["corrected","修正后的结果"],["memory","分开动作与记忆"],["limits","结论边界"]];
+---
+<Week6Layout title="为什么早期微调反而变差？" description="已有诊断找到时间步权重遗漏与更新幅度过大的问题；组合修正后，动作适配重新获得正收益。" active="finetuning" chapters={chapters}>
+  <section id="finding" class="weekly-question">
+    <span class="question-number">01 / 先回答问题</span><h2>旧结果暴露了训练配方的问题，不能直接判定微调无效。</h2>
+    <p>早期 LoRA 与 Full 微调都曾下降。后续检查发现：<strong>原 Relation 训练使用了时间步损失权重，而 LoRA 联合 / Full 训练漏乘了它；原来的更新幅度也过大。</strong>此外，旧实验固定使用训练末步权重，即使开发验证已经变差。</p>
+    <div class="w6-callout"><strong>这次真正理清的因果边界</strong><p>遗漏权重是确认的实现差异；学习率探针支持更新过大是早期恶化的重要因素。恢复加权、减小学习率、改用开发 best 后，成功率回升。因为三项一起修正，<strong>还不能把所有退化只归因于其中一项</strong>。</p></div>
+  </section>
+  <section id="loss" class="weekly-question">
+    <span class="question-number">02 / 为什么要重算整个训练集？</span><h2>平均分变好，可能只是修好了一个特别差的样本。</h2>
+    <p>旧日志每隔若干步记录一个样本的 loss，不能代表整个训练集。我们因此固定噪声与样本，重评<strong>同一组 900 个训练样本、274 个验证样本</strong>，比较原始权重和 6000 步权重。</p>
+    <Table id="diagnosis" caption="固定样本重新评估：训练均值下降不代表验证改善（报告 §12）" />
+    <div class="w6-stats">
+      <div><b>约 −22%</b><strong>Full 训练平均 MSE</strong><p>只看这个均值，会以为训练正在变好。</p></div>
+      <div><b>852 / 900</b><strong>误差反而升高的训练样本</strong><p>中位数增至约 8.5 倍，多数样本都变差了。</p></div>
+      <div><b>68.2%</b><strong>初始总误差被一个样本占据</strong><p>少数极端值足以掩盖大多数样本的退化。</p></div>
+    </div>
+    <p>这个极端样本来自成功轨迹，但位于固定的极低扩散时间步 <strong>10.1875 / 1000</strong>，原缓存权重只有 <strong>0.0652</strong>。成功轨迹只能说明那次任务完成了，不能保证从它构造出的每个带噪训练样本都应有同样的影响力。</p>
+    <p class="w6-meta">这里描述的是已观察到的误差分布与训练配方差异。68.2% 不是梯度占比；仅凭误差占比不能完整解释每一步参数更新。</p>
+  </section>
+  <section id="recipe" class="weekly-question">
+    <span class="question-number">03 / 两个诊断，一项选权修正</span><h2>训练不只是“喂成功动作”，还包括怎样分配每个噪声阶段的影响。</h2>
+    <h3>① 时间步权重：原本该轻一些的样本，被按同等权重训练了。</h3>
+    <p>同一条正确动作可以加上不同程度的噪声，形成多个去噪训练题。原配方用时间步权重调节这些题对训练的影响。漏掉权重后，目标动作即使没变，<strong>实际优化的问题也已经变了</strong>。</p>
+    <Formula expression={String.raw`\mathcal L_{\mathrm{action}}=\frac{1}{N}\sum_{i=1}^{N}w(\tau_i)\,\operatorname{MSE}(\widehat y_i,y_i)`} caption="示意：y 是实现采用的去噪目标，τ 是噪声时间；应沿用已核对的 scheduler 权重，而非在所有模型上套同一个权重函数。" />
+    <h3>② 学习率：已有能力的模型，被每一步改得太多。</h3>
+    <p>为隔离这个因素，每支从相同初始化开始，使用相同样本顺序和固定噪声，只改学习率，跑 100 步。这样能观察“第一段训练是否已经把模型推坏”，而不把网络结构和数据变化混进来。</p>
+    <Table id="learningRate" caption="Full 的 100 步学习率探针：缩小更新，抑制早期验证恶化（报告 §12）" />
+    <p>这轮共 9 档探针加 2 次复验、1100 个开发更新，没有新增正式闭环评测。它支持降低更新幅度，但<strong>不单独证明机器人成功率提高</strong>；正式结论要看下一轮。</p>
+    <h3>③ 选权方式：训练最后一步，不一定是最能用的一步。</h3>
+    <p>修正版按开发集选择 best checkpoint，并把第 0 步也纳入候选：没有改善就如实保留起点。正式测试不参与选择。最终单任务 LoRA 动作 LR 为 1e−5，Full 为 1e−7，M7 为 1e−6；它们是本轮设置，不能当作通用最优值。</p>
+  </section>
+  <section id="corrected" class="weekly-question">
+    <span class="question-number">04 / 修完后，有没有真正恢复？</span><h2>有。单独适配动作主干，已超过对应官方基线。</h2>
+    <p>保持原始 prompt、同一 300 个物理场景以及原检索和注入方式，修正训练配方后重跑。这里同时展示无 memory 的适配，以及带 memory 的联合训练。</p>
+    <Table id="singleTask" caption="Move Stapler Pad：修正前后结果（报告 §13，10-02 完成）" />
+    <p>LoRA-only 相对 Baseline 救回 42 场、损伤 27 场，净多 15 场；Full-only 救回 37 场、损伤 21 场，净多 16 场。<strong>Full-only 只比 LoRA-only 多 1 场，不能据此判断全量普遍更好。</strong></p>
+    <details><summary>为什么有些分母是 300，有些是 900？</summary><div><p>有在线记忆的方法按同一 300 场的三种历史顺序评估，共 900 次相关 rollout，仍只有 300 个物理场景。无记忆方法按 300 场报告。不能把三种顺序当成三套独立场景。</p><p>同权重比较时，把相应 Off 结果按三个顺序配对：LoRA-Joint 的 On 相对 Off 净 −14 / 900；Full-Joint 的 On 净 +17 / 900。LoRA-only 与 LoRA-Joint Off 恰好都成功 233 场，不代表权重或逐场结果相同。</p></div></details>
+    <div class="w6-note"><strong>仍未解决的训练问题：</strong><p>所有修正版分支在 6000 步的开发 MSE 仍高于初始化；本轮收益依赖较早的 best checkpoint。M7-only 选中了第 0 步的既有 Relation 权重，不能将其 74.78% 当作本轮续训获得的新收益。</p></div>
+  </section>
+  <section id="memory" class="weekly-question">
+    <span class="question-number">05 / 动作微调有效，是否意味着 memory 有效？</span><h2>十任务结果告诉我们：必须分别记账。</h2>
+    <p>十任务同一组 1000 场、一个混合顺序中，官方 Baseline 为 <strong>767 / 1000</strong>，Full-only 为 <strong>794 / 1000</strong>。这部分提升没有使用在线 memory。判断 memory 的即时作用，应关闭<strong>同一套已训练动作权重</strong>上的记忆分支来比较。</p>
+    <Table id="tenTask" caption="十任务：同动作权重下开启 memory 的净效果（报告 §14–15，10-04 完成）" />
+    <div class="w6-callout"><strong>最高的 80.3%，来自 Relation 联合训练后关闭 memory。</strong><p>三种 Joint 开启 memory 都没有超过本轮 Full-only 的 79.4%。两阶段达到 79.6%，但相对相同 Action 的 79.4% 只净多 2 场，而且训练量与同步 Joint 不同，尚不足以说明稳定性已经解决。</p></div>
+    <p>“救回”指原本失败而开启后成功；“损伤”指原本成功而开启后失败。两阶段的 53 次救回同时伴随 51 次损伤，说明只报净 +2 会隐藏大量相互抵消的变化。</p>
+  </section>
+  <section id="limits" class="weekly-question">
+    <span class="question-number">06 / 我们现在能说到哪里？</span><h2>先修好训练，再检验新的记忆表示。</h2>
+    <div class="w6-cards"><article><h3>已有证据支持</h3><p>早期微调负结果混入了训练配方问题；组合修正后，动作适配在既定测试集上有效。新架构必须以修正后的动作基座为比较对象。</p></article><article><h3>仍需验证</h3><p>memory 稳定收益、跨任务迁移、码本的帮助及在线更新效果都未解决。不能从现有结果推出“换成码本一定更好”。</p></article></div>
+    <p>原 M6 预测的是局部去噪 loss 改善，并不是整场任务收益；Mean 也可能抵消不同候选的作用。这些是后续研究线索，但现有实验<strong>没有证明它们中的任何一个是唯一失败原因</strong>。</p>
+    <p class="w6-meta">本页依据实验报告 §11–16；单任务与十任务不能直接横比。结果涉及重复顺序和单次训练，未宣称统计显著或未知任务泛化。</p>
+  </section>
+</Week6Layout>

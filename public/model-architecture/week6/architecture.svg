@@ -1,0 +1,68 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1120 1040" role="img" aria-labelledby="title desc">
+<title id="title">Memory-WAM 第二版：可更新行为码本</title><desc id="desc">候选 A：显式读取码内容，保留连续动作生成。全部新增模块与更新规则均待验证。</desc>
+<defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" fill="#95b9ed"/></marker><marker id="update" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" fill="#dfbc7d"/></marker></defs>
+<rect width="1120" height="1040" rx="12" fill="#0b1422"/>
+<g font-family="system-ui, Noto Sans SC, Microsoft YaHei, sans-serif">
+<text x="36" y="47" font-size="29" font-weight="700" fill="#f0f4ff">Memory-WAM 第二版：可更新行为码本</text>
+<text x="36" y="83" font-size="17" fill="#b3c5df">候选 A：显式读取码内容，保留连续动作生成。全部新增模块与更新规则均待验证。</text>
+<path d="M 340,191 L 410,191" fill="none" stroke="#95b9ed" stroke-width="2.4" marker-end="url(#arrow)"/>
+<path d="M 560,247 L 560,285 L 190,285 L 190,335" fill="none" stroke="#95b9ed" stroke-width="2.4" marker-end="url(#arrow)"/>
+<path d="M 710,191 L 741,191 L 741,400 L 855,400 L 855,505" fill="none" stroke="#95b9ed" stroke-width="2.4" marker-end="url(#arrow)"/>
+<path d="M 930,247 L 930,505" fill="none" stroke="#95b9ed" stroke-width="2.4" marker-end="url(#arrow)"/>
+<path d="M 190,437 L 190,505" fill="none" stroke="#95b9ed" stroke-width="2.4" marker-end="url(#arrow)"/>
+<path d="M 340,565 L 410,565" fill="none" stroke="#95b9ed" stroke-width="2.4" marker-end="url(#arrow)"/>
+<path d="M 710,565 L 780,565" fill="none" stroke="#95b9ed" stroke-width="2.4" marker-end="url(#arrow)"/>
+<path d="M 930,625 L 930,750" fill="none" stroke="#95b9ed" stroke-width="2.4" marker-end="url(#arrow)"/>
+<path d="M 780,802 L 710,802" fill="none" stroke="#95b9ed" stroke-width="2.4" marker-end="url(#arrow)"/>
+<path d="M 410,802 L 340,802" fill="none" stroke="#dfbc7d" stroke-width="2.4" stroke-dasharray="8 6" marker-end="url(#update)"/>
+<path d="M 190,750 L 190,625" fill="none" stroke="#dfbc7d" stroke-width="2.4" stroke-dasharray="8 6" marker-end="url(#update)"/>
+<rect x="40" y="135" width="300" height="112" rx="9" fill="#15283f" stroke="#799bcb" stroke-width="1.6"/>
+<text x="190.0" y="164.0" text-anchor="middle" font-size="21" font-weight="700" fill="#f0f4ff">当前可用信息</text>
+<text x="190.0" y="194.0" text-anchor="middle" font-size="17" fill="#c0d0e7">观测 O · 指令 L · 状态 s</text>
+<text x="190.0" y="220.0" text-anchor="middle" font-size="17" fill="#c0d0e7">不读取真实未来动作 / 结果</text>
+<rect x="410" y="135" width="300" height="112" rx="9" fill="#15283f" stroke="#799bcb" stroke-width="1.6"/>
+<text x="560.0" y="164.0" text-anchor="middle" font-size="21" font-weight="700" fill="#f0f4ff">WAM 当前条件</text>
+<text x="560.0" y="194.0" text-anchor="middle" font-size="17" fill="#c0d0e7">保留现有感知与条件路径</text>
+<text x="560.0" y="220.0" text-anchor="middle" font-size="17" fill="#c0d0e7">不要求生成完整未来视频</text>
+<rect x="780" y="135" width="300" height="112" rx="9" fill="#15283f" stroke="#799bcb" stroke-width="1.6"/>
+<text x="930.0" y="164.0" text-anchor="middle" font-size="21" font-weight="700" fill="#f0f4ff">动作生成的输入</text>
+<text x="930.0" y="194.0" text-anchor="middle" font-size="17" fill="#c0d0e7">带噪动作 Aτ · 去噪时刻 τ</text>
+<text x="930.0" y="220.0" text-anchor="middle" font-size="17" fill="#c0d0e7">每块内保持码本版本一致</text>
+<rect x="40" y="335" width="300" height="102" rx="9" fill="#14362f" stroke="#8ad2b7" stroke-width="1.6"/>
+<text x="190.0" y="359.0" text-anchor="middle" font-size="21" font-weight="700" fill="#f0f4ff">状态条件选择器 R</text>
+<text x="190.0" y="389.0" text-anchor="middle" font-size="17" fill="#c0d0e7">选码或短码序列</text>
+<text x="190.0" y="415.0" text-anchor="middle" font-size="17" fill="#c0d0e7">部署仅使用当前信息</text>
+<rect x="40" y="505" width="300" height="120" rx="9" fill="#2a2444" stroke="#b7a3ff" stroke-width="1.6"/>
+<text x="190.0" y="538.0" text-anchor="middle" font-size="21" font-weight="700" fill="#f0f4ff">行为码本 Cᵛ</text>
+<text x="190.0" y="568.0" text-anchor="middle" font-size="17" fill="#c0d0e7">有限、可复用的码向量</text>
+<text x="190.0" y="594.0" text-anchor="middle" font-size="17" fill="#c0d0e7">表示类型与容量待比较</text>
+<rect x="410" y="505" width="300" height="120" rx="9" fill="#14362f" stroke="#8ad2b7" stroke-width="1.6"/>
+<text x="560.0" y="538.0" text-anchor="middle" font-size="21" font-weight="700" fill="#f0f4ff">码条件接口 U</text>
+<text x="560.0" y="568.0" text-anchor="middle" font-size="17" fill="#c0d0e7">读入实际码值</text>
+<text x="560.0" y="594.0" text-anchor="middle" font-size="17" fill="#c0d0e7">生成条件 / 轻量调制</text>
+<rect x="780" y="505" width="300" height="120" rx="9" fill="#15283f" stroke="#799bcb" stroke-width="1.6"/>
+<text x="930.0" y="538.0" text-anchor="middle" font-size="21" font-weight="700" fill="#f0f4ff">连续 Action DiT</text>
+<text x="930.0" y="568.0" text-anchor="middle" font-size="17" fill="#c0d0e7">结合当前条件与码条件</text>
+<text x="930.0" y="594.0" text-anchor="middle" font-size="17" fill="#c0d0e7">逐步生成连续动作块</text>
+<rect x="780" y="750" width="300" height="105" rx="9" fill="#15283f" stroke="#799bcb" stroke-width="1.6"/>
+<text x="930.0" y="775.5" text-anchor="middle" font-size="21" font-weight="700" fill="#f0f4ff">环境执行</text>
+<text x="930.0" y="805.5" text-anchor="middle" font-size="17" fill="#c0d0e7">实际动作与状态变化</text>
+<text x="930.0" y="831.5" text-anchor="middle" font-size="17" fill="#c0d0e7">结果发生之后才记录</text>
+<rect x="410" y="750" width="300" height="105" rx="9" fill="#32291c" stroke="#ddbc7c" stroke-width="1.6"/>
+<text x="560.0" y="775.5" text-anchor="middle" font-size="21" font-weight="700" fill="#f0f4ff">已发生经历 + 反馈</text>
+<text x="560.0" y="805.5" text-anchor="middle" font-size="17" fill="#c0d0e7">成功 / 失败 / 可靠阶段信号</text>
+<text x="560.0" y="831.5" text-anchor="middle" font-size="17" fill="#c0d0e7">不把失败当正确动作标签</text>
+<rect x="40" y="750" width="300" height="105" rx="9" fill="#32291c" stroke="#ddbc7c" stroke-width="1.6"/>
+<text x="190.0" y="775.5" text-anchor="middle" font-size="21" font-weight="700" fill="#f0f4ff">拟议反馈更新器</text>
+<text x="190.0" y="805.5" text-anchor="middle" font-size="17" fill="#c0d0e7">改变码值或可更新增量</text>
+<text x="190.0" y="831.5" text-anchor="middle" font-size="17" fill="#c0d0e7">优化目标与规则尚待设计</text>
+<rect x="40" y="910" width="1040" height="70" rx="9" fill="#2a2444" stroke="#b7a3ff" stroke-width="1.6"/>
+<text x="560.0" y="931.0" text-anchor="middle" font-size="21" font-weight="700" fill="#f0f4ff">同权重 Off：真正绕过码条件接口，检验码本带来的净作用</text>
+<text x="560.0" y="961.0" text-anchor="middle" font-size="17" fill="#c0d0e7">改码本内容 ≠ 只改选码概率；去噪 latent 在变化 ≠ 码本参数在学习。</text>
+<text x="365" y="548" font-size="15" fill="#acbfdc">码值</text>
+<text x="728" y="548" font-size="15" fill="#acbfdc">条件</text>
+<text x="218" y="690" font-size="17" fill="#e0c38f">反馈到达后更新</text>
+<text x="218" y="718" font-size="17" fill="#e0c38f">下一边界切换版本</text>
+<text x="948" y="692" font-size="16" fill="#acbfdc">连续动作</text>
+<text x="40" y="1013" font-size="16" fill="#acbfdc">实线：生成与执行的信息流     虚线：拟议的反馈更新     紫色：码本     绿色：新增调用接口</text>
+</g></svg>

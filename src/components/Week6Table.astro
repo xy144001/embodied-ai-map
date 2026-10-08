@@ -1,0 +1,12 @@
+---
+import data from "../data/week6-memory.json";
+interface Props { id: keyof typeof data; caption: string }
+const {id,caption}=Astro.props;
+const table=data[id];
+---
+<div class="w6-table-block">
+  <p class="w6-meta">窄屏可左右滑动表格</p>
+  <div class="w6-table-wrap" tabindex="0" role="region" aria-label={caption+"，可横向滚动"}>
+    <table data-source-table={id}><caption>{caption}</caption><thead><tr>{table.columns.map(col=><th scope="col">{col}</th>)}</tr></thead><tbody>{table.rows.map(row=><tr>{row.map((cell,i)=>i===0?<th scope="row">{cell}</th>:<td>{cell}</td>)}</tr>)}</tbody></table>
+  </div>
+</div>
