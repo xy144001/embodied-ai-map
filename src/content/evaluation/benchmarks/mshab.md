@@ -26,7 +26,7 @@ references:
 
 | 项 | 具体内容 | 测试时量化什么 |
 |---|---|---|
-| observation | 低层 robot state、场景物体状态、2 路 $128\times128$ RGB-D（论文描述的环境设置） | state/visual policy 的 task/subtask success |
+| observation | 低层 robot state、场景物体状态、2 路 128×128 RGB-D（论文描述的环境设置） | state/visual policy 的 task/subtask success |
 | action | navigation 与 manipulation 的低层 control | 是否在物理接触下完成 pick/place/open/close，而非 magical grasp |
 | task | TidyHouse、PrepareGroceries、SetTable 及其子任务/目标对象 | 子技能 success、长时程任务成功、碰撞/安全条件 |
 | demonstrations | 从 RL policy 采样并经行为/安全条件过滤的 trajectory | IL 与 RL 的 data efficiency / task success |
@@ -39,4 +39,4 @@ MS-HAB 最适合作为“家庭场景、长时程 task graph、低层接触操�
 
 ## 4. 访问与部署
 
-官方仓库给出 conda Python ≥3.9、ManiSkill3 `mshab` branch、asset/data 下载及训练/评估脚本。项目页报告 GPU 并行在机器人与动态对象交互、渲染两路 $128\times128$ RGB-D 时可达 4300+ samples/s；这属于所述配置下的吞吐，不是所有硬件的保证。复现需锁定 ManiSkill branch、asset bundle、control mode、demo filter 和 success/safety阈值。
+官方仓库给出 conda Python ≥3.9、ManiSkill3 `mshab` branch、asset/data 下载及训练/评估脚本。项目页报告 GPU 并行在机器人与动态对象交互、渲染两路 128×128 RGB-D 时可达 4300+ samples/s；这属于所述配置下的吞吐，不是所有硬件的保证。复现需锁定 ManiSkill branch、asset bundle、control mode、demo filter 和 success/safety阈值。
