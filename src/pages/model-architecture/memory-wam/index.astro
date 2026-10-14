@@ -23,10 +23,11 @@ const chapters=[["idea","从经历到行为码"],["architecture","第二版架�
     <ModelSectionNav active="memory-wam" />
     <main id="main" class="mw-main w6-scope">
       <header class="mw-hero">
-        <div><p class="mw-eyebrow">OUR MODEL / ADAPTIVE BEHAVIOR CODEBOOK</p><h1>Memory-WAM</h1><p class="mw-tagline">把做法学进码本，让经验改变下一次行动。</p><p class="mw-intro">第二版准备把记忆从一条条历史片段，转向可复用、可修改的行为表示。核心问题是：<strong>怎样训练一套有用的码，并让部署后的真实反馈继续改进它？</strong></p></div>
-        <aside class="mw-status"><span>当前研究方向</span><strong>第二版 · 设计中</strong><p>Codebook 架构计划<br />尚无新模型实现与结果</p><time datetime="2026-10-08">2026 / 10 / 08</time></aside>
+        <div><p class="mw-eyebrow">OUR MODEL / ADAPTIVE BEHAVIOR CODEBOOK</p><h1>Memory-WAM</h1><p class="mw-tagline">把做法学进码本，让经验改变下一次行动。</p><p class="mw-intro">第二版的目标是把记忆从一条条历史片段，转向可复用、可修改的行为表示。核心问题是：<strong>怎样训练一套有用的码，并让部署后的真实反馈继续改进它？</strong></p></div>
+        <aside class="mw-status"><span>当前实现进度</span><strong>第二版 · 静态码本原型</strong><p>三模块已完成第一轮训练<br />尚无稳定收益；在线更新未实现</p><time datetime="2026-10-14">2026 / 10 / 14</time></aside>
       </header>
-      <nav class="w6-subnav" aria-label="Memory-WAM 版本"><a href={root+"/memory-wam/"} aria-current="page">第二版 · 可更新码本</a><a href={root+"/memory-wam/v1/"}>第一版 · 八模块与原始图</a><a href={root+"/problems/week6/"}>Week 6 · 证据与讨论</a></nav>
+      <nav class="w6-subnav" aria-label="Memory-WAM 版本"><a href={root+"/memory-wam/"} aria-current="page">第二版 · 总体研究设计</a><a href={root+"/problems/week7/"}>Week 7 · 当前实现与结果</a><a href={root+"/memory-wam/v1/"}>第一版 · 八模块与原始图</a><a href={root+"/problems/week6/"}>Week 6 · 证据与讨论</a></nav>
+      <aside class="w6-note"><strong>最新进展 · 已实现固定码本条件 WAM</strong><p>当前已训练 ActionTokenizer、CodePrior 和 CodeConditioner，父 WAM 冻结；推理重新选码，但不写入经验库、不更新码表。报告中已完整配对的 38 个任务上，Parent 92.26% → Predicted code 85.53%（10-12 22:05 快照，评测未全部完成）。<a href={root+"/problems/week7/architecture/"}>查看实际架构 →</a> · <a href={root+"/problems/week7/results/"}>查看结果与诊断 →</a></p><p>以下保留 10-08 的总体设计与未来更新设想；当前已经落地的具体选择、边界和实现图，以 Week 7 为准。</p></aside>
       <aside class="w6-callout"><strong>为什么现在重做记忆？</strong><p>修正训练配置后，十任务 Full-only 从 76.7% 提升至 79.4%，但在线 memory 仍未稳定带来额外收益。因此我们要重新研究记忆表示与训练方式；这不是已有实验已经证明码本更好。<a href={root+"/problems/week6/finetuning/"}>查看诊断与结果 →</a></p></aside>
       <nav class="mw-toc" aria-label="第二版架构目录">{chapters.map(([id,label],i)=><a href={"#"+id}><span>0{i+1}</span>{label}</a>)}</nav>
       <section id="idea" class="mw-section">

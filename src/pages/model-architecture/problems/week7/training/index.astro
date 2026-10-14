@@ -1,0 +1,69 @@
+---
+import Week7Layout from "../../../../../layouts/Week7Layout.astro";
+import Figure from "../../../../../components/Week7Figure.astro";
+import Table from "../../../../../components/Week7Table.astro";
+import Formula from "../../../../../components/FlowFormula.astro";
+const root=import.meta.env.BASE_URL.replace(/\/$/,"")+"/model-architecture/problems/week7/";
+const chapters=[["data","数据从哪里来"],["stages","三阶段各自学什么"],["mismatch","训练与推理的差异"],["padding","有效动作与尾部填充"],["budget","预算与开发选权"]];
+---
+<Week7Layout title="数据与训练 · 先学表示，再学选码与注入" description="三阶段的分工让问题更容易检查，但各自的离线指标变好，并不保证它们串起来就能完成任务。尤其要看清：哪个阶段真正见过部署时的预测码。" active="training" chapters={chapters}>
+  <section class="weekly-question" id="data">
+    <span class="question-number">01 / 训练材料</span>
+    <h2>8,000 条成功示范，分成训练与开发；10 类任务留出。</h2>
+    <p>本轮覆盖 RoboTwin50。选取 40 个任务类别采集通过检查的成功专家示范：每类 160 个训练场景、40 个开发场景。其余 10 类不参加本轮新增模块的训练。</p>
+    <div class="w6-stats">
+      <div><b>6,400</b><strong>训练示范场景</strong><p>40 类 × 160 场；切成 48,005 个动作 chunk。</p></div>
+      <div><b>1,600</b><strong>开发示范场景</strong><p>40 类 × 40 场；全部共有 12,096 个 chunk。</p></div>
+      <div><b>10 类</b><strong>本轮留出任务</strong><p>用于观察新模块的跨类别表现；不代表父 WAM 从未见过它们。</p></div>
+    </div>
+    <p><strong>8,000 指示范场景数，不是 chunk 数。</strong>每条示范按 32 步窗口组织，每执行 28 步形成下一个决策起点。采用父模型 normalizer 做 z-score，并把归一化命令截断到 [−5,5]。</p>
+    <p>训练只使用通过收集检查的成功专家示范；它提供“成功时怎么做”的监督，没有直接教会模型“这个码相对不用码能多带来多少任务收益”。</p>
+  </section>
+  <section class="weekly-question" id="stages">
+    <span class="question-number">02 / 三阶段训练</span>
+    <h2>先建立动作的编码方式，再训练调用与执行接口。</h2>
+    <Figure id="training" caption="S1 学会编码和重建；S2 学会在正确前缀下预测码；S3 只拿专家码训练注入接口。正式部署才改为 Prior 自己采样出的整组码。父模型始终冻结。" />
+    <Table id="training" caption="每阶段究竟更新谁、使用什么监督、怎样选 checkpoint" />
+    <h3>S1：压得下，还要尽量还原得回去。</h3>
+    <p>训练 Tokenizer 的上下文编码器、动作 encoder、两张 RVQ 表和重建 decoder。重建项要求动作尽量保真；codebook 项让码字靠近需要表达的向量；commitment 项让 encoder 的表示别离码字太远。</p>
+    <Formula expression={String.raw`\mathcal L_{S1}=\mathcal L_{\mathrm{rec,valid}}+\mathcal L_{\mathrm{codebook}}+0.25\lVert z-\operatorname{sg}(z_q)\rVert^2`} caption="valid 表示重建只计算真实有效动作；sg 表示停止梯度。codebook 项按各层残差计算。" />
+    <p>码表先在 320 个 chunk 上做 12 次 k-means 迭代初始化，然后与 Tokenizer 其余参数一起由 <strong>AdamW</strong> 更新。当前没有使用 EMA 更新码表。</p>
+    <details><summary>为什么离散选码之后，编码器还能学习？</summary><div>
+      <p>“选最近的 ID”本身不可直接求导。这里使用 straight-through：前向使用量化结果，反向把重建梯度传回 encoder。码表则由 codebook 项学习。</p>
+      <Formula expression={String.raw`z_{\mathrm{ST}}=z+\operatorname{sg}(z_q-z)`} caption="这是离线码本训练的梯度处理，不是测试时在线学习。" />
+    </div></details>
+    <h3>S2：学会根据眼前情境预测这组码。</h3>
+    <p>冻结 S1。让 Tokenizer 从专家未来动作和当前情境产生 16 个 ID 标签，再训练 Prior。每一步输入正确的前缀 ID，用交叉熵预测下一个 ID。这样容易学习基本依赖，但仍要单独验证自己采样时的错误累积。</p>
+    <h3>S3：教 WAM 在去噪时使用码。</h3>
+    <p>冻结 Tokenizer 和全部父模型，只训练 Conditioner。输入的是<strong>由未来专家动作编码得到的 teacher code</strong>；在带噪动作上学习原生 flow 目标。当前阶段<strong>不调用 Prior</strong>，训练和开发选权都没有改用预测码。</p>
+    <Formula expression={String.raw`A_\sigma=(1-\sigma)A^*+\sigma\epsilon,\qquad v^*=\epsilon-A^*`} caption="把专家动作与噪声混合，学习把动作逐步去噪所需的方向；最终损失是原时间步权重 × 有效动作上的 MSE。" />
+    <div class="w6-callout"><strong>这次保留了原生时间步权重。</strong><p>Week 6 已定位的旧微调漏权重问题，不能直接拿来解释本次新码本结果。当前是在修正后的训练约定上验证新增的码条件链路。</p></div>
+  </section>
+  <section class="weekly-question" id="mismatch">
+    <span class="question-number">03 / 已确认的条件差异</span>
+    <h2>练习时给的是“参考答案的码”，上场时用的是“自己猜的码”。</h2>
+    <div class="w6-cards">
+      <article><h3>S3 训练与开发选权</h3><p>专家未来动作 A* 已知，Tokenizer 可以提取 C*。Conditioner 学习在这类码条件下拟合专家去噪方向。</p></article>
+      <article><h3>正式推理</h3><p>未来动作未知，Prior 根据当前 x 逐个采样 Ĉ。选错前面的 ID，还可能改变后续 ID 的分布。</p></article>
+    </div>
+    <p>这好比练习执行说明时，手里一直拿着标准说明；正式使用时，说明要由另一个模型现场写出来。能照着标准说明做得好，不保证面对有误或不合适的说明也能保持表现。</p>
+    <div class="w6-plan"><strong>事实与解释分开</strong><p>训练—推理的码条件差异已经确认；它可能造成退化，但还没有隔离出它的因果贡献。需要在同一状态与噪声下比较 Off、teacher code、predicted code；不能仅凭差异存在就认定“选码器是唯一瓶颈”。</p></div>
+  </section>
+  <section class="weekly-question" id="padding">
+    <span class="question-number">04 / 有效动作与填充</span>
+    <h2>动作损失屏蔽了补齐部分，码分支还没有完全屏蔽。</h2>
+    <p>轨迹最后一个 chunk 可能不足 32 步，因此重复最后一条命令补齐，同时保存 valid mask。encoder 将动作乘有效步 mask，并加入一个可学习的有效步投影；重建和 flow loss 都只计算真正有效的动作。</p>
+    <p>但 <strong>RVQ 仍处理全部 8 个位置，Prior 的 CE 仍包含全部 16 个 ID，Conditioner 的 code K/V 也没有根据有效步屏蔽</strong>。这意味着“动作误差忽略 padding”，不等于“所有码训练都忽略 padding”。</p>
+    <div class="w6-note"><strong>当前开发面板对轨迹首尾更敏感。</strong><p>每个开发场景只取第一块和最后一块，共 3,200 个 chunk：其中 50% 是不足 32 步的尾块，25% 的 code 位置完全由填充构成。中间接触和转换阶段没有同等覆盖。</p></div>
+    <p>是否因此把尾部的易学信号当成了整体进步，是一个待验证假设。下一步可单独报告 full-valid 与轨迹中段指标，并对完全填充的码位置做遮蔽对照。</p>
+  </section>
+  <section class="weekly-question" id="budget">
+    <span class="question-number">05 / 训练预算与选权</span>
+    <h2>同样训练 6,000 步，三个模块见到的数据量并不相同。</h2>
+    <p>三个阶段均使用 AdamW、学习率 1e−4、梯度裁剪 1，最多训练 6,000 步。S1 / S2 的全局 batch 是 64，S3 是 8；任务轮转采样，任务内先均匀选场景，再选 chunk。</p>
+    <Table id="budget" caption="选中 checkpoint 实际访问过多少数据：重复访问与独立 chunk 分开计数" />
+    <p>Conditioner 第 5,500 步选中时访问了 44,000 次样本，但只见到 <strong>26,584 个不同 chunk，即 55.38%</strong>。训练到最后一步的覆盖为 58.03%。这值得检查，不过还不能仅凭覆盖率断言“只要多训就能解决”。</p>
+    <p>每 500 步评估一次固定开发面板，包含第 0 步，分别按重建 MSE、teacher-forcing CE 和 teacher-code flow loss 选最优权重。S1 / S2 选第 6,000 步，S3 选第 5,500 步；正式场景的成功率没有参与本轮 checkpoint 选择。</p>
+    <p><a href={root+"results/"}>继续：低损失和真实任务结果之间，出现了什么差距？ →</a></p>
+  </section>
+</Week7Layout>

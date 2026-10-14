@@ -1,0 +1,33 @@
+---
+import WeeklyLayout from "./WeeklyLayout.astro";
+import "../styles/model-week6.css";
+import "../styles/model-week7.css";
+import "katex/dist/katex.min.css";
+interface Props {
+  title: string;
+  description: string;
+  active?: "overview" | "architecture" | "training" | "results";
+  chapters?: string[][];
+}
+const { title, description, active="overview", chapters=[] }=Astro.props;
+const root=import.meta.env.BASE_URL.replace(/\/$/,"")+"/model-architecture/";
+const pages=[["overview","本周问题",""],["architecture","01 · 方法与模块","architecture/"],["training","02 · 数据与训练","training/"],["results","03 · 结果与诊断","results/"]];
+---
+<WeeklyLayout title={title+" · Week 7"} description={description} section="problems" week={7}>
+  <div class="w6-scope w7-scope">
+    <p class="eyebrow">WEEK 7 · CODEBOOK-MEMORY-WAM / FIRST IMPLEMENTATION</p>
+    <h1>{title}</h1><p class="intro">{description}</p>
+    <div class="w7-status"><span>已实现 · 固定码本原型</span><span>未实现 · 跨回合 memory / 在线更新</span></div>
+    <p class="w6-meta">页面更新：2026-10-14 · 实验快照：<time datetime="2026-10-12T22:05:41+08:00">2026-10-12 22:05:41（北京时间）</time> · 正式评测尚未全部完成</p>
+    <nav class="w6-subnav" aria-label="Week 7 内容">{pages.map(([id,label,path])=><a href={root+"problems/week7/"+path} aria-current={id===active?"page":undefined}>{label}</a>)}</nav>
+    <div class:list={{"weekly-reading":chapters.length>0}}>
+      {chapters.length>0&&<nav class="weekly-toc" aria-label="本页讲解目录"><strong>讲解顺序</strong>{chapters.map(([id,label])=><a href={"#"+id}>{label}</a>)}</nav>}
+      <article class="weekly-article"><slot /></article>
+    </div>
+    <div class="w6-sources" id="sources">
+      <p class="w6-meta"><strong>本周依据：</strong>《Codebook_Memory_WAM_Implementation_Explained(1).html》（source_revision=2，含实现说明、代码摘录与内嵌统计）和《Memory_WAM_Technical_Report_20261013(1).html》§6–14。数值来自前者的同一快照，后者用于交叉核对；两份文档不代表两次独立实验。图为按当前实现重绘的结构图。</p>
+      <p class="w6-meta">“已观察”描述报告中已有的结果；“待验证”描述可能原因与建议对照。未把拟议实验写成已完成实验，也未用旧十任务的成功率与本轮任务集直接比较。</p>
+    </div>
+    <nav class="w6-bottom" aria-label="继续阅读">{pages.filter(([id])=>id!==active).map(([,label,path])=><a href={root+"problems/week7/"+path}>{label} →</a>)}<a href={root+"memory-wam/"}>Memory-WAM · 总体研究方向 →</a><a href={root+"problems/week6/"}>← Week 6</a></nav>
+  </div>
+</WeeklyLayout>

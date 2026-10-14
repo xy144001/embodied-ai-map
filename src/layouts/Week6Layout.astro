@@ -12,6 +12,7 @@ const pages=[["overview","本周问题",""],["finetuning","01 · 微调退化复
     <p class="eyebrow">WEEK 6 · TRAINING DIAGNOSIS & ADAPTIVE CODEBOOK</p>
     <h1>{title}</h1><p class="intro">{description}</p>
     <p class="w6-meta">更新：2026-10-08 · 实验截至 10-04，10-07 复核 · 码本第二版为拟议方案</p>
+    <aside class="w6-callout"><strong>后续进展 · 静态码本原型已完成第一轮训练</strong><p>本页保留 10-08 的复盘与设计。当前 Tokenizer、Prior、Conditioner 的实际实现、训练和负结果已整理到 <a href={root+"problems/week7/"}>Week 7 →</a>；跨回合 memory 与在线更新仍未实现。</p></aside>
     <nav class="w6-subnav" aria-label="Week 6 内容">{pages.map(([id,label,path])=><a href={root+"problems/week6/"+path} aria-current={id===active?"page":undefined}>{label}</a>)}</nav>
     <div class:list={{"weekly-reading":chapters.length>0}}>
       {chapters.length>0&&<nav class="weekly-toc" aria-label="本页讲解目录"><strong>讲解顺序</strong>{chapters.map(([id,label])=><a href={"#"+id}>{label}</a>)}</nav>}
