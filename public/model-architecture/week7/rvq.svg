@@ -1,0 +1,88 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1120 1010" role="img" aria-labelledby="title desc">
+<title id="title">一个动作块，为什么是 16 个 ID、8 个向量？</title><desc id="desc">RVQ = 残差向量量化：第一张表近似原向量，第二张表继续近似剩余误差。以下省略 batch 维。</desc>
+<defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" fill="#9abce9"/></marker><marker id="teacher" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" fill="#e0bc7e"/></marker></defs>
+<rect width="1120" height="1010" rx="12" fill="#0b1422"/>
+<g font-family="system-ui, Noto Sans SC, Microsoft YaHei, sans-serif">
+<text x="36" y="46" font-size="29" font-weight="700" fill="#f0f4ff">一个动作块，为什么是 16 个 ID、8 个向量？</text>
+<text x="36" y="82" font-size="17" fill="#b5c7df">RVQ = 残差向量量化：第一张表近似原向量，第二张表继续近似剩余误差。以下省略 batch 维。</text>
+<path d="M 560,210 L 560,238" fill="none" stroke="#9abce9" stroke-width="2.3"/>
+<path d="M 101.5,238 L 1018.5,238" fill="none" stroke="#9abce9" stroke-width="2.3"/>
+<path d="M 101.5,238 L 101.5,265" fill="none" stroke="#9abce9" stroke-width="2.3" marker-end="url(#arrow)"/>
+<path d="M 101.5,337 L 101.5,365" fill="none" stroke="#9abce9" stroke-width="2.3"/>
+<path d="M 232.5,238 L 232.5,265" fill="none" stroke="#9abce9" stroke-width="2.3" marker-end="url(#arrow)"/>
+<path d="M 232.5,337 L 232.5,365" fill="none" stroke="#9abce9" stroke-width="2.3"/>
+<path d="M 363.5,238 L 363.5,265" fill="none" stroke="#9abce9" stroke-width="2.3" marker-end="url(#arrow)"/>
+<path d="M 363.5,337 L 363.5,365" fill="none" stroke="#9abce9" stroke-width="2.3"/>
+<path d="M 494.5,238 L 494.5,265" fill="none" stroke="#9abce9" stroke-width="2.3" marker-end="url(#arrow)"/>
+<path d="M 494.5,337 L 494.5,365" fill="none" stroke="#9abce9" stroke-width="2.3"/>
+<path d="M 625.5,238 L 625.5,265" fill="none" stroke="#9abce9" stroke-width="2.3" marker-end="url(#arrow)"/>
+<path d="M 625.5,337 L 625.5,365" fill="none" stroke="#9abce9" stroke-width="2.3"/>
+<path d="M 756.5,238 L 756.5,265" fill="none" stroke="#9abce9" stroke-width="2.3" marker-end="url(#arrow)"/>
+<path d="M 756.5,337 L 756.5,365" fill="none" stroke="#9abce9" stroke-width="2.3"/>
+<path d="M 887.5,238 L 887.5,265" fill="none" stroke="#9abce9" stroke-width="2.3" marker-end="url(#arrow)"/>
+<path d="M 887.5,337 L 887.5,365" fill="none" stroke="#9abce9" stroke-width="2.3"/>
+<path d="M 1018.5,238 L 1018.5,265" fill="none" stroke="#9abce9" stroke-width="2.3" marker-end="url(#arrow)"/>
+<path d="M 1018.5,337 L 1018.5,365" fill="none" stroke="#9abce9" stroke-width="2.3"/>
+<path d="M 101.5,365 L 1018.5,365" fill="none" stroke="#9abce9" stroke-width="2.3"/>
+<path d="M 746,365 L 746,395" fill="none" stroke="#9abce9" stroke-width="2.3" marker-end="url(#arrow)"/>
+<path d="M 340,450 L 410,450" fill="none" stroke="#9abce9" stroke-width="2.3" marker-end="url(#arrow)"/>
+<path d="M 746,505 L 746,545 L 150,545 L 150,580" fill="none" stroke="#9abce9" stroke-width="2.3" marker-end="url(#arrow)"/>
+<path d="M 260,635 L 340,635" fill="none" stroke="#9abce9" stroke-width="2.3" marker-end="url(#arrow)"/>
+<path d="M 620,635 L 710,635" fill="none" stroke="#9abce9" stroke-width="2.3" marker-end="url(#arrow)"/>
+<path d="M 480,690 L 480,780" fill="none" stroke="#9abce9" stroke-width="2.3" marker-end="url(#arrow)"/>
+<path d="M 895,690 L 895,740 L 660,740 L 660,780" fill="none" stroke="#9abce9" stroke-width="2.3" marker-end="url(#arrow)"/>
+<rect x="40" y="120" width="1040" height="90" rx="9" fill="#32291c" stroke="#ddbc7c" stroke-width="1.6"/>
+<text x="560.0" y="157.0" text-anchor="middle" font-size="21" font-weight="700" fill="#f0f4ff">专家动作 A*：32 步 × 14 维</text>
+<text x="560.0" y="187.0" text-anchor="middle" font-size="17" fill="#c5d3e7">绝对关节 / 夹爪命令 → 父模型归一化 → 每 4 步切成一个 patch</text>
+<rect x="40" y="265" width="123" height="72" rx="9" fill="#32291c" stroke="#ddbc7c" stroke-width="1.6"/>
+<text x="101.5" y="293.0" text-anchor="middle" font-size="21" font-weight="700" fill="#f0f4ff">patch 1</text>
+<text x="101.5" y="323.0" text-anchor="middle" font-size="17" fill="#c5d3e7">1–4 步</text>
+<rect x="171" y="265" width="123" height="72" rx="9" fill="#32291c" stroke="#ddbc7c" stroke-width="1.6"/>
+<text x="232.5" y="293.0" text-anchor="middle" font-size="21" font-weight="700" fill="#f0f4ff">patch 2</text>
+<text x="232.5" y="323.0" text-anchor="middle" font-size="17" fill="#c5d3e7">5–8 步</text>
+<rect x="302" y="265" width="123" height="72" rx="9" fill="#32291c" stroke="#ddbc7c" stroke-width="1.6"/>
+<text x="363.5" y="293.0" text-anchor="middle" font-size="21" font-weight="700" fill="#f0f4ff">patch 3</text>
+<text x="363.5" y="323.0" text-anchor="middle" font-size="17" fill="#c5d3e7">9–12 步</text>
+<rect x="433" y="265" width="123" height="72" rx="9" fill="#32291c" stroke="#ddbc7c" stroke-width="1.6"/>
+<text x="494.5" y="293.0" text-anchor="middle" font-size="21" font-weight="700" fill="#f0f4ff">patch 4</text>
+<text x="494.5" y="323.0" text-anchor="middle" font-size="17" fill="#c5d3e7">13–16 步</text>
+<rect x="564" y="265" width="123" height="72" rx="9" fill="#32291c" stroke="#ddbc7c" stroke-width="1.6"/>
+<text x="625.5" y="293.0" text-anchor="middle" font-size="21" font-weight="700" fill="#f0f4ff">patch 5</text>
+<text x="625.5" y="323.0" text-anchor="middle" font-size="17" fill="#c5d3e7">17–20 步</text>
+<rect x="695" y="265" width="123" height="72" rx="9" fill="#32291c" stroke="#ddbc7c" stroke-width="1.6"/>
+<text x="756.5" y="293.0" text-anchor="middle" font-size="21" font-weight="700" fill="#f0f4ff">patch 6</text>
+<text x="756.5" y="323.0" text-anchor="middle" font-size="17" fill="#c5d3e7">21–24 步</text>
+<rect x="826" y="265" width="123" height="72" rx="9" fill="#32291c" stroke="#ddbc7c" stroke-width="1.6"/>
+<text x="887.5" y="293.0" text-anchor="middle" font-size="21" font-weight="700" fill="#f0f4ff">patch 7</text>
+<text x="887.5" y="323.0" text-anchor="middle" font-size="17" fill="#c5d3e7">25–28 步</text>
+<rect x="957" y="265" width="123" height="72" rx="9" fill="#32291c" stroke="#ddbc7c" stroke-width="1.6"/>
+<text x="1018.5" y="293.0" text-anchor="middle" font-size="21" font-weight="700" fill="#f0f4ff">patch 8</text>
+<text x="1018.5" y="323.0" text-anchor="middle" font-size="17" fill="#c5d3e7">29–32 步</text>
+<rect x="40" y="395" width="300" height="110" rx="9" fill="#15283f" stroke="#799bcb" stroke-width="1.6"/>
+<text x="190.0" y="429.0" text-anchor="middle" font-size="21" font-weight="700" fill="#f0f4ff">当前情境 x</text>
+<text x="190.0" y="459.0" text-anchor="middle" font-size="17" fill="#c5d3e7">图像 · 指令 · qpos</text>
+<text x="190.0" y="485.0" text-anchor="middle" font-size="17" fill="#c5d3e7">Tokenizer 自己的 ContextEncoder</text>
+<rect x="410" y="395" width="670" height="110" rx="9" fill="#14362f" stroke="#8ad2b7" stroke-width="1.6"/>
+<text x="745.0" y="429.0" text-anchor="middle" font-size="21" font-weight="700" fill="#f0f4ff">逐 patch 编码：56 → 128</text>
+<text x="745.0" y="459.0" text-anchor="middle" font-size="17" fill="#c5d3e7">位置与有效步信息 + 对 context 的 cross-attention + FF</text>
+<text x="745.0" y="485.0" text-anchor="middle" font-size="17" fill="#c5d3e7">得到 8 个 z；patch 间没有显式 self-attention</text>
+<rect x="40" y="580" width="220" height="110" rx="9" fill="#14362f" stroke="#8ad2b7" stroke-width="1.6"/>
+<text x="150.0" y="614.0" text-anchor="middle" font-size="21" font-weight="700" fill="#f0f4ff">取其中一个 zⱼ</text>
+<text x="150.0" y="644.0" text-anchor="middle" font-size="17" fill="#c5d3e7">128 维连续向量</text>
+<text x="150.0" y="670.0" text-anchor="middle" font-size="17" fill="#c5d3e7">下述操作重复 8 次</text>
+<rect x="340" y="580" width="280" height="110" rx="9" fill="#2a2444" stroke="#b7a3ff" stroke-width="1.6"/>
+<text x="480.0" y="614.0" text-anchor="middle" font-size="21" font-weight="700" fill="#f0f4ff">第一层 E₀：64 × 128</text>
+<text x="480.0" y="644.0" text-anchor="middle" font-size="17" fill="#c5d3e7">找离 zⱼ 最近的码 kⱼ,₀</text>
+<text x="480.0" y="670.0" text-anchor="middle" font-size="17" fill="#c5d3e7">剩余 r = zⱼ − E₀[kⱼ,₀]</text>
+<rect x="710" y="580" width="370" height="110" rx="9" fill="#2a2444" stroke="#b7a3ff" stroke-width="1.6"/>
+<text x="895.0" y="614.0" text-anchor="middle" font-size="21" font-weight="700" fill="#f0f4ff">第二层 E₁：64 × 128</text>
+<text x="895.0" y="644.0" text-anchor="middle" font-size="17" fill="#c5d3e7">找离残差 r 最近的码 kⱼ,₁</text>
+<text x="895.0" y="670.0" text-anchor="middle" font-size="17" fill="#c5d3e7">补上第一层未表达的部分</text>
+<rect x="310" y="780" width="500" height="110" rx="9" fill="#2a2444" stroke="#b7a3ff" stroke-width="1.6"/>
+<text x="560.0" y="814.0" text-anchor="middle" font-size="21" font-weight="700" fill="#f0f4ff">两个向量相加，得到一个 zqⱼ</text>
+<text x="560.0" y="844.0" text-anchor="middle" font-size="17" fill="#c5d3e7">zqⱼ = E₀[kⱼ,₀] + E₁[kⱼ,₁]</text>
+<text x="560.0" y="870.0" text-anchor="middle" font-size="17" fill="#c5d3e7">保留 2 个 ID，输出 1 个 128 维向量</text>
+<text x="644" y="616" font-size="17" fill="#b4c8e1">残差</text>
+<text x="40" y="946" font-size="20" fill="#d8cbff">8 个 patch × 2 个 ID = 16 个 ID；查表相加后是 8 × 128 向量，不是 16 个向量。</text>
+<text x="40" y="980" font-size="17" fill="#b4c8e1">码的含义依赖上下文和完整码组；不能把两张表的 128 个条目直接命名为 128 个完整技能。</text>
+</g></svg>

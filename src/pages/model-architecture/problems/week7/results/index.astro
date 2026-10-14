@@ -1,0 +1,67 @@
+---
+import Week7Layout from "../../../../../layouts/Week7Layout.astro";
+import Table from "../../../../../components/Week7Table.astro";
+import Curves from "../../../../../components/Week7Curves.astro";
+const chapters=[["loss","离线损失确实下降"],["formal","正式配对表现"],["mechanism","机制实验说明什么"],["diagnosis","哪些原因仍待验证"],["next","下一步先回答什么"]];
+---
+<Week7Layout title="结果与诊断 · 损失下降，闭环成功率却下降" description="当前固定码本原型还没有带来稳定收益。先呈现可比结果，再用机制实验缩小问题范围；避免把一个代理指标的改善当作真实控制能力的改善。" active="results" chapters={chapters}>
+  <section class="weekly-question" id="loss">
+    <span class="question-number">01 / 已观察 · 离线训练</span>
+    <h2>三个模块都学会了降低各自的开发损失。</h2>
+    <Curves />
+    <p>例如，Conditioner 的 teacher-code flow loss 从 0.022768 降至 0.010096，约下降 <strong>55.7%</strong>。但这个指标只回答“给定专家码时，能否更好拟合专家去噪方向”，没有覆盖“自己选码后，在环境里能否完成任务”。</p>
+    <div class="w6-callout"><strong>三个能力不能互相代替。</strong><p>动作能够被压缩、当前情境能够预测合适的码、WAM 能按码产生有用行为，必须分别成立。各阶段独立的低损失，还不足以证明串联后的系统有用。</p></div>
+  </section>
+  <section class="weekly-question" id="formal">
+    <span class="question-number">02 / 已观察 · 正式场景配对</span>
+    <h2>在已完整评完的 38 个任务上，损伤多于救回。</h2>
+    <p>计划评测 50 个任务 × 每任务 50 个新场景，即 2,500 个物理场景，分别运行 Parent 和 Predicted-code WAM，共 5,000 次 rollout。两组使用<strong>相同父模型、配对场景和固定随机协议</strong>；Parent 绕过新增码条件，Predicted 使用 Prior 采样码。</p>
+    <div class="w6-note"><strong>中途快照，不是最终成绩。</strong><p>截至 2026-10-12 22:05:41（北京时间），完成 4,092 / 5,000 次 rollout：Parent 2,060 次，Predicted 2,032 次。因为完成进度不同，下面只比较双方共同完成的场景。</p></div>
+    <Table id="paired" caption="同场景配对：完整任务是主结果，含未完整任务的配对结果单列" />
+    <p><strong>救回</strong>指 Parent 失败而 Predicted 成功；<strong>损伤</strong>指 Parent 成功而 Predicted 失败。主结果中救回 53 场、损伤 181 场，净减少 128 场成功；38 个完整任务里，3 个任务更高、27 个更低、8 个相同。</p>
+    <h3>下降并不只发生在挂杯任务。</h3>
+    <div class="w6-cards">
+      <article><h3>明显退化的例子</h3><p>挂杯 hanging_mug：26/50 → 19/50（救回 9、损伤 16）。开微波炉 open_microwave：31/50 → 16/50；锤击方块 beat_block_hammer：50/50 → 36/50。</p></article>
+      <article><h3>也有少量改善</h3><p>place_cans_plasticbox：46/50 → 50/50；place_empty_cup：49/50 → 50/50；留出类别 place_shoe：44/50 → 46/50。局部改善尚未形成整体增益。</p></article>
+    </div>
+    <details><summary>展开 50 个任务的完整快照表</summary><div><p>未完整任务仅列共同完成的场景；配对 N=0 时用“—”表示尚无结果。留出仅针对本轮新增模块训练。</p><Table id="tasks" caption="50 个任务逐项结果 · 2026-10-12 22:05:41 快照" /></div></details>
+    <p class="w6-meta">本轮 Parent 92.26% 与 Week 6 的旧十任务 Full-only 79.4% 使用不同任务、场景与协议，不能拼成一条性能提升曲线。这里的负结果属于固定码本 + Prior + Conditioner 整条链路，不能单独归因于某张码表。</p>
+  </section>
+  <section class="weekly-question" id="mechanism">
+    <span class="question-number">03 / 已观察 · 开发机制检查</span>
+    <h2>接口确实生效了，但“能改变动作”还不等于“能正确控制动作”。</h2>
+    <ol class="w6-steps">
+      <li><strong>检查一：压缩后的动作还能直接完成任务吗？</strong><p>在 8 个开发任务、每任务 2 场中，专家原命令重放 <strong>16/16</strong> 成功；Tokenizer 重建动作回放 <strong>0/16</strong>。重建关节 RMSE 为 0.0947 rad，约 5.43°；夹爪 RMSE 为 0.0730。数值上不大的误差，可能影响接触与对齐。</p><p>这项测试使用专家上下文预先计算整条轨迹，再开环回放。它<strong>不是 teacher-code WAM 的闭环上限</strong>，也不是正式 Prior 链路的成功率。</p></li>
+      <li><strong>检查二：固定状态和噪声，只换码会怎样？</strong><p>使用 16 个专家前缀状态，每个做 9 种干预，共 <strong>144 次单 chunk 执行</strong>。固定状态和噪声重复时结果精确一致，换码能够改变动作，因此“码接口完全没生效”不符合这些观察。</p></li>
+      <li><strong>检查三：两个解码路径对同一码的理解一致吗？</strong><p>换用 donor 码后，WAM 的动作变化与 Tokenizer decoder 的动作变化，方向余弦均值约 <strong>0.175</strong>，16 个状态中有 4 个为负。两条路径还没有显示出稳定一致的控制方向。</p><p>donor 取自同任务训练集的首个不同码，没有保证同阶段、同几何状态。因此这也可能包含码不适用的影响，不能当成纯粹的语义控制实验。</p></li>
+      <li><strong>检查四：是不是所有样本都挤进少数几个码了？</strong><p>两张表分别使用 <strong>61/64</strong>、<strong>56/64</strong> 个条目；perplexity 约 22.67 / 24.57，反映使用分布的不均匀程度。不是完全塌缩到极少数码，但统计包含 padding，也不能据此断言有用行为已经充分覆盖。</p></li>
+    </ol>
+    <div class="w6-note"><strong>技术检查通过，只说明可以可靠地测量这个原型。</strong><p>Off 回归、数值有限、固定条件可重复、换码作用非零，不等于成功率已经提升，也不等于已经验证了可更新 memory。报告没有放行 P3 / P4。</p></div>
+  </section>
+  <section class="weekly-question" id="diagnosis">
+    <span class="question-number">04 / 待验证 · 原因定位</span>
+    <h2>目前有几个具体疑点，但还不能把任何一个写成定论。</h2>
+    <div class="w6-cards">
+      <article><h3>码的来源变了</h3><p><strong>事实：</strong>S3 用专家码训练，部署用自由采样码。</p><p><strong>待验证：</strong>选码误差、前缀错误累积与训练条件失配，各自造成多大损伤？</p></article>
+      <article><h3>两套解码器缺少一致性约束</h3><p><strong>事实：</strong>重建 decoder 与 WAM + Conditioner 是两条不同路径；换码响应方向并不总一致。</p><p><strong>待验证：</strong>码是否具有足够稳定的状态条件含义，WAM 是否学会正确使用？</p></article>
+      <article><h3>开发面板与动作精度</h3><p><strong>事实：</strong>首尾采样偏重尾块，码训练仍含 padding；绝对动作压缩的开环重放失败。</p><p><strong>待验证：</strong>中间接触阶段、时间连续性或量化误差，是否被平均损失掩盖？</p></article>
+      <article><h3>注入幅度与训练覆盖</h3><p><strong>事实：</strong>没有额外 gate；选中的 S3 权重只覆盖约 55.38% 的不同训练 chunk。</p><p><strong>待验证：</strong>注入过强或训练不足是否是因素？降低注入后的改善，是否只是退回 Parent？</p></article>
+    </div>
+    <p>现有证据还没有分别隔离码表容量、数据量、注入位置和表示形式的影响。因此不能直接定论“码表太小”“加大模型就好”“RVQ 不适合 WAM”，更不能据此判断 memory 本身没有价值。</p>
+  </section>
+  <section class="weekly-question" id="next">
+    <span class="question-number">05 / 讨论建议 · 尚未作为新实验完成</span>
+    <h2>先区分“码选错了”与“正确的码也没用好”。</h2>
+    <p>最优先的对照是：在<strong>同一 query、同一状态、同一噪声</strong>下，比较 Off、teacher code 和 predicted code；先分析报告中已保存的单块诊断，再补充与任务进展相关的闭环检查。当前尚无可直接引用的完整 teacher-code 闭环成绩。</p>
+    <div class="w7-decision">
+      <div><strong>如果 teacher code 也不比 Off 好</strong><p>先检查动作表示、重建精度和注入接口。此时只改善 Prior，未必能解决问题。</p></div>
+      <div><strong>如果 teacher 有益，predicted 却无益</strong><p>优先追查选码与训练条件差异，包括自由采样、错误累积及预测码混合训练。</p></div>
+    </div>
+    <ol class="w6-steps">
+      <li><strong>让换码实验更可解释</strong><p>在相同阶段、相近几何状态选择 donor，测量局部进展、接触和任务结果，不能只报告动作 L2 变化。</p></li>
+      <li><strong>用最小对照定位表示问题</strong><p>连续 latent 与 RVQ 使用相同接口和预算；补充轨迹中段、有效步与 padding 分组指标，再判断是否需要增加码数或改时间结构。</p></li>
+      <li><strong>固定码链路可靠后，再接 memory</strong><p>先用经验影响状态相关的完整码组选择，随后研究局部 ΔE。只给真实执行过的动作分配反馈，并验证新任务收益、旧能力保持和版本回退。</p></li>
+    </ol>
+    <div class="w6-callout"><strong>本周要带走的结论</strong><p>我们已经搭出了能训练、能选码、能影响 WAM 的原型；还没有证明这些码能稳定帮助控制，更没有证明在线记忆更新有效。下一步最有价值的是把失败定位到具体环节，让后续 memory 建在可验证的行为表示之上。</p></div>
+  </section>
+</Week7Layout>

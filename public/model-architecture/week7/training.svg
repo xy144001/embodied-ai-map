@@ -1,0 +1,61 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1120 1060" role="img" aria-labelledby="title desc">
+<title id="title">三阶段分别训练，部署时才把它们串起来</title><desc id="desc">绿色：本阶段更新；蓝色：冻结或输入；橙色：离线专家信息。所有父 WAM 权重始终冻结。</desc>
+<defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" fill="#9abce9"/></marker><marker id="teacher" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" fill="#e0bc7e"/></marker></defs>
+<rect width="1120" height="1060" rx="12" fill="#0b1422"/>
+<g font-family="system-ui, Noto Sans SC, Microsoft YaHei, sans-serif">
+<text x="36" y="46" font-size="29" font-weight="700" fill="#f0f4ff">三阶段分别训练，部署时才把它们串起来</text>
+<text x="36" y="82" font-size="17" fill="#b5c7df">绿色：本阶段更新；蓝色：冻结或输入；橙色：离线专家信息。所有父 WAM 权重始终冻结。</text>
+<path d="M 340,217 L 410,217" fill="none" stroke="#9abce9" stroke-width="2.3" marker-end="url(#arrow)"/>
+<path d="M 710,217 L 780,217" fill="none" stroke="#9abce9" stroke-width="2.3" marker-end="url(#arrow)"/>
+<path d="M 340,467 L 410,467" fill="none" stroke="#9abce9" stroke-width="2.3" marker-end="url(#arrow)"/>
+<path d="M 780,467 L 710,467" fill="none" stroke="#e0bc7e" stroke-width="2.3" stroke-dasharray="7 5" marker-end="url(#teacher)"/>
+<path d="M 340,717 L 410,717" fill="none" stroke="#9abce9" stroke-width="2.3" marker-end="url(#arrow)"/>
+<path d="M 710,717 L 780,717" fill="none" stroke="#9abce9" stroke-width="2.3" marker-end="url(#arrow)"/>
+<rect x="40" y="160" width="300" height="115" rx="9" fill="#32291c" stroke="#ddbc7c" stroke-width="1.6"/>
+<text x="190.0" y="196.5" text-anchor="middle" font-size="21" font-weight="700" fill="#f0f4ff">专家动作 A* + 当前 x</text>
+<text x="190.0" y="226.5" text-anchor="middle" font-size="17" fill="#c5d3e7">成功示范切成 32 步 chunk</text>
+<text x="190.0" y="252.5" text-anchor="middle" font-size="17" fill="#c5d3e7">尾块带有效步 mask</text>
+<rect x="410" y="160" width="300" height="115" rx="9" fill="#14362f" stroke="#8ad2b7" stroke-width="1.6"/>
+<text x="560.0" y="196.5" text-anchor="middle" font-size="21" font-weight="700" fill="#f0f4ff">Tokenizer + 两层 RVQ</text>
+<text x="560.0" y="226.5" text-anchor="middle" font-size="17" fill="#c5d3e7">上下文编码 · 动作编码</text>
+<text x="560.0" y="252.5" text-anchor="middle" font-size="17" fill="#c5d3e7">E₀ / E₁ 都学习</text>
+<rect x="780" y="160" width="300" height="115" rx="9" fill="#14362f" stroke="#8ad2b7" stroke-width="1.6"/>
+<text x="930.0" y="196.5" text-anchor="middle" font-size="21" font-weight="700" fill="#f0f4ff">重建 decoder</text>
+<text x="930.0" y="226.5" text-anchor="middle" font-size="17" fill="#c5d3e7">码向量 + 当前 x → 动作</text>
+<text x="930.0" y="252.5" text-anchor="middle" font-size="17" fill="#c5d3e7">只用于离线训练 / 诊断</text>
+<rect x="40" y="410" width="300" height="115" rx="9" fill="#32291c" stroke="#ddbc7c" stroke-width="1.6"/>
+<text x="190.0" y="446.5" text-anchor="middle" font-size="21" font-weight="700" fill="#f0f4ff">当前 x + 正确码前缀</text>
+<text x="190.0" y="476.5" text-anchor="middle" font-size="17" fill="#c5d3e7">Teacher forcing</text>
+<text x="190.0" y="502.5" text-anchor="middle" font-size="17" fill="#c5d3e7">前面的 ID 由标签提供</text>
+<rect x="410" y="410" width="300" height="115" rx="9" fill="#14362f" stroke="#8ad2b7" stroke-width="1.6"/>
+<text x="560.0" y="446.5" text-anchor="middle" font-size="21" font-weight="700" fill="#f0f4ff">CodePrior</text>
+<text x="560.0" y="476.5" text-anchor="middle" font-size="17" fill="#c5d3e7">独立 ContextEncoder</text>
+<text x="560.0" y="502.5" text-anchor="middle" font-size="17" fill="#c5d3e7">逐位置 64 类交叉熵</text>
+<rect x="780" y="410" width="300" height="115" rx="9" fill="#32291c" stroke="#ddbc7c" stroke-width="1.6"/>
+<text x="930.0" y="446.5" text-anchor="middle" font-size="21" font-weight="700" fill="#f0f4ff">冻结 Tokenizer → C*</text>
+<text x="930.0" y="476.5" text-anchor="middle" font-size="17" fill="#c5d3e7">A* + x 生成专家码标签</text>
+<text x="930.0" y="502.5" text-anchor="middle" font-size="17" fill="#c5d3e7">不改变 S1 的编码方式</text>
+<rect x="40" y="660" width="300" height="115" rx="9" fill="#32291c" stroke="#ddbc7c" stroke-width="1.6"/>
+<text x="190.0" y="696.5" text-anchor="middle" font-size="21" font-weight="700" fill="#f0f4ff">冻结 Tokenizer → C*</text>
+<text x="190.0" y="726.5" text-anchor="middle" font-size="17" fill="#c5d3e7">仍然读取专家未来动作 A*</text>
+<text x="190.0" y="752.5" text-anchor="middle" font-size="17" fill="#c5d3e7">不调用 CodePrior</text>
+<rect x="410" y="660" width="300" height="115" rx="9" fill="#14362f" stroke="#8ad2b7" stroke-width="1.6"/>
+<text x="560.0" y="696.5" text-anchor="middle" font-size="21" font-weight="700" fill="#f0f4ff">只训练 Conditioner</text>
+<text x="560.0" y="726.5" text-anchor="middle" font-size="17" fill="#c5d3e7">专家码 K/V + 动作 hidden Q</text>
+<text x="560.0" y="752.5" text-anchor="middle" font-size="17" fill="#c5d3e7">第 9 个 Action block 后注入</text>
+<rect x="780" y="660" width="300" height="115" rx="9" fill="#15283f" stroke="#799bcb" stroke-width="1.6"/>
+<text x="930.0" y="696.5" text-anchor="middle" font-size="21" font-weight="700" fill="#f0f4ff">冻结 WAM + flow loss</text>
+<text x="930.0" y="726.5" text-anchor="middle" font-size="17" fill="#c5d3e7">保留原时间步权重</text>
+<text x="930.0" y="752.5" text-anchor="middle" font-size="17" fill="#c5d3e7">梯度穿过冻结层回到接口</text>
+<rect x="40" y="870" width="1040" height="115" rx="9" fill="#32291c" stroke="#ddbc7c" stroke-width="1.6"/>
+<text x="560.0" y="906.5" text-anchor="middle" font-size="21" font-weight="700" fill="#f0f4ff">部署的改变：当前 x → Prior 自由采样 Ĉ → 查固定表 → Conditioner / WAM</text>
+<text x="560.0" y="936.5" text-anchor="middle" font-size="17" fill="#c5d3e7">没有真实未来动作，也没有正确码前缀；每个 chunk 采样 16 个 ID，随后进行连续去噪。</text>
+<text x="560.0" y="962.5" text-anchor="middle" font-size="17" fill="#c5d3e7">这处条件差异已经确认；是否是成功率下降的主因，还需要 Off / teacher / predicted 对照。</text>
+<text x="40" y="131" font-size="21" fill="#a8dfc9">S1 / 学表示：怎样用有限的码保留动作信息？</text>
+<text x="40" y="313" font-size="17" fill="#b4c8e1">目标：有效动作重建 + codebook loss + 0.25 × commitment；AdamW 更新，非 EMA。</text>
+<text x="40" y="381" font-size="21" fill="#a8dfc9">S2 / 学选码：只看当前情境，预测专家会用的码。</text>
+<text x="40" y="563" font-size="17" fill="#b4c8e1">目标：猜对下一个 ID；训练时的正确前缀，不等于部署时自己采样出的前缀。</text>
+<text x="40" y="631" font-size="21" fill="#a8dfc9">S3 / 学注入：给定专家码，怎样帮助冻结的 WAM 去噪？</text>
+<text x="40" y="813" font-size="17" fill="#e8c98f">S3 的训练和开发选权都使用 teacher code；当前没有用预测码训练接口。</text>
+<text x="40" y="1027" font-size="17" fill="#b4c8e1">相同的 6,000 步不代表相同数据量：S1 / S2 batch 64；S3 batch 8，选用第 5,500 步。</text>
+</g></svg>

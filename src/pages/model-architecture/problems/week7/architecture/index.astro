@@ -1,0 +1,73 @@
+---
+import Week7Layout from "../../../../../layouts/Week7Layout.astro";
+import Figure from "../../../../../components/Week7Figure.astro";
+import Table from "../../../../../components/Week7Table.astro";
+import Formula from "../../../../../components/FlowFormula.astro";
+const root=import.meta.env.BASE_URL.replace(/\/$/,"")+"/model-architecture/problems/week7/";
+const chapters=[["system","先看整体链路"],["context","当前情境怎么表示"],["tokenizer","动作怎么变成码"],["prior","推理时怎么选码"],["conditioner","码怎么影响 WAM"],["boundary","与 memory 目标的边界"]];
+---
+<Week7Layout title="方法与模块 · 三个模块怎样接入 WAM" description="当前系统先从专家动作学习离散表示，再预测码、查表并注入动作主干。最终执行的仍是 WAM 生成的连续关节与夹爪命令。" active="architecture" chapters={chapters}>
+  <section class="weekly-question" id="system">
+    <span class="question-number">01 / 当前实现</span>
+    <h2>保留父模型的行动能力，新增一条码条件路径。</h2>
+    <p>父模型由<strong>官方 Faster-WAM step_029355</strong>和上一轮十任务 Full-only 的 <strong>Action step 60000</strong> 组成。本轮冻结视频、文本、VAE 和全部 Action 权重；新增三个小模块。旧路线的 M6、M7、Mean / Random 经验注入均未加载。</p>
+    <Figure id="inference" caption="实线是正式推理的信息流。每个 chunk 先预测 16 个 ID，查两层固定码表后得到 8 个向量；同一组向量参与 10 次动作去噪。Tokenizer 的重建 decoder 只用于离线训练和诊断。" />
+    <Table id="modules" caption="实际组件与职责：三模块合计 2,237,880 个新增参数" />
+    <div class="w6-callout"><strong>读图时抓住一件事</strong><p>码提供额外条件，WAM 仍负责连续控制。当前没有硬性约束让“码只管大方向、WAM 只做小修正”；这是一种希望得到的分工，还不是代码保证的行为。</p></div>
+  </section>
+  <section class="weekly-question" id="context">
+    <span class="question-number">02 / CONTEXT ENCODER</span>
+    <h2>每次选码，只看当前图像、指令和身体状态。</h2>
+    <p>把当前情境记作 <strong>x</strong>。机器人需要同时知道“眼前有什么”“要做什么”和“手臂现在在哪里”，因此码本分支将三类信息变成同一宽度的 token：</p>
+    <ol class="w6-steps">
+      <li><strong>图像：三视角 → 16 个视觉 token</strong><p>头部相机 256×320，两只腕部相机各 128×160，拼为 384×320 图像。冻结 VAE 产生 48 通道表示，空间池化到 4×4，再把每个 48 维 token 投影到 128 维。</p></li>
+      <li><strong>指令：保留词序列，统一特征宽度</strong><p>语言特征从 L×4096 投影为 L×128。L 是指令的 token 数，不是固定只有一个任务编号。</p></li>
+      <li><strong>状态：14 维 qpos → 1 个 token</strong><p>双臂的关节与夹爪状态投影成一个 128 维 token，与视觉和语言拼接，得到共 16+L+1 个上下文 token，并加入相应位置或模态标识。</p></li>
+    </ol>
+    <p>Tokenizer 和 Prior <strong>各自拥有一套 ContextEncoder 参数</strong>。新码条件没有读取真实未来图像、历史轨迹、显式物体几何或接触信号；这与旧 memory 使用的 38 维规则相对状态不是同一套输入。</p>
+  </section>
+  <section class="weekly-question" id="tokenizer">
+    <span class="question-number">03 / ACTION TOKENIZER + RVQ</span>
+    <h2>先给已知动作写一份紧凑的“编码”。</h2>
+    <p>一个动作块有 <strong>32 步 × 14 维</strong>，每只手臂是 6 个关节命令加 1 个夹爪命令。这里存的是<strong>绝对命令</strong>，不是末端位姿增量，也不是物体相对运动。</p>
+    <p>每 4 步切成一个 patch，共 8 个 patch；每个 patch 展平为 56 维，映射到 128 维，再通过 cross-attention 读取当前情境。随后用 <strong>RVQ（残差向量量化）</strong>把连续向量替换成有限码表中的向量。</p>
+    <Figure id="rvq" caption="第一层寻找最接近当前表示的向量，第二层再补上残差。每个 patch 留下两个 ID；两层查表向量相加，才是交给 WAM 的一个码向量。" />
+    <Formula expression={String.raw`z_{q,j}=E_0[k_{j,0}]+E_1[k_{j,1}],\quad E_0,E_1\in\mathbb R^{64\times128}`} caption="每张表有 64 个、每个 128 维的码字；j 对应 8 个时间 patch 中的一个。" />
+    <div class="w6-note"><strong>码到底表示什么？</strong><p>它是结合上下文学习到的动作表示。不能把两张表的 128 个条目直接叫作“128 种完整技能”，也不能把同一个 ID 永久等同于“抓取”或“挂杯”。相同码在不同状态、不同完整码组中，可能产生不同的动作效果。</p></div>
+    <details><summary>展开编码器与解码器的结构细节</summary><div>
+      <p>动作 encoder 由逐 patch 的线性映射、位置编码、有效步投影、4-head context cross-attention 和 128→256→128 的 GELU 前馈层组成。8 个动作 patch 之间没有显式 self-attention。</p>
+      <p>训练 decoder 同样读取当前 context，再通过 128→256→56 输出每个 patch，拼回 32×14。它检查码能否重建专家动作，但正式控制走 WAM 输出头。两套解码路径之间目前没有强制的行为一致性约束，也没有显式速度、加速度或接触连续性损失。</p>
+    </div></details>
+  </section>
+  <section class="weekly-question" id="prior">
+    <span class="question-number">04 / CODE PRIOR</span>
+    <h2>训练时知道正确动作，部署时必须自己猜该用什么码。</h2>
+    <p>CodePrior 的作用是把“看过专家动作才能得到的码”变成“只看当前 x 就能预测的码”。它按时间 patch 优先、RVQ 层次其次的顺序生成：第一个 patch 的两层 ID，再到第二个 patch，直到产生 <strong>16 个 ID</strong>。</p>
+    <p>当前使用 2 层自回归 Transformer，宽度 128、4 个注意力头、前馈宽度 512、dropout 为 0。输入词表有 129 项，即两层各 64 个 ID 加一个起始符；每个位置预测对应层的 64 类。</p>
+    <div class="w6-cards">
+      <article><h3>训练：给它正确前缀</h3><p>预测下一个 ID 时，前面的 ID 来自专家标签。这就是 teacher forcing：先在已知前文正确的条件下学习下一步。</p></article>
+      <article><h3>部署：使用自己选出的前缀</h3><p>从起始符开始，温度为 1，逐个随机采样 ID。每块只采样一个完整序列，没有多候选重排、beam search 或不确定时回退。</p></article>
+    </div>
+    <p>Prior 的“词嵌入”只是预测编号时使用的内部特征；<strong>传给 WAM 的不是这张词嵌入表</strong>，而是 S1 训练出的真实 E₀ / E₁ 查表结果。两者的职责必须分清。</p>
+  </section>
+  <section class="weekly-question" id="conditioner">
+    <span class="question-number">05 / CODE CONDITIONER</span>
+    <h2>让正在生成动作的 WAM 读取码，而不是直接播放重建动作。</h2>
+    <p>在 Action 的 <strong>blocks[8] 后，也就是第 9 个 block 之后</strong>，取 32×1024 的动作隐藏状态作为 query；8×128 的码向量提供 key / value。4-head cross-attention 的结果投影回 1024 维，以残差形式加回主干。</p>
+    <Formula expression={String.raw`h'=h+W_{\mathrm{out}}\,\mathrm{MHA}(Q(h),K(z_q),V(z_q))`} caption="动作 hidden 决定现在从码里读什么；码通过一个可训练的增量影响后续连续去噪。" />
+    <p>一个动作块内，<strong>同一组码用于全部 10 次去噪</strong>；每次的动作 hidden 不同，因此读取方式仍可改变。WAM 生成 32 步命令，环境通常执行前 28 步，再获取新观测、重新选码。后 4 步是预测重叠，不能当作已经执行的经历。</p>
+    <div class="w6-note"><strong>零初始化只保证起点接近父模型，不保证训练后不会伤害它。</strong><p>输出投影没有 bias，初始为零；当前没有额外注入强度 alpha、utility gate 或残差范数约束。学会注入以后，即使码不合适，它仍可能改变动作。</p></div>
+    <details><summary>展开注入位置、视频缓存与梯度边界</summary><div>
+      <p>码不进入视频侧，也不改变视频缓存。原 <code>one_pass_future_cache</code> 每块预填充一次，随后复用于动作去噪；这与旧 M7 在 <code>blocks[28]</code> 后注入的设计不同。</p>
+      <p>新模块使用 FP32，进入父模型边界时转换精度。S3 训练时主干参数冻结，但注入后的计算仍保留对输入的梯度，从而训练 Conditioner。</p>
+      <p>当前 hook 对码向量使用 <code>detach().clone()</code>。对于冻结码本的 S3 这是明确边界；未来若要通过动作损失更新局部码字增量 ΔE，必须重新打通这条输入梯度路径。</p>
+    </div></details>
+  </section>
+  <section class="weekly-question" id="boundary">
+    <span class="question-number">06 / 阶段边界</span>
+    <h2>名称保留 Memory-WAM，当前先验证固定码本能否有用。</h2>
+    <p>本轮没有经验检索、跨回合写入、成败价值评估或在线码字变化。未来 P3 想先用状态相关经验改善<strong>完整码组的选择</strong>；P4 再探索固定基础表上的<strong>局部码向量增量</strong>，以及版本管理和回退。它们都不在当前成功率中。</p>
+    <p>按本轮实现报告的定位，这套原型借鉴了 Wall-OSS-0.5 的码本思路，但新增了显式的 code→flow 条件连接，并未完整复现其全部训练目标与联合主干训练。因此这里讨论的是我们这套原型的成败，不能把它等同于对原方法的完整复现结论。</p>
+    <p><a href={root+"training/"}>继续：这三个模块各自怎么训练？ →</a></p>
+  </section>
+</Week7Layout>

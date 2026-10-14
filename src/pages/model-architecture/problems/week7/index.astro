@@ -1,0 +1,35 @@
+---
+import Week7Layout from "../../../../layouts/Week7Layout.astro";
+const root=import.meta.env.BASE_URL.replace(/\/$/,"")+"/model-architecture/";
+---
+<Week7Layout title="Week 7 · Codebook-Memory-WAM 是怎样搭起来的？" description="把第一轮原型讲清楚：怎样把动作变成码、根据当前情境选码、把码接进 WAM，以及为什么训练损失下降后，实际任务表现仍然变差。">
+  <section class="weekly-question">
+    <span class="question-number">本周问题 / 从设计走到第一轮实验</span>
+    <h2>我们已经训练了什么，又还没有做到什么？</h2>
+    <p class="w6-lead">当前完成的是<strong>“固定码本 + 选码器 + 动作注入接口”</strong>：先把成功示范中的动作压成有限的码，再让模型根据眼前情境选出一组码，最后用这些码影响 WAM 生成连续动作。</p>
+    <p>这里说“先只训练 codebook”，指先完成<strong>码本相关的离线链路</strong>。实际分三阶段训练了 ActionTokenizer、CodePrior 和 CodeConditioner；父 WAM 全部冻结。推理时会重新选码，但码表内容保持不变，尚未根据新一轮任务的成功或失败继续学习。</p>
+    <div class="w6-entries w7-entries">
+      <a href={root+"problems/week7/architecture/"}><small>01 / METHOD & MODULES</small><strong>方法与模块</strong><p>从一段 32 步动作出发，看两层 RVQ、16 个码 ID、选码器和第 9 层后的注入接口怎样连接。</p><b>看实际架构与张量流向 →</b></a>
+      <a href={root+"problems/week7/training/"}><small>02 / DATA & TRAINING</small><strong>数据与训练</strong><p>哪些数据用于训练？每阶段更新谁？为什么训练时的“专家码”和部署时的“预测码”不同？</p><b>看三阶段训练与关键边界 →</b></a>
+      <a href={root+"problems/week7/results/"}><small>03 / RESULTS & DIAGNOSIS</small><strong>结果与诊断</strong><p>损失曲线、正式配对结果、重建回放与换码实验，并区分已经观察到的事实和仍待验证的原因。</p><b>看证据与下一步问题 →</b></a>
+    </div>
+    <div class="w6-stats">
+      <div><b>3 个新模块</b><strong>共 2,237,880 个参数</strong><p>编码动作、预测码、注入动作主干。它们分阶段学习，并非本轮重新训练整个 WAM。</p></div>
+      <div><b>32 → 8 → 16</b><strong>动作步数 → patch 数 → 码 ID 数</strong><p>每个 patch 用两层码表示；实际查表后得到 8 个 128 维向量。</p></div>
+      <div class="w7-negative"><b>−6.74 个百分点</b><strong>当前固定码本链路的闭环差值</strong><p>已完整配对的 38 个任务、1,900 个场景：Parent 92.26% → Predicted code 85.53%。</p></div>
+    </div>
+    <div class="w6-note w7-alert"><strong>目前的初步结论</strong><p>这套具体原型还没有带来稳定收益。已完成任务中，码本链路救回 53 场，同时损伤 181 场；因此重点是定位“表示、选码、使用码”哪一环首先失效。现有结果还不足以否定码本或 memory 的整体方向。</p></div>
+  </section>
+  <section class="weekly-question">
+    <span class="question-number">建议讲解顺序 / 先说明方法，再讨论为什么失败</span>
+    <h2>把三种能力拆开，才知道下一步该改哪里。</h2>
+    <ol class="w6-steps">
+      <li><strong>能不能把动作信息存进码里？</strong><p>ActionTokenizer 学习“怎样描述已经知道的动作”。重建误差衡量信息损失，但接触任务可能对很小的误差也敏感。</p></li>
+      <li><strong>只看当前场景，能不能选出合适的码？</strong><p>CodePrior 负责“现在该用哪组码”。部署看不到未来专家动作，还要承受前面选错一个 ID 对后续选择的影响。</p></li>
+      <li><strong>WAM 能不能正确使用这些码？</strong><p>CodeConditioner 负责“让码影响动作”。码能改变输出，不代表它能以可预期的方式帮助完成任务。</p></li>
+      <li><strong>上述链路可靠后，怎样让经验改变它？</strong><p>未来先研究状态相关的整组码选择，再研究局部码向量更新。跨回合检索、写入和在线训练均未包含在本轮结果中。</p></li>
+    </ol>
+    <div class="w6-plan"><strong>与 Week 6 的关系</strong><p>Week 6 记录为什么转向码本以及第二版的长期设想；Week 7 记录已经落地的第一轮静态原型。设计中的“可更新记忆”仍是目标，当前的负结果属于固定码本条件链路。</p></div>
+    <p><a href={root+"problems/week7/architecture/"}>从实际架构开始讲解 →</a></p>
+  </section>
+</Week7Layout>
