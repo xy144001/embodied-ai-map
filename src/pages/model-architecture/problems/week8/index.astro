@@ -1,0 +1,33 @@
+---
+import Week8Layout from "../../../../layouts/Week8Layout.astro";
+const root=import.meta.env.BASE_URL.replace(/\/$/,"")+"/model-architecture/problems/week8/";
+---
+<Week8Layout title="Week 8 · 先修好动作表示，再验证它能否帮助策略" description="从旧码本的负结果出发，逐步排查选码、注入、量化和执行；介绍参考星海图 G0.5 后的新架构，以及目前已经证明和仍待验证的部分。">
+  <section class="weekly-question">
+    <span class="question-number">本周主线 / 从“码本没效果”拆到具体环节</span>
+    <h2>重做动作编解码链，同步更新选码与注入接口。</h2>
+    <p class="w6-lead">本周最明确的进展是：<strong>旧量化链会伤害动作执行，已经有直接干预证据；新版结构化 codec 明显减轻了重建损伤。</strong>接下来还要分别检验：新 Prior 能否预测合适的码，以及新 Conditioner 能否把这些码用好。</p>
+    <div class="w6-entries">
+      <a href={root+"diagnostics/"}><small>01 / 为什么需要改架构</small><strong>诊断实验：逐个排除简单解释</strong><p>联合微调、专家参考码、弱注入、内容替换，以及量化前后的执行对照。每个实验说明为什么做、结果是什么。</p><b>查看实验 00–08 →</b></a>
+      <a href={root+"architecture/"}><small>02 / 我们具体改了什么</small><strong>新旧架构：从 8 个条件向量到 48 个</strong><p>双臂分组、时序编码、低维 EMA-RVQ、独立夹爪码，以及必须配套重训的 Prior 和 Conditioner。</p><b>查看整体图、模块对照与训练 →</b></a>
+      <a href={root+"g05/"}><small>03 / 单独介绍参考对象</small><strong>星海图 G0.5：统一推理与动作的 VLA</strong><p>讲清 VLM、ActionCodec、RVQ 和视觉记忆的关系，再对照哪些被我们借鉴、哪些没有移植。</p><b>进入 G0.5 专门模块 →</b></a>
+      <a href={root+"results/"}><small>04 / 改造后走到了哪里</small><strong>新版验证：保真与策略收益分开看</strong><p>64 个中间起点的结构消融，以及整集 roundtrip 和新预测码注入的独立进度。</p><b>查看实验 09–10 →</b></a>
+    </div>
+    <div class="w6-stats">
+      <div class="negative"><b>91.40% → 83.84%</b><strong>旧版 50 类最终结果</strong><p>2,500 个相同场景；救回 81、损伤 270。补全 Week 7 当时尚未结束的评测。</p></div>
+      <div><b>44 → 58 / 59</b><strong>重建首块后的成功数 / 64</strong><p>旧 RVQ 对比新版基础 codec 的两个训练 seed；关码对照为 58，专家首块为 59。</p></div>
+      <div><b>70 / 71</b><strong>新版整集编解码的配对快照</strong><p>同一子集 Parent 也是 70/71。这是重建保真检查；新预测码注入当时尚无整集结果。</p></div>
+    </div>
+    <div class="w6-plan"><strong>不要把这三个数字读成一条“性能增长曲线”。</strong><p>它们分别来自完整任务、中间起点首块干预和运行中整集配对子集，父模型与样本范围也不同。尤其不能把 70/71 写成“新版预测码策略达到 98.59%”。</p></div>
+  </section>
+  <section class="weekly-question">
+    <span class="question-number">三个问题 / 让后续讨论落到可检查的对象</span>
+    <h2>保住动作、预测对码、正确使用码，是三件事。</h2>
+    <ol class="w6-steps">
+      <li><strong>表示能保住动作吗？</strong><p>专家动作或 WAM 自己的 proposal 经编码、量化、解码后，是否还能执行？新版首先在这一层取得进展。</p></li>
+      <li><strong>更精细的码，能被当前情境预测出来吗？</strong><p>新版显式离散载荷从 96 bit 增到 1,792 bit。保留的信息更多，同时也给 Prior 提出了新要求。</p></li>
+      <li><strong>动作网络会按码做出有用的改变吗？</strong><p>码能直接重建动作，不代表作为 hidden 条件就能帮助 WAM。实验 10 把编解码保真与预测码注入分别评测。</p></li>
+    </ol>
+    <p>我们仍处在<strong>固定码本条件阶段</strong>。跨回合经验检索、写入、成败驱动的局部码字更新（P3 / P4）尚未启用；当前结果没有检验“随着经验积累越做越好”。</p>
+  </section>
+</Week8Layout>

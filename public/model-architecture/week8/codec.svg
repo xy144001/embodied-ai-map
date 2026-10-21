@@ -1,0 +1,60 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1120 1160" role="img" aria-labelledby="title desc">
+<title id="title">新版动作表示：两臂共享 codec，夹爪独立保真</title><desc id="desc">图示学习 / 重建路径。正常预测码部署时，相同格式的 ID 来自新 Prior，而不是专家动作。</desc>
+<defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" fill="#9abce9"/></marker><marker id="optional" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" fill="#e0bc7e"/></marker></defs>
+<rect width="1120" height="1160" rx="12" fill="#0b1422"/>
+<g font-family="system-ui, Noto Sans SC, Microsoft YaHei, sans-serif">
+<text x="36" y="46" font-size="29" font-weight="700" fill="#f0f4ff">新版动作表示：两臂共享 codec，夹爪独立保真</text>
+<text x="36" y="82" font-size="17" fill="#b5c7df">图示学习 / 重建路径。正常预测码部署时，相同格式的 ID 来自新 Prior，而不是专家动作。</text>
+<path d="M 365,210 L 365,265" fill="none" stroke="#9abce9" stroke-width="2.3" marker-end="url(#arrow)"/>
+<path d="M 365,365 L 365,425" fill="none" stroke="#9abce9" stroke-width="2.3" marker-end="url(#arrow)"/>
+<path d="M 365,540 L 365,600" fill="none" stroke="#9abce9" stroke-width="2.3" marker-end="url(#arrow)"/>
+<path d="M 915,210 L 915,265" fill="none" stroke="#9abce9" stroke-width="2.3" marker-end="url(#arrow)"/>
+<path d="M 915,365 L 915,425" fill="none" stroke="#9abce9" stroke-width="2.3" marker-end="url(#arrow)"/>
+<path d="M 915,540 L 915,600" fill="none" stroke="#9abce9" stroke-width="2.3" marker-end="url(#arrow)"/>
+<path d="M 365,725 L 365,780 M 915,725 L 915,780 M 290,780 L 915,780" fill="none" stroke="#9abce9" stroke-width="2.3"/>
+<circle cx="365" cy="780" r="4" fill="#9abce9"/>
+<circle cx="830" cy="780" r="4" fill="#9abce9"/>
+<circle cx="915" cy="780" r="4" fill="#9abce9"/>
+<path d="M 290,780 L 290,835" fill="none" stroke="#9abce9" stroke-width="2.3" marker-end="url(#arrow)"/>
+<path d="M 830,780 L 830,835" fill="none" stroke="#9abce9" stroke-width="2.3" marker-end="url(#arrow)"/>
+<rect x="40" y="125" width="1040" height="85" rx="9" fill="#15283f" stroke="#799bcb" stroke-width="1.6"/>
+<text x="560.0" y="159.5" text-anchor="middle" font-size="21" font-weight="700" fill="#f0f4ff">32 步 × 14 维动作</text>
+<text x="560.0" y="189.5" text-anchor="middle" font-size="17" fill="#c5d3e7">左右臂各 6 个关节命令 + 各 1 个连续夹爪命令；先拆开处理。</text>
+<rect x="40" y="265" width="650" height="100" rx="9" fill="#14362f" stroke="#8ad2b7" stroke-width="1.6"/>
+<text x="365.0" y="307.0" text-anchor="middle" font-size="21" font-weight="700" fill="#f0f4ff">双臂：每臂 32 × 6，共享同一套编码权重</text>
+<text x="365.0" y="337.0" text-anchor="middle" font-size="17" fill="#c5d3e7">两臂放入 batch 维：B → 2B；关节维从 6 补到 9。</text>
+<rect x="750" y="265" width="330" height="100" rx="9" fill="#2a2444" stroke="#b7a3ff" stroke-width="1.6"/>
+<text x="915.0" y="294.0" text-anchor="middle" font-size="21" font-weight="700" fill="#f0f4ff">夹爪：32 × 2 个开度</text>
+<text x="915.0" y="324.0" text-anchor="middle" font-size="17" fill="#c5d3e7">还原到官方 0…1 范围</text>
+<text x="915.0" y="350.0" text-anchor="middle" font-size="17" fill="#c5d3e7">保留连续开度，不做二值化</text>
+<rect x="40" y="425" width="650" height="115" rx="9" fill="#14362f" stroke="#8ad2b7" stroke-width="1.6"/>
+<text x="365.0" y="461.5" text-anchor="middle" font-size="21" font-weight="700" fill="#f0f4ff">短段 DCT + Conv / Transformer</text>
+<text x="365.0" y="491.5" text-anchor="middle" font-size="17" fill="#c5d3e7">8 步 DCT 保留全部系数；通道 128 → 256 → 256</text>
+<text x="365.0" y="517.5" text-anchor="middle" font-size="17" fill="#c5d3e7">3 个阶段各 2 个 self-attention block → 每臂 8 × 128 latent</text>
+<rect x="750" y="425" width="330" height="115" rx="9" fill="#2a2444" stroke="#b7a3ff" stroke-width="1.6"/>
+<text x="915.0" y="461.5" text-anchor="middle" font-size="21" font-weight="700" fill="#f0f4ff">独立 16-bit 量化</text>
+<text x="915.0" y="491.5" text-anchor="middle" font-size="17" fill="#c5d3e7">ID = round(opening × 65535)</text>
+<text x="915.0" y="517.5" text-anchor="middle" font-size="17" fill="#c5d3e7">每步每只夹爪一个整数</text>
+<rect x="40" y="600" width="650" height="125" rx="9" fill="#14362f" stroke="#8ad2b7" stroke-width="1.6"/>
+<text x="365.0" y="628.5" text-anchor="middle" font-size="21" font-weight="700" fill="#f0f4ff">4 级 EMA-RVQ：在低维空间量化残差</text>
+<text x="365.0" y="658.5" text-anchor="middle" font-size="17" fill="#c5d3e7">每级：128 → 8 维 → 查 4096 项码表 → 128 维</text>
+<text x="365.0" y="684.5" text-anchor="middle" font-size="17" fill="#c5d3e7">4 级反投影结果相加；左右臂共 64 个 ID</text>
+<text x="365.0" y="710.5" text-anchor="middle" font-size="17" fill="#c5d3e7">训练时 EMA 更新码表；推理时固定</text>
+<rect x="750" y="600" width="330" height="125" rx="9" fill="#2a2444" stroke="#b7a3ff" stroke-width="1.6"/>
+<text x="915.0" y="628.5" text-anchor="middle" font-size="21" font-weight="700" fill="#f0f4ff">夹爪码：32 × 2 个 ID</text>
+<text x="915.0" y="658.5" text-anchor="middle" font-size="17" fill="#c5d3e7">重建时 ID / 65535</text>
+<text x="915.0" y="684.5" text-anchor="middle" font-size="17" fill="#c5d3e7">部署时 ID 由 Prior 预测</text>
+<text x="915.0" y="710.5" text-anchor="middle" font-size="17" fill="#c5d3e7">不是原始浮点动作旁路</text>
+<rect x="40" y="835" width="500" height="120" rx="9" fill="#32291c" stroke="#ddbc7c" stroke-width="1.6"/>
+<text x="290.0" y="874.0" text-anchor="middle" font-size="21" font-weight="700" fill="#f0f4ff">用途 A：检查动作能否还原</text>
+<text x="290.0" y="904.0" text-anchor="middle" font-size="17" fill="#c5d3e7">arm decoder + 逆 DCT + 夹爪合并</text>
+<text x="290.0" y="930.0" text-anchor="middle" font-size="17" fill="#c5d3e7">得到 32 × 14 动作，供重建 / roundtrip 执行</text>
+<rect x="580" y="835" width="500" height="120" rx="9" fill="#15283f" stroke="#799bcb" stroke-width="1.6"/>
+<text x="830.0" y="874.0" text-anchor="middle" font-size="21" font-weight="700" fill="#f0f4ff">用途 B：给 WAM 提供码条件</text>
+<text x="830.0" y="904.0" text-anchor="middle" font-size="17" fill="#c5d3e7">16 个 arm 向量 + 32 个夹爪 token</text>
+<text x="830.0" y="930.0" text-anchor="middle" font-size="17" fill="#c5d3e7">48 × 128 → Conditioner → Action hidden</text>
+<rect x="40" y="1010" width="1040" height="90" rx="9" fill="#32291c" stroke="#ddbc7c" stroke-width="1.6"/>
+<text x="560.0" y="1047.0" text-anchor="middle" font-size="21" font-weight="700" fill="#f0f4ff">基础版 codec 不读取图像、语言或状态；Prior 仍然需要当前情境。</text>
+<text x="560.0" y="1077.0" text-anchor="middle" font-size="17" fill="#c5d3e7">显式离散载荷：arm 768 bit + 夹爪 1024 bit = 1792 bit；旧版为 96 bit，不能称等码率比较。</text>
+<text x="40" y="1135" font-size="17" fill="#b4c8e1">8 个 latent 位置已混合时间与关节信息，不等于 8 个连续时间点；新 self-attention 发生在动作特征上。</text>
+</g></svg>

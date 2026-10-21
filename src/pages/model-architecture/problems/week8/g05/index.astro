@@ -1,0 +1,68 @@
+---
+import Week8Layout from "../../../../../layouts/Week8Layout.astro";
+import Table from "../../../../../components/Week8Table.astro";
+import Figure from "../../../../../components/Week8Figure.astro";
+const root=import.meta.env.BASE_URL.replace(/\/$/,"")+"/model-architecture/problems/week8/";
+const official="https://github.com/OpenGalaxea/GalaxeaVLA/blob/89f2322b4ad016e192437adc1a2c253b05bab246/";
+const chapters=[["idea","整体思想"],["stream","VLM 怎样生成行动"],["codec","ActionCodec 怎样表示动作"],["memory","视觉记忆是什么"],["adaptation","我们借鉴与改动了什么"],["sources","官方来源与版本"]];
+---
+<Week8Layout title="星海图 G0.5 · 让推理与动作共用一条生成过程" description="本周新架构的主要参考对象。先理解 G0.5 自己的完整接法，再看我们只借鉴 ActionCodec 后，为什么仍然是一套不同的 Memory-WAM。" active="g05" chapters={chapters}>
+  <section class="weekly-question" id="idea">
+    <span class="question-number">GALAXEA G0.5 / 模型全貌</span><h2>先把连续动作变成可预测的码，再让视觉语言模型生成它们。</h2>
+    <p>G0.5 是自回归 VLA，使用 Qwen3.5-2B 初始化视觉语言主干。它把指令、图像历史、本体状态和机器人形态信息放进当前条件；输出序列可以先出现任务推理，再出现动作码。默认动作路径由 ActionCodec 把码还原成连续命令。</p>
+    <Figure id="g05" caption="按官方论文与公开实现重绘。实线为默认自回归动作路径；虚线为可选 flow-matching 输出头。我们参考其动作编解码方法，未移植整个 VLM、视觉历史模块或预训练权重。" />
+    <div class="w8-reference"><p><strong>与我们的关键差别在动作出口。</strong>G0.5 默认是“生成 ID → codec 解码 → 执行”；我们是“小 Prior 生成 ID → 查表 → 修改 WAM hidden → Action DiT 去噪 → 执行”。因此它的码表示值得参考，但它的完整策略能力不能直接当作我们的能力。</p></div>
+  </section>
+  <section class="weekly-question" id="stream">
+    <span class="question-number">模块一 / 一条序列里连接理解与行动</span><h2>动作能读取前面的推理，而不是另起一套互不相通的语言。</h2>
+    <p>同一个 VLM decoder 生成后续 token。可选推理包括子任务、目标框、运动轨迹提示和动作提示；随后生成按机器人部件组织的动作 ID。文本推理、动作与视觉问答可使用 next-token 分类目标训练。</p>
+    <p>ActionCodec 先单独学习动作表示，再冻结，作为 VLM 的动作词表接口。VLM 学的是“在当前条件下该写出哪些码”；codec 学的是“这些码应当还原成什么动作”。两者分工明确。</p>
+    <p>论文另外设置可选 flow-matching 动作头，读取自回归主干 hidden。它是另一条输出路径，不能画成每个动作都必然先经 codec decoder、再经过 flow 头的串行流水线。</p>
+    <div class="w6-note"><strong>放回我们的讨论：</strong><p>我们目前的 Prior 只是独立小网络，没有统一生成语言推理与动作，也没有借用 G0.5 的 VLM 权重。当前 WAM 仍负责最后的连续动作生成。</p></div>
+  </section>
+  <section class="weekly-question" id="codec">
+    <span class="question-number">模块二 / 有结构的动作词表</span><h2>机器人部件先分组，时间上的变化先编码，再逐级量化残差。</h2>
+    <ol class="w6-steps">
+      <li><strong>按部件组织，而不是把所有维度混成一个扁平向量。</strong><p>论文统一布局为 27 维：左控制 9 + 左夹爪 1 + 右控制 9 + 右夹爪 1 + 下身 7。部件补到相同最大宽度，生成时只输出当前机器人实际使用的部件。公开双臂配置列出前四组，不能把这份配置误写成已经包含下身控制。</p></li>
+      <li><strong>先理解一段动作内部的变化。</strong><p>短段 DCT 换一种坐标描述运动，卷积提取局部结构，Transformer 让特征相互参考。8 步 DCT 保留全部系数；压缩主要发生在后续编码和量化，而不是简单删除频率分量。</p></li>
+      <li><strong>用多级小补丁逼近原表示。</strong><p>RVQ 第一层先给近似，后面的层补充剩余误差。公开配置使用四级、每级 4,096 项；在 8 维量化空间查表，再映回 128 维表示。EMA 根据分配到的样本更新码表中心。</p></li>
+      <li><strong>生成码后，把结构重新拼回动作。</strong><p>论文按残差轮次与部件标识组织动作序列，每个有效部件每轮输出 8 个 ID。decoder 重建连续动作，机器人执行一块后，再基于新观测规划下一块。</p></li>
+    </ol>
+    <p>这种设计把“动作的时间结构”和“机器人部件结构”带进了表示学习。它为我们重做 codec 提供了具体选择；是否对我们的任务有效，仍由本地消融与执行结果检验。</p>
+    <details><summary>展开官方公开配置的关键尺寸</summary><div>
+      <p>动作块长 32，DCT block 为 8；编码通道为 256 / 512 / 512，三个阶段各两个 attention block，latent 维度为 128。RVQ 为 4 × 4,096，量化维度 8，EMA decay 0.95，dead-code threshold 2，quantizer dropout 0.5；commitment 权重 0.25。</p>
+      <p>使用 RoPE；公开配置中一致性损失权重为 0。论文讨论时序一致性，不意味着所有公开配置或所有训练都启用同一损失。我们本地“加一致性约束”的消融也不能视作对官方完整训练配方的复现。</p>
+    </div></details>
+  </section>
+  <section class="weekly-question" id="memory">
+    <span class="question-number">模块三 / 视觉历史，不是跨回合码表更新</span><h2>让当前画面带上“刚才发生了什么”。</h2>
+    <p>G0.5 在视觉编码器里融合短时历史：空间 attention 处理每帧内容，时间 attention 连接不同时刻。论文预训练从约 5 秒窗口采样 6 帧，每四层视觉模块插入相关时序处理；融合后丢弃历史帧 token，让后续 VLM 主要读取已经包含历史信息的当前表示。</p>
+    <p>状态使用连续 embedding，并与对应帧对齐。训练也会随机去掉全部历史，帮助模型适应历史不可用的情况。这类 memory 帮模型理解短期运动与状态变化。</p>
+    <div class="w6-plan"><strong>不要混同三种“记忆”。</strong><p>G0.5 的视觉历史是过去几秒的观测；ActionCodec 是训练得到的动作表示；我们希望未来实现的 memory 是反馈驱动、可跨回合修改的内容。前两者并不自动具备第三种能力。本轮本地码本仍固定。</p></div>
+  </section>
+  <section class="weekly-question" id="adaptation">
+    <span class="question-number">对应表 / 参考动作表示，保留自己的策略主干</span><h2>我们采用了哪些结构，又在哪些地方做了适配？</h2>
+    <Table id="g05_adaptation" />
+    <div class="w6-table-wrap" tabindex="0" role="region" aria-label="官方公开配置与本地基础版的具体差异"><table><caption>具体实现对照 · 官方列以所链接配置版本为准</caption><thead><tr><th scope="col">项目</th><th scope="col">G0.5 官方公开版本</th><th scope="col">我们的新版基础 codec / 接口</th></tr></thead><tbody>
+      <tr><th scope="row">动作结构</th><td>论文统一 27 维；双臂配置为 9+1+9+1 四组</td><td>RoboTwin 14 维；两臂各 6 维，共享编码网络；夹爪另行处理</td></tr>
+      <tr><th scope="row">编码通道 / 位置编码</th><td>256 / 512 / 512；RoPE</td><td>128 / 256 / 256；固定正弦位置编码</td></tr>
+      <tr><th scope="row">残差码表</th><td>4 级 × 4,096，8 维量化，128 维 latent</td><td>沿用这些主要尺寸；本地重新训练</td></tr>
+      <tr><th scope="row">EMA / 低使用率码字阈值</th><td>0.95 / 2</td><td>0.95 / 0.1；初始化等细节也不同</td></tr>
+      <tr><th scope="row">夹爪</th><td>公开配置使用规则式编码，含二值化阈值</td><td>每步 16-bit 连续开度；新增高低字节预测 head</td></tr>
+      <tr><th scope="row">一致性约束</th><td>论文讨论；当前公开配置权重为 0</td><td>基础版不用；额外消融采用本地配方，未证明有收益</td></tr>
+      <tr><th scope="row">预测与最终执行</th><td>VLM 自回归生成码，默认由 codec decoder 还原动作</td><td>小 Prior 预测码，查表注入 Action DiT；最终仍由 WAM 去噪</td></tr>
+    </tbody></table></div>
+    <div class="w8-result"><p><strong>最值得继续检验的思想：</strong>先让码完整、稳定地保存动作，再研究情境能否预测它、策略能否利用它。新版首块结果支持继续探索这种表示，但没有证明 G0.5 的全部设计都必要，也没有证明更大码表一定更容易预测。</p></div>
+    <p><a href={root+"architecture/"}>查看我们自己的完整接线与训练安排 →</a> · <a href={root+"results/"}>查看结构消融与部署验证 →</a></p>
+  </section>
+  <section class="weekly-question" id="sources">
+    <span class="question-number">来源 / 原论文、官方代码、本地报告分开标明</span><h2>外部架构说明以官方资料为准。</h2>
+    <ul class="w8-source-list">
+      <li><a href="https://arxiv.org/html/2608.11739v1" target="_blank" rel="noopener">G0.5 论文 v1：Galaxea G0.5: One Autoregressive Stream for Robot Reasoning and Action</a>，重点为模型、ActionCodec、视觉记忆与训练章节。</li>
+      <li><a href="https://github.com/OpenGalaxea/GalaxeaVLA" target="_blank" rel="noopener">OpenGalaxea / GalaxeaVLA 官方仓库</a>。本页配置核对固定于 commit <code>89f2322b4ad016e192437adc1a2c253b05bab246</code>，查阅于 2026-10-21。</li>
+      <li><a href={official+"configs/tokenizer/actioncodec.yaml"} target="_blank" rel="noopener">ActionCodec 公开配置</a>：分组、通道、DCT、RVQ、EMA、夹爪和损失权重。</li>
+      <li><a href={official+"src/g05/tokenizer/models/actioncodec2_v2/modular_actioncodec2v2.py"} target="_blank" rel="noopener">ActionCodec 实现</a>：分块 DCT、编解码网络与量化接口。</li>
+      <li>本地改动和实验值来自本周提供的《Codebook_Diagnostics_Review.html》。所有架构图均按资料重绘；表格中的本地尺寸不冒充官方默认。</li>
+    </ul>
+  </section>
+</Week8Layout>

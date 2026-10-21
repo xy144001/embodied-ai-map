@@ -1,0 +1,8 @@
+---
+interface Props { id: "comparison" | "codec" | "g05"; caption: string }
+const {id,caption}=Astro.props;
+const figures={comparison:["新旧架构对照：更换码分支，保留 Faster-WAM",1100],codec:["新版结构化动作码本：双臂与夹爪分开处理",1160],g05:["星海图 G0.5 与我们的 WAM 接法",1100]} as const;
+const [title,height]=figures[id];
+const src=import.meta.env.BASE_URL.replace(/\/$/,"")+"/model-architecture/week8/"+id+".svg";
+---
+<figure class="w6-figure"><div class="w6-figure-tools"><a href={src} target="_blank" rel="noopener">打开并放大结构图 ↗</a><a href={src} download={"Week8-"+id+".svg"}>下载 SVG</a></div><div class="w6-figure-scroll" tabindex="0" role="region" aria-label={title+"，窄屏可横向滚动"}><a href={src} target="_blank" rel="noopener" aria-label={title+"，打开矢量原图"}><img src={src} width="1120" height={height} alt={title+"。"+caption} loading="lazy" decoding="async" /></a></div><figcaption>{caption}</figcaption></figure>

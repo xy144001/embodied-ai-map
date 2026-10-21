@@ -19,6 +19,7 @@ const pages=[["overview","本周问题",""],["architecture","01 · 方法与模�
     <h1>{title}</h1><p class="intro">{description}</p>
     <div class="w7-status"><span>已实现 · 固定码本原型</span><span>未实现 · 跨回合 memory / 在线更新</span></div>
     <p class="w6-meta">页面更新：2026-10-14 · 实验快照：<time datetime="2026-10-12T22:05:41+08:00">2026-10-12 22:05:41（北京时间）</time> · 正式评测尚未全部完成</p>
+    <aside class="w6-note"><strong>后续进展已更新到 Week 8。</strong><p>本页保留 10-12 的历史快照。旧版完整 2,500 场评测、新一轮诊断与参考 G0.5 的结构化 codec，见 <a href={root+"problems/week8/"}>Week 8 · 诊断与新架构</a>；不要将本页未完成的结果视为最新状态。</p></aside>
     <nav class="w6-subnav" aria-label="Week 7 内容">{pages.map(([id,label,path])=><a href={root+"problems/week7/"+path} aria-current={id===active?"page":undefined}>{label}</a>)}</nav>
     <div class:list={{"weekly-reading":chapters.length>0}}>
       {chapters.length>0&&<nav class="weekly-toc" aria-label="本页讲解目录"><strong>讲解顺序</strong>{chapters.map(([id,label])=><a href={"#"+id}>{label}</a>)}</nav>}

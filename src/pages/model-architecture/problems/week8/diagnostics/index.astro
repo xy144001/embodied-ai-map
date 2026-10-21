@@ -1,0 +1,89 @@
+---
+import Week8Layout from "../../../../../layouts/Week8Layout.astro";
+import Table from "../../../../../components/Week8Table.astro";
+import Formula from "../../../../../components/FlowFormula.astro";
+const root=import.meta.env.BASE_URL.replace(/\/$/,"")+"/model-architecture/problems/week8/";
+const chapters=[["routes","先分清三条测试路径"],["exp-00","00 · 确认总体下降"],["exp-01","01 · 联合微调"],["exp-02","02 · 给专家参考码"],["exp-03","03 · 弱注入与换码"],["exp-04","04 · 小样本重建"],["exp-05","05 / 08 · 隔离量化损伤"],["exp-06","06 · 读取码内容了吗"],["exp-07","07 · 整集弱注入"],["conclusion","证据支持到哪里"]];
+---
+<Week8Layout title="诊断实验 · 为什么旧码本没有帮上忙" description="按问题组织实验 00–08。重点是理解每个对照隔离了哪一环，以及结果还不能说明什么；新版结构与后续验证分别在另外两个模块展开。" active="diagnostics" chapters={chapters}>
+  <section class="weekly-question" id="routes">
+    <span class="question-number">先看接线 / 三种不同的问题</span><h2>“给码”“换码”和“直接执行重建动作”，测的不是同一条路径。</h2>
+    <div class="w8-route-grid">
+      <article><h3>A · 正常预测码策略</h3><p class="route-flow">当前情境 → Prior → 查表与注入 → Action DiT → 动作</p><p>同时检验选码与使用码。最终动作由 WAM 去噪产生，codec decoder 不直接控制机器人。</p></article>
+      <article><h3>B · 专家参考码注入</h3><p class="route-flow">专家未来动作 → 编码 / 量化 → 注入 → Action DiT</p><p>绕开 Prior，但仍经过有损表示和注入器。参考码不等于完美动作，也未必是预测码的性能上界。</p></article>
+      <article><h3>C · 重建动作直接执行</h3><p class="route-flow">已知动作 → 编码 / 量化 / 解码 → 执行首块</p><p>绕开 Prior 和 Conditioner，专门检查编解码保真；随后统一关码续跑。</p></article>
+    </div>
+    <p><strong>中间起点</strong>是先回放专家前缀，把机器人带到任务中途，再从相同状态比较首块动作。这有助于隔离问题，但不代表从初态出发的自主成功率。32 起点来自 16 场景，每场两个起点相关。</p>
+  </section>
+  <section class="weekly-question" id="exp-00">
+    <span class="question-number">00 / 完整任务 · 已完成</span><h2>先确认：退化是总体问题，而不只是某个难任务。</h2>
+    <p><strong>设计：</strong>50 类 × 每类 50 场，原 Parent 与旧预测码注入使用同一批 2,500 个场景。Parent 已包含旧十任务 Full-only 的动作适配，不能叫作官方未经微调的基线。</p>
+    <Table id="baseline" />
+    <div class="w8-result"><p><strong>结果：</strong>救回 81 场、损伤 270 场，净少成功 189 场，下降 7.56 个百分点。码分支存在总体负作用，下一步要拆分它来自哪里。</p></div>
+    <details><summary>早期实现审查还留下了哪些疑点？</summary><div><Table id="old_audit" /><p>padding、开发抽样和训练覆盖都值得检查，但没有单因素证据说明其中某项就是最初下降的根因。</p></div></details>
+  </section>
+  <section class="weekly-question" id="exp-01">
+    <span class="question-number">01 / 完整任务 · 相同 500 场</span><h2>如果让 Action 一起训练，会不会配合得更好？</h2>
+    <p><strong>为什么做：</strong>冻结大模型、只训练小接口，可能限制二者的配合。因此保留旧 codec 与 Prior，尝试只微调 Action、只续训接口，以及 LoRA / 全参数 Action 与接口联合训练。五个分支各 6,000 步。</p>
+    <Table id="joint" />
+    <p><strong>关键对照是同一联合权重开码 / 关码：</strong>这样把动作权重固定，只测推理时码条件带来的净作用。LoRA 从关码 455 降到开码 408；Full 从 466 降到 421。</p>
+    <Table id="joint_paired" />
+    <div class="w8-result"><p><strong>结论：</strong>这一轮联合微调没有解决问题。它削弱了“仅仅因为 Action 被冻结”的解释，但不否定所有联合训练方式。</p></div>
+    <p class="w8-limit">旧 codec / Prior 未更新，训练仍用参考码，部署用预测码。每类按原顺序取前 10 场；另跑的 136 条只作补充，不混进主表。“全参数”仅指 Action，视频、文本和 VAE 继续冻结。</p>
+  </section>
+  <section class="weekly-question" id="exp-02">
+    <span class="question-number">02 / 专家中间起点 · 只干预首块</span><h2>跳过 Prior，直接给专家参考码，还会变差吗？</h2>
+    <p><strong>设计：</strong>8 类任务各 2 个开发场景，在约 1/3、2/3 处取得 32 个起点。对每个联合模型比较关码、专家参考码和 Prior 预测码；首块后全部关码。这样只绕开选码错误，保留相同的表示与使用接口。</p>
+    <Table id="oracle" />
+    <div class="w8-result"><p><strong>结果：</strong>Full-joint 给参考码后从 28/32 降到 24/32。“只是 Prior 选错码”不足以解释全部现象。LoRA 三组都为 25/32，但参考码和预测码都各有 2 次救回、2 次损伤，并非场景成败完全相同。</p></div>
+    <p class="w8-limit">参考码仍经过旧量化，再交给注入器解释。本实验不能唯一判定是表示坏了还是接口用错了；专家起点也不覆盖模型走偏后的全部状态。</p>
+  </section>
+  <section class="weekly-question" id="exp-03">
+    <span class="question-number">03 / 同 32 起点 · 注入强度与内容</span><h2>会不会是信息有用，但修改动作的幅度太大？</h2>
+    <p><strong>设计：</strong>保持权重不动，把最终注入增量乘以 α=0.25 或 0.5；另外换成同任务另一段示范码、每任务固定码。候选不根据测试结果选择。</p>
+    <Formula expression={String.raw`h'=h+\alpha\,\delta(h,Z)`} caption="只缩放 Conditioner 产生的修改量 δ，避免同时改变基础动作模型。" />
+    <Table id="strength" />
+    <div class="w8-result"><p><strong>结果：</strong>弱注入让 Full 的首块损伤得到缓解，LoRA 净多成功 2 次。原强度下，增量 / 原 hidden 的 L2 范数比中位数约 0.517 / 0.577，提示注入力度值得追踪。</p></div>
+    <p class="w8-limit">大范数不是失败的充分证据；异码成功数接近也不等于网络不读内容。首块弱注入是否有用，还需要实验 07 的整集验证。</p>
+  </section>
+  <section class="weekly-question" id="exp-04">
+    <span class="question-number">04 / 小样本拟合与首块重建</span><h2>绕过注入器，压缩后的动作本身还能执行吗？</h2>
+    <p><strong>设计：</strong>只拿 128 个完整动作块，分别训练连续表示和旧规格 RVQ，各两个 seed、6,000 步，按训练重建误差选权。再从同 32 起点直接执行重建首块，之后统一 Full-joint-off 续跑。</p>
+    <Table id="small_execute" />
+    <details><summary>展开训练误差与开发误差</summary><div><Table id="small_train" /></div></details>
+    <div class="w8-result"><p><strong>结果：</strong>小训练集可以拟合，但开发重建误差与执行表现仍差。仅靠更低平均 MSE 不能排序控制能力：连续模型误差较小，成功数仍未超过旧 RVQ。</p></div>
+    <p class="w8-limit">128 块诊断不能否定 40 类充分训练的可能性。小 RVQ 每层使用了 57–63 个码，不支持严重塌缩到一两个码的解释。</p>
+  </section>
+  <section class="weekly-question" id="exp-05">
+    <span class="question-number">05 → 08 / 从离线误差到真实执行</span><h2>固定连续表示，只插入量化，损伤能被复现吗？</h2>
+    <p><strong>实验 05 的设计：</strong>回到 40 类、6,400 场、40,919 个完整块，避开尾部 padding。先训练连续表示，再冻结编码器加入旧规格 2×64 量化，最后只适配 decoder；另设从头 RVQ 对照。两 seed 在同一开发面板选权。</p>
+    <Table id="quantization_loss" />
+    <p>加量化后误差放大，适配 decoder 只能部分恢复。但这仍是数值层面的观察，因此继续看执行。</p>
+    <h3 id="exp-08">实验 08：把这些重建动作真正执行一次。</h3>
+    <p>不再训练模型，沿用相同 32 起点、相同后续 Full-joint-off，只改变首个动作块。记录成功数，以及执行过程中夹爪末端（TCP）相对专家轨迹的平均位置偏差。</p>
+    <Table id="quantization_execute" />
+    <div class="w8-result"><p><strong>直接证据：</strong>固定连续编码器后插入量化，TCP 偏差从约 5–6 mm 增至 44–49 mm，成功数也下降；只适配 decoder 后部分恢复。当前量化 / 解码链的执行损伤，不再只是 loss 相关性。</p></div>
+    <p class="w8-limit">这定位的是重建路径，不能把原码注入路径的全部退化唯一归于量化。两 seed 使用同一组起点；分阶段方案还多了 decoder 适配预算，不是等计算量比较。连续表示本身也没有达到专家首块水平。</p>
+  </section>
+  <section class="weekly-question" id="exp-06">
+    <span class="question-number">06 / 离线单步去噪 · 不是 rollout</span><h2>最终成功数相近，会不会只是粗指标看不见差别？</h2>
+    <p><strong>设计：</strong>32 个 query 各配两份固定噪声，两模型分别读参考码、同任务异码、固定码，比较去噪 loss。总计 896 条单步预测记录，不是 896 次完整任务。</p>
+    <Table id="content" />
+    <div class="w8-result"><p><strong>结果：</strong>α=1 时参考码比关码更低，异码和固定码更高，说明内容确实影响模型。但参考码改善训练目标，仍可能在实际执行中造成损伤。</p></div>
+    <p class="w8-limit">因此要区分“读了码”和“按码正确控制”。离线单步指标没有覆盖整条去噪过程、接触以及闭环误差累积。</p>
+  </section>
+  <section class="weekly-question" id="exp-07">
+    <span class="question-number">07 / 从初态出发 · 80 个新开发场景</span><h2>把弱注入用满整个任务，能留下净收益吗？</h2>
+    <p><strong>设计：</strong>8 类各 10 个不在旧起点面板中的开发场景，保持旧 Full-joint、旧 codec 和旧 Prior，每块都使用同样注入强度。实验 05 的新表示没有接入。</p>
+    <Table id="weak_episode" />
+    <div class="w8-result"><p><strong>结果：</strong>α=0.5 与关码打平，α=0.25 仍净损伤 3 场。首块更安全，没有转化成完整任务的净增益。</p></div>
+    <p class="w8-limit">本面板没有同场景 α=1 整集组，不能直接量化相对强注入改善了多少。实验 05、06、07 为同轮并行验证，不写成逐次看结果后调整的过程。</p>
+    <details><summary>展开这 8 类任务的逐项结果</summary><div><Table id="weak_tasks" /></div></details>
+  </section>
+  <section class="weekly-question" id="conclusion">
+    <span class="question-number">讨论落点 / 不再笼统地说“码本没训好”</span><h2>修复编解码链有证据依据，但后面还有两个独立关口。</h2>
+    <Table id="evidence" />
+    <p>这些小开发面板多次复用，适合定位机制；尚无统计显著或普遍优越的结论。接下来先看新结构如何减轻表示损伤，再检验自主选码与注入是否带来收益。</p>
+    <p><a href={root+"architecture/"}>继续：新旧整体架构到底改了什么？ →</a></p>
+  </section>
+</Week8Layout>
