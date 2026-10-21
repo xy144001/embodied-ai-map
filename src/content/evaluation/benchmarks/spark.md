@@ -37,7 +37,7 @@ references:
 |---|---|---|
 | task success / task progress | 完成目标的 episode 比例或任务进度 | 只降低动作幅度可很安全但完全不工作 |
 | constraint violation | 碰撞、最小距离/速度/关节限位等约束被违反的次数、比例或累计量；阈值必须公开 | 只报 success 会掩盖危险完成方式 |
-| intervention magnitude | safe action 与 nominal action 的差，例如 $\|a_{safe}-a_{nominal}\|$ 或投影次数 | 量化安全层对操作者/策略的侵入程度 |
+| intervention magnitude | safe action 与 nominal action 的差，例如 ‖a_safe − a_nominal‖ 或投影次数 | 量化安全层对操作者/策略的侵入程度 |
 | minimum clearance / risk margin | episode 内最小人—robot/robot—obstacle 距离或 barrier margin | 区分“未撞上”与“长期危险贴近” |
 | computation latency | safety filter 单步耗时、控制频率下能否实时运行 | 安全算法若超过实时预算，真机不可部署 |
 

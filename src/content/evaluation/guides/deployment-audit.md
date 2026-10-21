@@ -37,12 +37,12 @@ references:
 
 | 平台 | 官方最小/明确要求 | 适合的 humanoid 实验 | 入口 |
 |---|---|---|---|
-| Isaac Lab / Isaac Sim | Ubuntu 22.04 或 Windows 11；≥32 GB RAM、≥16 GB VRAM；Isaac Sim 文档列 50 GB SSD 最小、RTX 4080 最小级别 | 大规模并行、RGB-D/分割、USD 场景、G1/H1/Digit 相关任务 | [部署页](../isaac-lab/) |
-| MuJoCo + MJX | `pip install mujoco`/`mujoco-mjx`；官方未给统一 RAM/Storage/CPU 数字 | 状态控制、接触、JAX 批量 motion imitation/低层技能 | [部署页](../mujoco-mjx/) |
-| Genesis World | Python 3.10–3.13；Linux/macOS/Windows；CPU、CUDA 和非 CUDA GPU 均支持；官方未给统一资源数字 | 多物理/传感器原型、可自定义 humanoid | [部署页](../genesis/) |
-| SAPIEN + ManiSkill | state-only 不额外要求 GPU；GPU 渲染需 Vulkan；官方未给统一 RAM/Storage 数字 | 高吞吐视觉/状态操作；全身任务需自定义 | [部署页](../sapien-maniskill/) |
-| OmniGibson + BEHAVIOR | 依赖 Omniverse/Isaac Sim；按对应 release 的 NVIDIA RTX 要求核验 | 家庭场景与长时程交互；全身下身控制需自建 | [部署页](../omnigibson-behavior/) |
-| InternUtopia | Ubuntu 20.04/22.04、≥32 GB RAM、RTX 2070+（需 RT cores）、driver 535.216.01+；绑定 Isaac Sim 4.5.0 | 大场景、social navigation、mobile manipulation；humanoid 需核验 asset/action | [部署页](../internutopia/) |
+| Isaac Lab / Isaac Sim | Ubuntu 22.04 或 Windows 11；≥32 GB RAM、≥16 GB VRAM；Isaac Sim 文档列 50 GB SSD 最小、RTX 4080 最小级别 | 大规模并行、RGB-D/分割、USD 场景、G1/H1/Digit 相关任务 | [部署页](../../platforms/isaac-lab/) |
+| MuJoCo + MJX | `pip install mujoco`/`mujoco-mjx`；官方未给统一 RAM/Storage/CPU 数字 | 状态控制、接触、JAX 批量 motion imitation/低层技能 | [部署页](../../platforms/mujoco-mjx/) |
+| Genesis World | Python 3.10–3.13；Linux/macOS/Windows；CPU、CUDA 和非 CUDA GPU 均支持；官方未给统一资源数字 | 多物理/传感器原型、可自定义 humanoid | [部署页](../../platforms/genesis/) |
+| SAPIEN + ManiSkill | state-only 不额外要求 GPU；GPU 渲染需 Vulkan；官方未给统一 RAM/Storage 数字 | 高吞吐视觉/状态操作；全身任务需自定义 | [部署页](../../platforms/sapien-maniskill/) |
+| OmniGibson + BEHAVIOR | 依赖 Omniverse/Isaac Sim；按对应 release 的 NVIDIA RTX 要求核验 | 家庭场景与长时程交互；全身下身控制需自建 | [部署页](../../platforms/omnigibson-behavior/) |
+| InternUtopia | Ubuntu 20.04/22.04、≥32 GB RAM、RTX 2070+（需 RT cores）、driver 535.216.01+；绑定 Isaac Sim 4.5.0 | 大场景、social navigation、mobile manipulation；humanoid 需核验 asset/action | [部署页](../../platforms/internutopia/) |
 
 ## 3. 可行部署方案
 

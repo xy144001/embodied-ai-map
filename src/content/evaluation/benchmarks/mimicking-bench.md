@@ -70,7 +70,7 @@ Mimicking-Bench 内部已有 human reference 资产；AMASS/GRAB/OMOMO/BEHAVE �
 - GRAB、OMOMO：补充手—物/大物体交互参考；
 - BEHAVE：补充 RGB-D 人—物感知前端。
 
-这些外部数据不应包含 benchmark test 的对象/场景/动作近重复；更不能覆盖基准的未见 geometry split。详见[数据集—Benchmark 关联页](../overview/)。
+这些外部数据不应包含 benchmark test 的对象/场景/动作近重复；更不能覆盖基准的未见 geometry split。详见[数据集—Benchmark 关联地图](../../overview/benchmark-dataset-map/)。
 
 ## 6. 复现与访问状态
 
