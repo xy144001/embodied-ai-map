@@ -2,9 +2,10 @@
 import Week8Layout from "../../../../../layouts/Week8Layout.astro";
 import Table from "../../../../../components/Week8Table.astro";
 import Figure from "../../../../../components/Week8Figure.astro";
+import Formula from "../../../../../components/FlowFormula.astro";
 const root=import.meta.env.BASE_URL.replace(/\/$/,"")+"/model-architecture/problems/week8/";
 const official="https://github.com/OpenGalaxea/GalaxeaVLA/blob/89f2322b4ad016e192437adc1a2c253b05bab246/";
-const chapters=[["idea","整体思想"],["stream","VLM 怎样生成行动"],["codec","ActionCodec 怎样表示动作"],["memory","视觉记忆是什么"],["adaptation","我们借鉴与改动了什么"],["sources","官方来源与版本"]];
+const chapters=[["idea","整体思想"],["stream","VLM 怎样生成行动"],["codec","ActionCodec 怎样表示动作"],["rvq","RVQ：128 → 8 → 128"],["memory","视觉记忆是什么"],["adaptation","我们借鉴与改动了什么"],["sources","官方来源与版本"]];
 ---
 <Week8Layout title="星海图 G0.5 · 让推理与动作共用一条生成过程" description="本周新架构的主要参考对象。先理解 G0.5 自己的完整接法，再看我们只借鉴 ActionCodec 后，为什么仍然是一套不同的 Memory-WAM。" active="g05" chapters={chapters}>
   <section class="weekly-question" id="idea">
@@ -33,6 +34,39 @@ const chapters=[["idea","整体思想"],["stream","VLM 怎样生成行动"],["co
       <p>动作块长 32，DCT block 为 8；编码通道为 256 / 512 / 512，三个阶段各两个 attention block，latent 维度为 128。RVQ 为 4 × 4,096，量化维度 8，EMA decay 0.95，dead-code threshold 2，quantizer dropout 0.5；commitment 权重 0.25。</p>
       <p>使用 RoPE；公开配置中一致性损失权重为 0。论文讨论时序一致性，不意味着所有公开配置或所有训练都启用同一损失。我们本地“加一致性约束”的消融也不能视作对官方完整训练配方的复现。</p>
     </div></details>
+  </section>
+  <section class="weekly-question" id="rvq">
+    <span class="question-number">技术展开 / 每一级 RVQ 到底在算什么</span><h2>在 8 维里选码，在 128 维里补偿残差。</h2>
+    <p>这里有两个不同的空间：编码器产生的动作 latent 是 <strong>128 维</strong>；每级实际存放的码字是 <strong>8 维</strong>，一张表有 <strong>4,096 项</strong>。每一级先把当前残差投影到 8 维，找最近的码字，再映回 128 维参与残差更新。</p>
+    <p>固定一个经过学习式 RVQ 的动作组，只看其中一个潜位置 j。设编码器输出为 z，初始残差就是它本身；公开配置使用 R=4 级。</p>
+    <Formula expression={String.raw`z_j\in\mathbb R^{128},\qquad r_j^{(0)}=z_j,\qquad R=4`} caption="j 是动作 latent 的位置，ℓ 是残差量化层。8 个潜位置与 8 维码字是两个独立的尺寸，不能混为一谈。" />
+    <h3>第一步：将本层需要解释的残差投影到 8 维。</h3>
+    <Formula expression={String.raw`u_j^{(\ell)}=P_\ell r_j^{(\ell-1)}\in\mathbb R^8`} caption="输入投影 Pℓ 的形状为 8×128。每一级都读取当前的 128 维残差，而不是接着压缩上一层的 8 维向量。" />
+    <h3>第二步：在本层的 4,096 个八维码字中找最近邻。</h3>
+    <Formula expression={String.raw`c_j^{(\ell)}=\operatorname*{arg\,min}_{k\in\{0,\ldots,4095\}}\left\|u_j^{(\ell)}-e_k^{(\ell)}\right\|_2^2`} caption="距离是 8 维空间中的欧氏距离平方；c 是一个整数编号，e 是编号对应的 8 维向量。不是拿原来的 128 维残差直接匹配 4,096 个 128 维码字。" />
+    <h3>第三步：把选中的码字映回 128 维。</h3>
+    <Formula expression={String.raw`v_j^{(\ell)}=W_\ell e_{c_j^{(\ell)}}^{(\ell)}\in\mathbb R^{128}`} caption="输出投影 Wℓ 的形状为 128×8。它学习如何把码字变成对动作 latent 的贡献；Wℓ 与 Pℓ 分别学习，没有被约束为互逆或互为转置。" />
+    <h3>第四步：从残差中减去本层已经表达的部分。</h3>
+    <Formula expression={String.raw`r_j^{(\ell)}=r_j^{(\ell-1)}-v_j^{(\ell)}`} caption="相减发生在 128 维。下一层重新投影这个剩余量，用自己的码表继续补充。" />
+    <h3>最后：把四级的贡献相加，交给动作 decoder。</h3>
+    <Formula expression={String.raw`\boxed{\hat z_j=\sum_{\ell=1}^{R}v_j^{(\ell)}}\in\mathbb R^{128}`} caption="最终仍是一个 128 维向量，不是把四个 8 维码字拼成 32 维；剩余重建误差为 zⱼ−ẑⱼ。" />
+    <div class="w8-reference"><p><strong>直观理解：</strong>第一层先表示一部分运动特征，第二层补充它尚未解释的部分，后续层继续补偿。每一层都有自己的“观察方式”P、码表 E 和“还原方式”W；它们不是反复查询同一张表，也没有预先规定某层必须表示速度、方向或某个具体子动作。</p></div>
+    <div class="w6-table-block"><p class="w6-meta">窄屏可左右滑动表格</p><div class="w6-table-wrap" tabindex="0" role="region" aria-label="RVQ 各量的尺寸与作用，可横向滚动"><table><caption>每个动作组、每个潜位置的一轮量化</caption><thead><tr><th scope="col">对象</th><th scope="col">尺寸 / 取值</th><th scope="col">含义</th></tr></thead><tbody>
+      <tr><th scope="row">z、r、v、最终 ẑ</th><td>128 维</td><td>原 latent、当前残差、单层贡献与最终量化表示</td></tr>
+      <tr><th scope="row">u、单个码字 e</th><td>8 维</td><td>真正进行最近邻比较的向量</td></tr>
+      <tr><th scope="row">本层码表 E</th><td>4,096 × 8</td><td>4,096 个候选，每项 8 维；不同残差层各自一张表</td></tr>
+      <tr><th scope="row">本层投影 P、W</th><td>8 × 128、128 × 8</td><td>对应代码 in_proj / out_proj；均为无 bias 线性层，各残差层独立</td></tr>
+      <tr><th scope="row">单层编号 c</th><td>一个 0…4095 的整数</td><td>四级产生 4 个 ID，但合成一个 128 维向量</td></tr>
+    </tbody></table></div></div>
+    <p><strong>位置与码数：</strong>在同一量化器内，各潜位置共享该层的码表和投影。如果一个学习式 RVQ 动作组有 8 个潜位置，四级就产生 8×4=32 个 ID，解码后仍是 8×128 的表示。不同部件的序列标记与规则式夹爪编码另算，不能把这个数直接当成整个机器人的动作 token 总数。</p>
+    <h3>训练和部署各自使用这条链的哪一段？</h3>
+    <div class="w6-cards">
+      <article><h3>学习 codec：动作 → 码</h3><p>专家动作经编码器形成 z，再逐层做投影、最近邻、反投影和残差更新。P、W 与编解码网络通过损失接收梯度；量化处使用直通估计，码表由 EMA 更新。</p></article>
+      <article><h3>G0.5 默认部署：预测 ID → 动作</h3><p>VLM 已经生成各层编号，此时只需逐层查表、应用 W，再相加得到 ẑ，交给 codec decoder。代码的 from_codes / decode_codes 走这条路径，不需要 P 或最近邻搜索。</p></article>
+    </div>
+    <p class="w8-limit">上面的公式描述完整四级的前向计算；训练中 quantizer dropout 可以让样本只使用前若干级。最近邻只保证在本层的 8 维投影空间中最接近，不能据此保证每加一级，128 维残差范数或任务失败率就一定下降。</p>
+    <p class="w6-meta">实现核对：<a href={official+"src/g05/tokenizer/models/actioncodec2_v2/modular_actioncodec2v2.py#L905-L919"} target="_blank" rel="noopener">投影与码表尺寸</a> · <a href={official+"src/g05/tokenizer/models/actioncodec2_v2/modular_actioncodec2v2.py#L989-L1043"} target="_blank" rel="noopener">投影、最近邻、EMA 与反投影</a> · <a href={official+"src/g05/tokenizer/models/actioncodec2_v2/modular_actioncodec2v2.py#L1093-L1248"} target="_blank" rel="noopener">逐层残差与从 ID 重建</a>。与本页其余配置使用同一固定版本。</p>
+    <p><a href={root+"architecture/#codec"}>对照我们本地采用的低维 RVQ 与 WAM 注入路径 →</a></p>
   </section>
   <section class="weekly-question" id="memory">
     <span class="question-number">模块三 / 视觉历史，不是跨回合码表更新</span><h2>让当前画面带上“刚才发生了什么”。</h2>
