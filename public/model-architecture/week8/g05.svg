@@ -1,0 +1,58 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1120 1100" role="img" aria-labelledby="title desc">
+<title id="title">星海图 G0.5：一个自回归 VLM 连续生成推理与动作码</title><desc id="desc">默认主线是 VLA 的动作码解码执行。可选 flow 头单列；我们借鉴其动作表示，没有移植整个模型。</desc>
+<defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" fill="#9abce9"/></marker><marker id="optional" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" fill="#e0bc7e"/></marker></defs>
+<rect width="1120" height="1100" rx="12" fill="#0b1422"/>
+<g font-family="system-ui, Noto Sans SC, Microsoft YaHei, sans-serif">
+<text x="36" y="46" font-size="29" font-weight="700" fill="#f0f4ff">星海图 G0.5：一个自回归 VLM 连续生成推理与动作码</text>
+<text x="36" y="82" font-size="17" fill="#b5c7df">默认主线是 VLA 的动作码解码执行。可选 flow 头单列；我们借鉴其动作表示，没有移植整个模型。</text>
+<path d="M 190,245 L 190,320" fill="none" stroke="#9abce9" stroke-width="2.3" marker-end="url(#arrow)"/>
+<path d="M 560,245 L 560,320" fill="none" stroke="#9abce9" stroke-width="2.3" marker-end="url(#arrow)"/>
+<path d="M 340,385 L 410,385" fill="none" stroke="#9abce9" stroke-width="2.3" marker-end="url(#arrow)"/>
+<path d="M 710,385 L 780,385" fill="none" stroke="#9abce9" stroke-width="2.3" marker-end="url(#arrow)"/>
+<path d="M 930,450 L 930,525" fill="none" stroke="#9abce9" stroke-width="2.3" marker-end="url(#arrow)"/>
+<path d="M 930,640 L 930,715" fill="none" stroke="#9abce9" stroke-width="2.3" marker-end="url(#arrow)"/>
+<path d="M 560,450 L 560,525" fill="none" stroke="#e0bc7e" stroke-width="2.3" stroke-dasharray="7 5" marker-end="url(#optional)"/>
+<path d="M 560,640 L 560,762 L 780,762" fill="none" stroke="#e0bc7e" stroke-width="2.3" stroke-dasharray="7 5" marker-end="url(#optional)"/>
+<rect x="40" y="140" width="300" height="105" rx="9" fill="#15283f" stroke="#799bcb" stroke-width="1.6"/>
+<text x="190.0" y="171.5" text-anchor="middle" font-size="21" font-weight="700" fill="#f0f4ff">多视角当前图像 + 视觉历史</text>
+<text x="190.0" y="201.5" text-anchor="middle" font-size="17" fill="#c5d3e7">预训练：5 秒窗口取 6 帧</text>
+<text x="190.0" y="227.5" text-anchor="middle" font-size="17" fill="#c5d3e7">短时观测，不是跨回合经验库</text>
+<rect x="410" y="140" width="300" height="105" rx="9" fill="#15283f" stroke="#799bcb" stroke-width="1.6"/>
+<text x="560.0" y="171.5" text-anchor="middle" font-size="21" font-weight="700" fill="#f0f4ff">指令 / 本体标识 / 状态</text>
+<text x="560.0" y="201.5" text-anchor="middle" font-size="17" fill="#c5d3e7">与视觉输入组成当前条件</text>
+<text x="560.0" y="227.5" text-anchor="middle" font-size="17" fill="#c5d3e7">状态使用连续 embedding</text>
+<rect x="40" y="320" width="300" height="130" rx="9" fill="#15283f" stroke="#799bcb" stroke-width="1.6"/>
+<text x="190.0" y="351.0" text-anchor="middle" font-size="21" font-weight="700" fill="#f0f4ff">视觉编码器</text>
+<text x="190.0" y="381.0" text-anchor="middle" font-size="17" fill="#c5d3e7">分解的空间 / 时间 attention</text>
+<text x="190.0" y="407.0" text-anchor="middle" font-size="17" fill="#c5d3e7">融合历史后丢弃历史 token</text>
+<text x="190.0" y="433.0" text-anchor="middle" font-size="17" fill="#c5d3e7">保留有历史信息的当前表示</text>
+<rect x="410" y="320" width="300" height="130" rx="9" fill="#14362f" stroke="#8ad2b7" stroke-width="1.6"/>
+<text x="560.0" y="351.0" text-anchor="middle" font-size="21" font-weight="700" fill="#f0f4ff">Qwen3.5-2B VLM</text>
+<text x="560.0" y="381.0" text-anchor="middle" font-size="17" fill="#c5d3e7">同一个自回归 decoder</text>
+<text x="560.0" y="407.0" text-anchor="middle" font-size="17" fill="#c5d3e7">按 next-token 目标训练</text>
+<text x="560.0" y="433.0" text-anchor="middle" font-size="17" fill="#c5d3e7">文本与动作共享生成过程</text>
+<rect x="780" y="320" width="300" height="130" rx="9" fill="#14362f" stroke="#8ad2b7" stroke-width="1.6"/>
+<text x="930.0" y="351.0" text-anchor="middle" font-size="21" font-weight="700" fill="#f0f4ff">生成一条 token 序列</text>
+<text x="930.0" y="381.0" text-anchor="middle" font-size="17" fill="#c5d3e7">可选 Subtask / BBox 等推理</text>
+<text x="930.0" y="407.0" text-anchor="middle" font-size="17" fill="#c5d3e7">随后生成结构化动作 ID</text>
+<text x="930.0" y="433.0" text-anchor="middle" font-size="17" fill="#c5d3e7">动作可以读取前面的推理</text>
+<rect x="780" y="525" width="300" height="115" rx="9" fill="#2a2444" stroke="#b7a3ff" stroke-width="1.6"/>
+<text x="930.0" y="561.5" text-anchor="middle" font-size="21" font-weight="700" fill="#f0f4ff">ActionCodec decoder</text>
+<text x="930.0" y="591.5" text-anchor="middle" font-size="17" fill="#c5d3e7">按部件读取实际码内容</text>
+<text x="930.0" y="617.5" text-anchor="middle" font-size="17" fill="#c5d3e7">还原连续控制命令</text>
+<rect x="410" y="525" width="300" height="115" rx="9" fill="#32291c" stroke="#ddbc7c" stroke-width="1.6"/>
+<text x="560.0" y="561.5" text-anchor="middle" font-size="21" font-weight="700" fill="#f0f4ff">可选 flow-matching 头</text>
+<text x="560.0" y="591.5" text-anchor="middle" font-size="17" fill="#c5d3e7">读取自回归主干 hidden</text>
+<text x="560.0" y="617.5" text-anchor="middle" font-size="17" fill="#c5d3e7">论文另设的替代输出路径</text>
+<rect x="780" y="715" width="300" height="95" rx="9" fill="#15283f" stroke="#799bcb" stroke-width="1.6"/>
+<text x="930.0" y="754.5" text-anchor="middle" font-size="21" font-weight="700" fill="#f0f4ff">机器人执行动作块</text>
+<text x="930.0" y="784.5" text-anchor="middle" font-size="17" fill="#c5d3e7">获取新观测后重新规划</text>
+<rect x="40" y="900" width="1040" height="125" rx="9" fill="#2a2444" stroke="#b7a3ff" stroke-width="1.6"/>
+<text x="560.0" y="941.5" text-anchor="middle" font-size="21" font-weight="700" fill="#f0f4ff">我们的新接法：小型 Prior → 48 个码 token → Conditioner → Faster-WAM</text>
+<text x="560.0" y="971.5" text-anchor="middle" font-size="17" fill="#c5d3e7">码向量先修改 Action hidden，最终动作由 Action DiT 去噪生成。</text>
+<text x="560.0" y="997.5" text-anchor="middle" font-size="17" fill="#c5d3e7">没有使用 G0.5 的 VLM / 预训练权重、统一 CoT 生成或视觉历史模块。</text>
+<text x="40" y="712" font-size="17" fill="#b4c8e1">ActionCodec：先学习动作表示，再冻结为 VLM 的动作词表接口。</text>
+<text x="40" y="747" font-size="17" fill="#b4c8e1">官方默认 AR 路径会调用 codec decoder，码直接决定解码动作。</text>
+<text x="40" y="840" font-size="17" fill="#e4c88f">实线：默认自回归动作路径     虚线：可选 flow 路径（并非每次动作都串行经过它）</text>
+<text x="40" y="1068" font-size="16" fill="#b4c8e1">来源：G0.5 论文 v1 §3–4、官方仓库。图为结构关系重绘，未将该模型归类为视频预测 WAM。</text>
+</g></svg>

@@ -1,0 +1,78 @@
+---
+import Week8Layout from "../../../../../layouts/Week8Layout.astro";
+import Table from "../../../../../components/Week8Table.astro";
+import Figure from "../../../../../components/Week8Figure.astro";
+import Formula from "../../../../../components/FlowFormula.astro";
+const root=import.meta.env.BASE_URL.replace(/\/$/,"")+"/model-architecture/problems/week8/";
+const chapters=[["overview","先看总体接法"],["old","旧版怎样工作"],["codec","新版动作编解码"],["prior","为什么 Prior 也要重训"],["conditioner","48 个条件向量怎样注入"],["training","各阶段训练什么"],["boundaries","与长期 memory 的边界"]];
+---
+<Week8Layout title="新旧架构 · 重做动作表示，配套重训选码与注入" description="总体仍是 Prior 选码、Conditioner 注入、Faster-WAM 生成动作。改变的是动作怎样被编码、码有多少种，以及动作网络读取它们的接口。" active="architecture" chapters={chapters}>
+  <section class="weekly-question" id="overview">
+    <span class="question-number">整体图 / 先固定不变的部分</span><h2>我们借鉴 G0.5 的 ActionCodec，最终动作仍由 WAM 产生。</h2>
+    <p>Parent 是官方 Faster-WAM step029355 加上此前十任务 Full-only Action step60000。当前新一轮重新<strong>冻结 Parent</strong>，并非继续更新实验 01 的 Full-joint 模型；新 Prior 和新 Conditioner 分阶段训练。</p>
+    <Figure id="comparison" caption="同一总体接法下的两套模型：旧版读取 8 个码向量，新版读取 48 个。codec decoder 只用于学习重建或专门的执行诊断，不是正常预测码策略的最终动作头。" />
+    <Table id="architecture" />
+    <div class="w8-route-grid">
+      <article><h3>Prior 的 decoder</h3><p>根据当前图像、指令和本体状态，预测离散编号。这里的“解码”指生成 ID。</p></article>
+      <article><h3>Codec 的 decoder</h3><p>把量化表示还原成连续动作。训练重建、专家首块诊断、整集 roundtrip 会用到它。</p></article>
+      <article><h3>Action DiT</h3><p>从带噪动作逐步去噪，是正常部署的动作生成器。Conditioner 把码信息送入它的 hidden。</p></article>
+    </div>
+    <p class="w8-limit">三者常被笼统称作 decoder，但作用不同。G0.5 默认路径会把动作码交给 codec decoder 直接还原命令；我们的正常路径没有采用这个最终动作出口。</p>
+  </section>
+  <section class="weekly-question" id="old">
+    <span class="question-number">旧版 / 上下文条件下的紧凑 RVQ</span><h2>把四步动作摊成一行，再压成少量离散码。</h2>
+    <p>一个动作块是 32 步 × 14 维。旧版将双臂和夹爪放在一起，每 4 步组成 56 维 patch，得到 8 个位置。线性层映射为 128 维，再通过 cross-attention 读取当前情境，得到 8 × 128 的连续表示。</p>
+    <p>每个位置用两级残差量化，每级只有 64 个 128 维码字。因此一块共有 <strong>8 × 2 = 16 个 ID</strong>，查表后按级相加，形成 8 个条件向量。两级码表用 AdamW 梯度更新；编码器、decoder 和码表通过重建、codebook 与 commitment 损失学习。</p>
+    <div class="w6-note"><strong>旧版不是“没有 attention”。</strong><p>它有动作到当前情境的 cross-attention，也有注入器的 cross-attention；缺少的是动作 patch 之间显式的 self-attention。新版增加的是动作特征内部的交互，并不是让数千个码字互相做 attention。</p></div>
+    <details><summary>展开旧版的上下文、掩码和接口尺寸</summary><div>
+      <p>Tokenizer 与 Prior 分别使用自己的 ContextEncoder：16 个视觉 token（输入 48 维）、L 个语言 token（4,096 维）和 1 个本体状态 token（14 维），投影成 17+L 个 128 维 token。旧 codec 的编码器与 decoder 都读取当前情境。</p>
+      <p>后续 MaskedActionTokenizer 让编码器读取 valid mask，重建损失只计有效动作；decoder 与 Prior 不读取未来长度，Prior 的分类损失仍覆盖全部码位置。新版这轮 codec 则只用完整动作块，避开这类尾部 padding。</p>
+      <p>旧 Prior 为 2 层、128 维、4 头，预测 16 个 0…63 的 ID；Conditioner 用 32×1,024 的 Action hidden 作为 query，读取 8×128 的码向量。输出投影零初始化。</p>
+    </div></details>
+  </section>
+  <section class="weekly-question" id="codec">
+    <span class="question-number">新版 / 先按动作结构拆开</span><h2>两臂学习运动表示，夹爪单独保留连续开度。</h2>
+    <Figure id="codec" caption="学习与重建路径。双臂通过共享网络生成残差码；夹爪单独量化。得到的 ID 既能用于重建诊断，也能查表成为 WAM 的条件；正式部署时 ID 由 Prior 预测。" />
+    <h3>1 · 共享双臂编码器，让动作块内部先交流。</h3>
+    <p>从 14 维中拆出左右臂各 6 个关节命令，把两臂放进同一网络的 batch 维，权重共享。每臂从 6 维补到 9 维，先做 8 步短段 DCT，再经过卷积和 Transformer。DCT 把短段运动换成频率形式，<strong>保留全部 8 个系数</strong>，没有在这一步删掉高频。</p>
+    <p>卷积先提取局部变化，self-attention 让同一动作块内的特征互相参考。最终每臂得到 8 个 128 维 latent；这些位置已经混合时间与关节信息，不能简单解释为八个连续时刻。</p>
+    <details><summary>展开具体张量形状</summary><div><p><code>[B,32,14]</code> 拆臂后为 <code>[2B,32,6]</code>；补维与 DCT 后为 <code>[2B,8,4,9]</code>。卷积各阶段依次为 <code>[2B,128,4,8]</code>、<code>[2B,256,2,8]</code>、<code>[2B,256,1,8]</code>，最后投影为 <code>[2B,8,128]</code>。三个阶段各有两个 attention block。</p></div></details>
+    <h3>2 · 用四级低维 RVQ，逐级补充没表达好的部分。</h3>
+    <p>每一级把 128 维残差投影到 8 维，从 4,096 个码字里找最近的一个，再反投影回 128 维。下一层继续解释剩余残差；四层结果相加得到量化表示。这样左右臂共 16 个位置、每位置 4 个 ID，即 <strong>64 个 arm ID</strong>，查表后仍是 16 个 128 维 arm 向量。</p>
+    <Formula expression={String.raw`q_r=U_r E_r[k_r],\qquad z_q=\sum_{r=1}^{4}q_r`} caption="Eᵣ 是第 r 级的 4,096×8 码表，Uᵣ 把低维码字映回 128 维。四级逐步补足残差，不是从一张表里一次选四个互不相关的动作。" />
+    <p>码表使用 EMA：根据被分到每个码字的特征，缓慢更新中心，衰减系数为 0.95。训练时一半样本随机只用若干前级，推理时全部使用四级；本地 dead-code threshold 为 0.1。基础版损失是动作 MSE + 0.25 × commitment loss，不加一致性约束。</p>
+    <h3>3 · 夹爪独立编码，避免把接触关键量挤进同一个小瓶颈。</h3>
+    <p>先把夹爪命令还原到 0…1 的官方连续开度，再取 <code>round(opening × 65535)</code>，每步每只夹爪一个 16-bit ID。重建时除以 65,535。它是高精度离散值，既不是二值开关，也不是原始浮点动作直接绕过量化。</p>
+    <div class="w6-plan"><strong>新版不只是容量相同、网络更好的公平替换。</strong><p>旧显式 ID 载荷为 8×2×6=96 bit；新版双臂为 16×4×12=768 bit，夹爪为 32×2×16=1,024 bit，总计 1,792 bit，约为旧版 18.7 倍。旧 decoder 还读取上下文，新基础版不读取。不能把差距全部归因于 attention 或 EMA。</p></div>
+    <p class="w8-limit">roundtrip 中新版还会把 Parent 超出 0…1 范围的夹爪 proposal 截回合法范围并记录裁剪；它也是执行路径的改变。相对位置消融需要 qpos 还原绝对命令，但选用的基础 codec 本身不读图像、语言或状态。</p>
+  </section>
+  <section class="weekly-question" id="prior">
+    <span class="question-number">选码模块 / 仍然只看当前可用信息</span><h2>新码的数量、词表和夹爪格式都变了，旧 Prior 无法直接沿用。</h2>
+    <p>新 Prior 沿用 2 层、128 维、4 头的小型 Transformer 骨架，重新训练输出接口。先按“位置 → 手臂 → RVQ 层”的顺序，自回归预测 64 个 0…4095 的 arm ID。</p>
+    <p>随后并行预测夹爪：把每个 16-bit 值拆成高、低两个字节，用 <strong>128 个 256 类输出</strong>生成 32 步 × 2 只夹爪 × 2 字节，再拼回 64 个 16-bit ID。训练该 head 时读取完整参考 arm 码序列；部署时读取自己采样的 arm 序列，因此仍有训练与推理输入分布的差距。</p>
+    <div class="w8-result"><p><strong>真正的部署输入没有变：</strong>当前 VAE 视觉特征、语言和本体状态。专家未来动作只用来制作训练标签或做标注清楚的诊断；没有把真实未来图像、任务类别标签或成功奖励作为新 Prior 的部署输入。</p></div>
+  </section>
+  <section class="weekly-question" id="conditioner">
+    <span class="question-number">注入模块 / 从 8 个 token 到 48 个</span><h2>保留原来的注入位置，扩大它能读取的动作表示。</h2>
+    <p>64 个 arm ID 经四级反投影求和，形成 16 个 128 维 token。每一步的左右夹爪值组成 2 维向量，经线性投影生成 1 个 token，共 32 个。再加入位置与模态编码，拼成 <strong>48 × 128 的 K/V</strong>。</p>
+    <p>Conditioner 在 Action 的 <code>blocks[8]</code> 后运行——下标从零开始，即第九个 block 后。32×1,024 的 hidden 作为 query，读取这些码向量，输出增量 δ，再与原 hidden 相加。没有额外 utility 选择、候选平均或默认强度门；输出投影仍从零初始化。</p>
+    <p>原生 <code>one_pass_future_cache</code> 路径保留：视频侧使用当前 latent 和未来噪声位置，预先计算一次 K/V；动作侧执行 10 次去噪，同一动作块共用同一码条件。码不改写 Video DiT 或缓存。每块输出 32×14 动作，通常先执行 28 步，然后根据新观测重新选码。</p>
+  </section>
+  <section class="weekly-question" id="training">
+    <span class="question-number">训练顺序 / 三段各自负责一件事</span><h2>先学会表示动作，再学会选码，最后学会让 WAM 使用码。</h2>
+    <div class="w6-table-wrap" tabindex="0" role="region" aria-label="新版三阶段训练与冻结关系"><table><caption>实验 09–10 的模块训练安排</caption><thead><tr><th scope="col">阶段</th><th scope="col">更新哪些参数</th><th scope="col">监督与选权</th></tr></thead><tbody>
+      <tr><th scope="row">① Codec</th><td>编码 / 解码网络与量化投影学习；码表 EMA 更新</td><td>40 类、6,400 场、40,919 完整块；五结构 × 两 seed，各 6,000 步；按开发重建 MSE 选权</td></tr>
+      <tr><th scope="row">② Prior</th><td>冻结选定 codec，只训练新 Prior</td><td>预测专家动作的码标签；6,000 步，全局 batch 64；开发 CE 选权</td></tr>
+      <tr><th scope="row">③ Conditioner</th><td>冻结 codec、Prior 与整个 Parent；分别训练两个新接口</td><td>6,000 步计划，全局 batch 8；开发目标为 0.75 × 预测码 flow MSE + 0.25 × Off MSE，含 step 0</td></tr>
+    </tbody></table></div>
+    <p>两个 Conditioner 的区别仅在训练时给什么码：<strong>专家码组</strong>为 75% 参考码 + 25% Off；<strong>混合码组</strong>为 37.5% 参考码 + 37.5% Prior 预测码 + 25% Off。两者部署时都使用 Prior 预测码，不能把“专家码训练”误读成部署时提供专家答案。</p>
+    <p>新版 codec 的开发集剔除了新增执行面板的 16 个场景，剩余 1,488 场、2,966 个块；实验 05 原开发集为 1,504 场、2,998 块。不同表中的开发数值应连同数据范围阅读。</p>
+    <p class="w8-limit">这些是报告的训练设计和快照：Prior 已到 6,000 步；两个 Conditioner 截至 10-20 17:38:41 均到 1,000 / 6,000 步。最终进度与整集结果见<a href={root+"results/#exp-10"}>实验 10</a>，本页不假定它们后来已完成。</p>
+  </section>
+  <section class="weekly-question" id="boundaries">
+    <span class="question-number">Memory 的边界 / 当前先验证固定表示</span><h2>训练时码表会变，部署时这轮仍然固定。</h2>
+    <p>EMA 是训练阶段更新表示中心的规则；它不是根据测试成败持续学习。推理每块重新选 ID，也只是选码，不是改码。跨 episode 检索、经验写入、在线 ΔE、P3 / P4 目前都未开启。</p>
+    <p>先把动作表示做可靠，是后续可更新记忆的基础；但还需要证明当前情境能预测这些码、注入后确有策略收益，才有理由讨论如何把真实反馈写回。</p>
+    <p><a href={root+"g05/"}>继续：G0.5 原本如何连接这些模块？ →</a> · <a href={root+"results/"}>新版当前验证到哪一层？ →</a></p>
+  </section>
+</Week8Layout>

@@ -1,0 +1,56 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1120 1100" role="img" aria-labelledby="title desc">
+<title id="title">新旧整体架构：更换码条件支路，保留 Faster-WAM</title><desc id="desc">两列为两套不同模型，不是同一次推理同时启用。当前新版基于冻结的历史 Full-only Parent。</desc>
+<defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" fill="#9abce9"/></marker><marker id="optional" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" fill="#e0bc7e"/></marker></defs>
+<rect width="1120" height="1100" rx="12" fill="#0b1422"/>
+<g font-family="system-ui, Noto Sans SC, Microsoft YaHei, sans-serif">
+<text x="36" y="46" font-size="29" font-weight="700" fill="#f0f4ff">新旧整体架构：更换码条件支路，保留 Faster-WAM</text>
+<text x="36" y="82" font-size="17" fill="#b5c7df">两列为两套不同模型，不是同一次推理同时启用。当前新版基于冻结的历史 Full-only Parent。</text>
+<path d="M 285,210 L 285,280" fill="none" stroke="#9abce9" stroke-width="2.3" marker-end="url(#arrow)"/>
+<path d="M 285,390 L 285,445" fill="none" stroke="#9abce9" stroke-width="2.3" marker-end="url(#arrow)"/>
+<path d="M 285,725 L 285,790" fill="none" stroke="#9abce9" stroke-width="2.3" marker-end="url(#arrow)"/>
+<path d="M 285,890 L 285,955" fill="none" stroke="#9abce9" stroke-width="2.3" marker-end="url(#arrow)"/>
+<path d="M 835,210 L 835,280" fill="none" stroke="#9abce9" stroke-width="2.3" marker-end="url(#arrow)"/>
+<path d="M 835,390 L 835,445" fill="none" stroke="#9abce9" stroke-width="2.3" marker-end="url(#arrow)"/>
+<path d="M 835,725 L 835,790" fill="none" stroke="#9abce9" stroke-width="2.3" marker-end="url(#arrow)"/>
+<path d="M 835,890 L 835,955" fill="none" stroke="#9abce9" stroke-width="2.3" marker-end="url(#arrow)"/>
+<path d="M 560,210 L 560,620" fill="none" stroke="#9abce9" stroke-width="2.3" marker-end="url(#arrow)"/>
+<path d="M 40,497 L 20,497 L 20,840 L 40,840" fill="none" stroke="#9abce9" stroke-width="2.3" marker-end="url(#arrow)"/>
+<path d="M 1080,497 L 1100,497 L 1100,840 L 1080,840" fill="none" stroke="#9abce9" stroke-width="2.3" marker-end="url(#arrow)"/>
+<rect x="40" y="120" width="1040" height="90" rx="9" fill="#15283f" stroke="#799bcb" stroke-width="1.6"/>
+<text x="560.0" y="157.0" text-anchor="middle" font-size="21" font-weight="700" fill="#f0f4ff">共同输入 x：当前多视角图像 · 指令 · 14 维本体状态</text>
+<text x="560.0" y="187.0" text-anchor="middle" font-size="17" fill="#c5d3e7">Prior 只读当前信息；正式部署没有专家未来动作。</text>
+<rect x="40" y="280" width="490" height="110" rx="9" fill="#2a2444" stroke="#b7a3ff" stroke-width="1.6"/>
+<text x="285.0" y="314.0" text-anchor="middle" font-size="21" font-weight="700" fill="#f0f4ff">旧 Prior：2 层 / 128 维 / 4 头</text>
+<text x="285.0" y="344.0" text-anchor="middle" font-size="17" fill="#c5d3e7">8 位置 × 2 级 → 16 个 ID</text>
+<text x="285.0" y="370.0" text-anchor="middle" font-size="17" fill="#c5d3e7">每个 ID 取值 0…63</text>
+<rect x="590" y="280" width="490" height="110" rx="9" fill="#14362f" stroke="#8ad2b7" stroke-width="1.6"/>
+<text x="835.0" y="314.0" text-anchor="middle" font-size="21" font-weight="700" fill="#f0f4ff">新 Prior：同规模骨架，重新训练</text>
+<text x="835.0" y="344.0" text-anchor="middle" font-size="17" fill="#c5d3e7">64 个 arm ID（0…4095）</text>
+<text x="835.0" y="370.0" text-anchor="middle" font-size="17" fill="#c5d3e7">再预测 128 个夹爪高 / 低字节</text>
+<rect x="40" y="445" width="490" height="105" rx="9" fill="#2a2444" stroke="#b7a3ff" stroke-width="1.6"/>
+<text x="285.0" y="476.5" text-anchor="middle" font-size="21" font-weight="700" fill="#f0f4ff">旧查表：2 级向量相加</text>
+<text x="285.0" y="506.5" text-anchor="middle" font-size="17" fill="#c5d3e7">16 个 ID → 8 × 128 向量</text>
+<text x="285.0" y="532.5" text-anchor="middle" font-size="17" fill="#c5d3e7">旧 codec 的 decoder 不参与正常动作输出</text>
+<rect x="590" y="445" width="490" height="105" rx="9" fill="#14362f" stroke="#8ad2b7" stroke-width="1.6"/>
+<text x="835.0" y="476.5" text-anchor="middle" font-size="21" font-weight="700" fill="#f0f4ff">新查表：4 级反投影求和＋夹爪投影</text>
+<text x="835.0" y="506.5" text-anchor="middle" font-size="17" fill="#c5d3e7">16 个 arm token + 32 个夹爪 token</text>
+<text x="835.0" y="532.5" text-anchor="middle" font-size="17" fill="#c5d3e7">Z_new：48 × 128</text>
+<rect x="40" y="620" width="1040" height="105" rx="9" fill="#15283f" stroke="#799bcb" stroke-width="1.6"/>
+<text x="560.0" y="651.5" text-anchor="middle" font-size="21" font-weight="700" fill="#f0f4ff">共同主干计算：原生 Video K/V 缓存 + Action 前 9 个 block</text>
+<text x="560.0" y="681.5" text-anchor="middle" font-size="17" fill="#c5d3e7">当前图像与带噪动作走原路径 → 动作 hidden H：32 × 1024</text>
+<text x="560.0" y="707.5" text-anchor="middle" font-size="17" fill="#c5d3e7">码不写入 Video DiT 或视频缓存；H 是两种 Conditioner 的 query。</text>
+<rect x="40" y="790" width="490" height="100" rx="9" fill="#2a2444" stroke="#b7a3ff" stroke-width="1.6"/>
+<text x="285.0" y="819.0" text-anchor="middle" font-size="21" font-weight="700" fill="#f0f4ff">旧 Conditioner：H 读取 8 个码 token</text>
+<text x="285.0" y="849.0" text-anchor="middle" font-size="17" fill="#c5d3e7">cross-attention 产生 δ</text>
+<text x="285.0" y="875.0" text-anchor="middle" font-size="17" fill="#c5d3e7">原版已有 attention；不是这次才加入</text>
+<rect x="590" y="790" width="490" height="100" rx="9" fill="#14362f" stroke="#8ad2b7" stroke-width="1.6"/>
+<text x="835.0" y="819.0" text-anchor="middle" font-size="21" font-weight="700" fill="#f0f4ff">新 Conditioner：H 读取 48 个 token</text>
+<text x="835.0" y="849.0" text-anchor="middle" font-size="17" fill="#c5d3e7">扩展位置 / 模态编码与夹爪投影</text>
+<text x="835.0" y="875.0" text-anchor="middle" font-size="17" fill="#c5d3e7">仍以 cross-attention 产生 δ</text>
+<rect x="40" y="955" width="1040" height="90" rx="9" fill="#15283f" stroke="#799bcb" stroke-width="1.6"/>
+<text x="560.0" y="992.0" text-anchor="middle" font-size="21" font-weight="700" fill="#f0f4ff">合流位置不变：blocks[8] 后 H′ = H + δ</text>
+<text x="560.0" y="1022.0" text-anchor="middle" font-size="17" fill="#c5d3e7">其余 Action 层 → 10 次去噪 → 32 × 14 连续动作 → 最多执行 28 步，再观察、再选码。</text>
+<text x="40" y="252" font-size="21" fill="#c5b6f5">旧版 / 上下文条件 RVQ</text>
+<text x="590" y="252" font-size="21" fill="#a8dfc9">新版 / 结构化动作 codec</text>
+<text x="40" y="1081" font-size="17" fill="#b4c8e1">同一动作块的 10 次去噪共享码；下一块重新预测。跨 episode 检索、写入与在线码字更新仍关闭。</text>
+</g></svg>

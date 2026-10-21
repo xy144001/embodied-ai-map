@@ -1,0 +1,71 @@
+---
+import Week8Layout from "../../../../../layouts/Week8Layout.astro";
+import Table from "../../../../../components/Week8Table.astro";
+import Panels from "../../../../../components/Week8Panels.astro";
+const root=import.meta.env.BASE_URL.replace(/\/$/,"")+"/model-architecture/problems/week8/";
+const chapters=[["exp-09","09 · 新版结构消融"],["panels","切换起点面板"],["limits","进展与解释边界"],["exp-10","10 · 整集部署设计"],["snapshot","训练与执行快照"],["paired","共同 71 场对照"],["next","下一步要回答什么"]];
+---
+<Week8Layout title="新版结果 · 保真改善之后，策略收益还要单独检验" description="实验 09 是已完成的首块重建验证；实验 10 是 10 月 20 日保存的运行中快照。两个实验使用不同父模型、起点和动作来源，按各自口径阅读。" active="results" chapters={chapters}>
+  <section class="weekly-question" id="exp-09">
+    <span class="question-number">09 / 新编解码结构 · 已完成</span><h2>先问：专家动作经过新版表示，是否还能保住原来的效果？</h2>
+    <p>五种结构、两个训练 seed，各训练 6,000 步；只按开发重建 MSE 选 checkpoint，不按执行成功率挑权重。随后在 64 个共同中间起点，直接执行专家动作的重建首块，再统一由 <strong>Full-joint-off</strong> 续跑。本实验不经过新 Prior 或新 Conditioner。</p>
+    <Table id="variants" />
+    <p>64 起点由历史 32 个与新增 32 个组成；新增部分来自另外 16 个开发场景，每场两个起点。所有结构使用同一批起点，并共享关码、专家首块和旧 RVQ 对照。</p>
+    <details><summary>展开样本、训练与选权口径</summary><div>
+      <p>训练使用 40 类、6,400 场、40,919 个完整动作块；开发选权集剔除新增执行场景，剩 1,488 场、2,966 块。两个 seed 标识是 20261020 / 20261021，表示随机种子，不是两次测试日期。</p>
+      <Table id="redesign_training" />
+      <p>10 个新结构分支 × 64 起点 = 640 次；新增 32 起点补跑三个参考对照 = 96 次，合计 736 次新执行。再加复用的 96 条历史参考，原报告共 832 条记录。</p>
+    </div></details>
+  </section>
+  <section class="weekly-question" id="panels">
+    <span class="question-number">结果面板 / 同场景比较</span><h2>新版基础 codec 从旧 RVQ 的 44/64，恢复到 58/64 与 59/64。</h2>
+    <Panels />
+    <div class="w8-result"><p><strong>这轮支持的结论：</strong>新基础版的重建首块接近关码与专家参考水平；新增 32 起点上也有改善，旧 RVQ 为 19/32，新版为 30/32、29/32。这使改善不只局限于原来反复查看的历史面板。</p></div>
+    <p>“关码 58/64”表示从这些专家中间状态交给 Full-joint-off 续跑；“专家首块 59/64”是在此基础上先给一块真实专家动作。二者都不是从任务初态出发、覆盖 50 类的自主策略成功率。</p>
+  </section>
+  <section class="weekly-question" id="limits">
+    <span class="question-number">解释边界 / 哪些归因现在还做不到</span><h2>基础版值得继续用，但不能据此宣布某一个零件赢了。</h2>
+    <ul>
+      <li><strong>一致性约束没有显示收益。</strong>两个 seed 都在 step 1,000 选出最佳权重，约 1,200 步后 loss 增长；虽然跑完 6,000 步且数值有限，优化状态并不理想，不能把结果当成对一致性思想的普遍否定。</li>
+      <li><strong>去掉 attention 仍有 56/64、58/64。</strong>基础版略高，但样本有限、同场景反复使用；尚不足以确认稳定的独立 attention 增益。</li>
+      <li><strong>缩回 2×64 仍有 56/64、57/64。</strong>说明扩大词表并非唯一变化；该组仍保留 16 个 arm 位置、独立 16-bit 夹爪与新编解码网络，并不是与旧版相同码率。</li>
+      <li><strong>整体改善是多项变化一起出现的结果。</strong>分组、容量、上下文依赖、夹爪路径、时序网络与 EMA 都变了；还没有等码率、等计算量的完整单因素分解。</li>
+    </ul>
+    <p class="w8-limit">两 seed 共用同一起点，一个场景内两个起点也相关。这里没有宣称统计显著；开发诊断面板的改善仍需要独立完整任务确认。</p>
+  </section>
+  <section class="weekly-question" id="exp-10">
+    <span class="question-number">10 / 整集执行 · 以下均为报告保存时的快照</span><h2>把“动作经得住编解码”和“预测码能帮助 WAM”分开测。</h2>
+    <p>部署面板为 50 类 × 每类 10 场，计划四组各 500 场，共 2,000 次新 rollout；Parent 和旧预测码策略的历史 500 场各自复用。这里使用<strong>历史 Full-only step60000 Parent</strong>，不再是实验 09 的 Full-joint-off，因此不能将两处成功率直接连成趋势。</p>
+    <div class="w8-route-grid">
+      <article><h3>A · 旧 / 新 codec roundtrip</h3><p class="route-flow">Parent 自己预测动作 → 编码 → 量化 → 解码 → 执行</p><p>每个动作块都这样处理，再根据新观测重新规划。没有专家未来动作，也没有 Prior 或 Conditioner。回答整条任务中重建损伤是否累积。</p></article>
+      <article><h3>B · 专家码训练的接口</h3><p class="route-flow">当前情境 → 新 Prior → 新 Conditioner → 冻结 Parent</p><p>接口训练时 75% 专家参考码、25% Off；部署完全依靠预测码。回答参考码监督得到的接口能否接住真实预测误差。</p></article>
+      <article><h3>C · 混合码训练的接口</h3><p class="route-flow">与 B 相同的部署接线，只更换接口权重</p><p>训练时 37.5% 专家码、37.5% 预测码、25% Off；检验提前见过预测码，是否减轻训练与部署的差距。</p></article>
+    </div>
+    <p>Prior 采样与扩散噪声使用分开的随机数流，避免增添码采样时顺带改变原扩散噪声。所有比较仍需在同场景完成交集内配对，而不是只看两列各自的累计成功率。</p>
+  </section>
+  <section class="weekly-question" id="snapshot">
+    <span class="question-number">固定时间点 / 2026-10-20 17:38:41 北京时间</span><h2>Prior 训练完成；新注入策略当时还没有整集结果。</h2>
+    <Table id="deployment_training" />
+    <p>Prior 的开发交叉熵从 14.21035 降到 3.61512，只说明分类目标改善。两个 Conditioner 均到 1,000 / 6,000 步，表中最近完整开发评估仍是 step 0；不能把这一行当成最终训练表现。</p>
+    <Table id="deployment_progress" caption="报告快照：完成 202 / 2,000 次新执行；各方法覆盖不同" />
+    <div class="w6-plan"><strong>不能直接拿 17/131 与 70/71 作公平横向比较。</strong><p>两组完成的场景范围不同。下面严格取共同完成的 71 场；它们只覆盖 7 类完整的 10 场，加上第 8 类 1 场。四组完整 500 场结果在本报告里尚未齐备。</p></div>
+  </section>
+  <section class="weekly-question" id="paired">
+    <span class="question-number">当前可比较的交集 / 71 个相同场景</span><h2>新 roundtrip 暂时保住 Parent 的总成功数，仍有逐场变化。</h2>
+    <Table id="roundtrip_paired" />
+    <p>新 codec 相对同一子集 Parent 救回 1 场、损伤 1 场，因此总数同为 70/71，但成败并非逐场完全相同。旧 codec 在同一交集为 13/71，表明这批场景上的整集重建损伤很重。</p>
+    <details><summary>展开这 71 场包含哪些任务</summary><div><Table id="roundtrip_tasks" /></div></details>
+    <div class="w8-result"><p><strong>目前可说：</strong>新版动作编解码链在已完成的共同子集里明显减少损伤。<strong>目前不能说：</strong>新预测码注入策略已经达到 98.59%，或新版已在完整 50 类上带来净增益。</p></div>
+    <p class="w8-limit">这是固定快照，页面没有连接服务器实时更新。该面板还复用历史测试场景，不是首次使用的全新盲测集；新夹爪编码与合法范围裁剪也是路径的一部分。</p>
+  </section>
+  <section class="weekly-question" id="next">
+    <span class="question-number">讨论问题 / 先把当前结论补全</span><h2>下一轮应围绕三条证据链继续，而不是直接跳到在线更新。</h2>
+    <ol class="w6-steps">
+      <li><strong>更可靠的表示，在完整整集上是否仍然保真？</strong><p>补齐同一批 500 场，报告逐任务成功、救回 / 损伤，以及夹爪裁剪和关键接触误差。避免用容易完成的前几个任务代表全部任务。</p></li>
+      <li><strong>更细的动作码是否能被当前情境预测？</strong><p>分别看 arm 层级与夹爪误差，检查先预测 arm 再预测夹爪的误差传递；分类 loss 下降不能替代执行验证。</p></li>
+      <li><strong>预测码注入有无净收益，混合训练能否缩小差距？</strong><p>待两组接口完成，在相同 Parent、场景与噪声上比较预测码、同权重 Off 和参考码诊断。再决定是否需要调整接口、联合训练或投入反馈更新。</p></li>
+    </ol>
+    <p>本周把问题推进到了更具体的位置：新表示已有首块与部分整集保真证据；自主选码与使用码的闭环收益，仍是下一关。</p>
+    <p><a href={root+"architecture/"}>回看新架构与训练接口 →</a> · <a href={root+"g05/"}>回看 G0.5 的参考边界 →</a></p>
+  </section>
+</Week8Layout>

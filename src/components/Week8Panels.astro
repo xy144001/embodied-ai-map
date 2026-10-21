@@ -1,0 +1,15 @@
+---
+import data from "../data/week8-diagnostics.json";
+const panels=[["overall","全部 64 起点"],["historical","历史 32 起点"],["fresh","新增 32 起点"]] as const;
+---
+<div class="w8-panel-controls" role="group" aria-label="实验 09 起点范围">{panels.map(([id,label],i)=><button type="button" data-panel-select={id} aria-pressed={i===0?"true":"false"}>{label}</button>)}</div>
+<p class="w6-meta">两个训练 seed 共用相同场景。点击切换面板；统计由报告中 832 条执行记录汇总，其中包含复用参考。窄屏可左右滑动表格。</p>
+{panels.map(([id,label],i)=><div class="w8-panel" data-result-panel={id} hidden={i>0}><div class="w6-table-wrap" tabindex="0" role="region" aria-label={label+"成功数，窄屏可横向滚动"}><table><caption>实验 09 · {label} · 只改首块，随后统一关码续跑</caption><thead><tr><th scope="col">方法</th><th scope="col">训练 seed 20261020</th><th scope="col">训练 seed 20261021</th></tr></thead><tbody>{data.panels[id].map((row,j)=><tr><th scope="row">{row.method}</th><td>{row.results[0].success}/{row.results[0].n}</td><td>{j<3?"同一参考对照":`${row.results[1].success}/${row.results[1].n}`}</td></tr>)}</tbody></table></div></div>)}
+<script>
+  const buttons=document.querySelectorAll<HTMLButtonElement>("[data-panel-select]");
+  buttons.forEach(button=>button.addEventListener("click",()=>{
+    buttons.forEach(b=>b.setAttribute("aria-pressed",String(b===button)));
+    document.querySelectorAll<HTMLElement>("[data-result-panel]").forEach(panel=>{panel.hidden=panel.dataset.resultPanel!==button.dataset.panelSelect;});
+  }));
+</script>
+<noscript><p class="w6-meta">未启用 JavaScript，显示全部 64 起点。新增面板：关码 30/32、旧 RVQ 19/32、新基础版 30/32 与 29/32。</p></noscript>
