@@ -1,0 +1,7 @@
+---
+import data from "../data/week9-review.json";
+interface Props {id:keyof typeof data.tables}
+const {id}=Astro.props;
+const table=data.tables[id];
+---
+<div class="w6-table-block"><p class="w6-meta">窄屏可左右滑动表格</p><div class="w6-table-wrap" tabindex="0" role="region" aria-label={table.caption+"，可横向滚动"}><table data-source-table={id}><caption>{table.caption}</caption><thead><tr>{table.columns.map(c=><th scope="col">{c}</th>)}</tr></thead><tbody>{table.rows.map(r=><tr>{r.map((v,i)=>i===0?<th scope="row">{v}</th>:<td>{v}</td>)}</tr>)}</tbody></table></div></div>

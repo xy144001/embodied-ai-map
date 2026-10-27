@@ -1,0 +1,27 @@
+---
+import Layout from "../../../../../layouts/Week9Layout.astro";
+import Experiment from "../../../../../components/Week9Experiment.astro";
+const root=import.meta.env.BASE_URL.replace(/\/$/,"")+"/model-architecture/problems/week9/";
+const chapters=[["e06","06 · VLM 直接生成"],["e07","07 · 小样本拟合"],["e08","08 · 连续动作对照"],["e09","09 · 尾段与重规划"],["e10","10 · 动作监督与历史"],["e11","11 · 充分拟合训练轨迹"],["e12","12 · 换新场景"],["causes","证据与原因假设"]];
+---
+<Layout title="拟合与泛化 · 会记住动作码，距离会控制还有多远" description="实验 06–12 逐步移除旧接口、改变动作输出、补齐监督，再强制充分覆盖少量训练轨迹。最终把“无法学习”与“无法泛化”区分开。" active="generalization" chapters={chapters}>
+  <div class="w6-note"><strong>这里的“Prior”逐渐指向新的动作预测策略。</strong><p>实验 06 起主要是 Qwen3-VL-4B 加本地动作接口的分支，后续试过自回归码、并行码和连续动作。它不经过旧 WAM Conditioner，也没有继承 Faster-WAM 的动作权重；不要与前页的小 Prior 混为同一个模型。</p></div>
+  <Experiment id="e06" /><Experiment id="e07" />
+  <div class="w9-step"><h3>能拟合小数据后，再检查输出与监督。</h3><p>如果去掉量化或自回归仍然做不好，就需要继续检查动作目标、样本覆盖和闭环状态，而不能只盯一个离散瓶颈。</p></div>
+  <Experiment id="e08" /><Experiment id="e09" /><Experiment id="e10" />
+  <div class="w9-step"><h3>最后，先把“这批数据到底学完没有”变成可检查的条件。</h3><p>固定少量轨迹、每个 epoch 无放回覆盖，直到完整序列连续两次全部正确。随后固定权重，分别看训练场景与独立测试场景。</p></div>
+  <Experiment id="e11" /><Experiment id="e12" />
+  <section class="weekly-question" id="causes">
+    <span class="question-number">原因分析 / 把已经观察到的事与机制假设分开</span><h2>证据最强的是泛化差距；“为什么差”仍有多个解释。</h2>
+    <span class="w9-verdict">已有直接证据</span>
+    <ul><li><strong>训练目标可以拟合。</strong>1、64、377 个块均能全部预测正确；这排除了“存在一个必然阻止学习的断点”，但没有排除所有实现问题或证明多任务训练已收敛。</li><li><strong>新场景控制很差。</strong>同一末轮模型在训练场景为 6/8，在独立 160 场为 18/160。后者与 Parent 配对后救回 4 场、损伤 117 场；仅同次数成功也不表示轨迹或能力相同。</li><li><strong>实际训练曝光不足。</strong>动作监督 / 历史那轮共 67,667 个 query，96,000 次访问只覆盖 43,168 个，24,499 个本轮未访问（约 36.2%），平均每块约 1.42 次。它继承过更早的训练，因此“这轮没访问”不等于此前从未见过相应场景。</li><li><strong>尾段监督确有缺口。</strong>1,204/1,280 条轨迹存在未覆盖末段，合计 17,596 条末段命令。修复后效果只小幅变化；补尾块还重新分配了固定采样预算，不能据此解释全部失败。</li></ul>
+    <span class="w9-verdict hypothesis">优先验证的解释 · 尚非唯一因果</span>
+    <div class="w6-cards">
+      <article><h3>基础动作经验不足</h3><p>通用 VLM 加新接口，需要建立视觉、语言与机器人动作的联系；官方 G0.5 Base 已有成套机器人预训练。还缺少同架构、同数据、仅换初始化的严格对照。</p></article>
+      <article><h3>码容易重建，未必容易预测</h3><p>给定正确动作压缩得好，不能保证从当前观测容易分类出相应 ID。粗层错误还会改变细层残差；已有分层和前缀修正实验未形成稳定解决方案。</p></article>
+      <article><h3>闭环走偏后的恢复没学会</h3><p>专家示范主要覆盖成功状态；第一次动作有误后，下一步可能已离开示范分布。接触与夹爪时机还可能把小误差变成任务失败。目前没有固定其他条件的纠错数据消融。</p></article>
+      <article><h3>覆盖与优化需要分别审计</h3><p>数据池大小、实际见过多少块、每块见过多少次并非一回事。8 条轨迹充分拟合只能证明可行性，不能当作 50 类充分训练的能力极限。</p></article>
+    </div>
+    <p>旧注入器的内容利用仍需诊断，但无注入、无离散码的连续头也差，所以它无法解释所有分支。下一步使用配套的机器人预训练模型，先降低基础动作学习的难度。</p><p><a href={root+"g05/"}>继续：官方 G0.5 Base 改变了哪些条件？ →</a></p>
+  </section>
+</Layout>

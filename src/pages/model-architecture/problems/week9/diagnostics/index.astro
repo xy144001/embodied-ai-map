@@ -1,0 +1,15 @@
+---
+import Layout from "../../../../../layouts/Week9Layout.astro";
+import Experiment from "../../../../../components/Week9Experiment.astro";
+const root=import.meta.env.BASE_URL.replace(/\/$/,"")+"/model-architecture/problems/week9/";
+const chapters=[["e01","01 · 整集最终结果"],["e02","02 · 真值码与错码"],["e03","03 · 换上下文"],["e04","04 · 分层预测"],["e05","05 · 前缀修正"],["takeaway","这一步定位了什么"]];
+---
+<Layout title="选码与注入诊断 · 动作能还原，当前情境却选不好码" description="先接上 Week8 尚未结束的整集评测，再围绕 Prior 的输入、预测顺序和训练前缀逐步做对照。实验 01–05 全部使用本周报告的最终结果。" active="diagnostics" chapters={chapters}>
+  <p class="w9-reading-note">本页 Parent 为历史 Full-only60000 Faster-WAM，包含此前动作微调。实验 01 的 500 场与实验 02–05 的 64 个专家中间起点分别回答完整策略与首块干预问题。</p>
+  <Experiment id="e01" />
+  <div class="w9-step"><h3>接下来把两件事拆开。</h3><p>编码专家动作得到真值码，可以绕开 Prior；把码直接解码执行，可以绕开 Conditioner。这样区分“码预测错了”和“注入器没正确利用内容”。</p></div>
+  <Experiment id="e02" />
+  <div class="w9-step"><h3>预测端的三个候选解释，分别检查。</h3><p>输入特征可能不够合适、残差层级可能没有被利用、推理时错误前缀可能改变后续码的含义。下列三组各自针对其中一项。</p></div>
+  <Experiment id="e03" /><Experiment id="e04" /><Experiment id="e05" foldTable />
+  <section class="weekly-question" id="takeaway"><span class="question-number">阶段结论 / 仍需继续拆解</span><h2>选码有明显差距，旧注入器也留下疑点。</h2><p>真值码直接解码为 57/64，预测码只有 24/64，支持继续检查预测策略；正确码注入却未稳定胜过跨任务错码，说明“预测得更准”也未必自动带来注入收益。</p><p>小 Prior 的三项调整都没有跨 seed 稳定解决问题。于是后续转向 VLM 直接输出动作，绕开旧 Conditioner，检验问题是否仍然存在。</p><p><a href={root+"generalization/"}>继续：通用 VLM 能否直接学会控制？ →</a></p></section>
+</Layout>
