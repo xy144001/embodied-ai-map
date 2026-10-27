@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1120 1090" role="img" aria-labelledby="title desc">
+<title id="title">当前 G0.5 适配：训练动作策略，固定 ActionCodec</title><desc id="desc">图示为报告核对的计划；快照时正式训练 0 更新。绿色将更新，蓝色固定，虚线为训练梯度。</desc>
+<defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" fill="#9abce9"/></marker><marker id="optional" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" fill="#e0bc7e"/></marker></defs>
+<rect width="1120" height="1090" rx="12" fill="#0b1422"/>
+<g font-family="system-ui, Noto Sans SC, Microsoft YaHei, sans-serif">
+<text x="36" y="46" font-size="29" font-weight="700" fill="#f0f4ff">当前 G0.5 适配：训练动作策略，固定 ActionCodec</text>
+<text x="36" y="82" font-size="17" fill="#b5c7df">图示为报告核对的计划；快照时正式训练 0 更新。绿色将更新，蓝色固定，虚线为训练梯度。</text>
+<path d="M 290,250 L 290,345" fill="none" stroke="#9abce9" stroke-width="2.3" marker-end="url(#arrow)"/>
+<path d="M 290,495 L 290,565" fill="none" stroke="#9abce9" stroke-width="2.3" marker-end="url(#arrow)"/>
+<path d="M 840,250 L 840,345" fill="none" stroke="#9abce9" stroke-width="2.3" marker-end="url(#arrow)"/>
+<path d="M 840,495 L 840,565" fill="none" stroke="#9abce9" stroke-width="2.3" marker-end="url(#arrow)"/>
+<path d="M 290,655 L 290,775 L 390,775" fill="none" stroke="#9abce9" stroke-width="2.3" marker-end="url(#arrow)"/>
+<path d="M 840,655 L 840,775 L 730,775" fill="none" stroke="#9abce9" stroke-width="2.3" marker-end="url(#arrow)"/>
+<path d="M 560,725 L 560,420 L 540,420" fill="none" stroke="#e0bc7e" stroke-width="2.3" stroke-dasharray="7 5" marker-end="url(#optional)"/>
+<path d="M 290,775 L 290,940 L 600,940" fill="none" stroke="#9abce9" stroke-width="2.3" marker-end="url(#arrow)"/>
+<rect x="40" y="140" width="500" height="110" rx="9" fill="#15283f" stroke="#799bcb" stroke-width="1.6"/>
+<text x="290.0" y="174.0" text-anchor="middle" font-size="21" font-weight="700" fill="#f0f4ff">当前三相机 + 状态 + 指令</text>
+<text x="290.0" y="204.0" text-anchor="middle" font-size="17" fill="#c5d3e7">头部 / 左腕 / 右腕；obs_size = 1</text>
+<text x="290.0" y="230.0" text-anchor="middle" font-size="17" fill="#c5d3e7">当前不使用 CoT 或跨 episode memory</text>
+<rect x="600" y="140" width="480" height="110" rx="9" fill="#15283f" stroke="#799bcb" stroke-width="1.6"/>
+<text x="840.0" y="174.0" text-anchor="middle" font-size="21" font-weight="700" fill="#f0f4ff">专家未来 32 步动作</text>
+<text x="840.0" y="204.0" text-anchor="middle" font-size="17" fill="#c5d3e7">只用于构造监督标签</text>
+<text x="840.0" y="230.0" text-anchor="middle" font-size="17" fill="#c5d3e7">不会成为部署输入</text>
+<rect x="40" y="345" width="500" height="150" rx="9" fill="#14362f" stroke="#8ad2b7" stroke-width="1.6"/>
+<text x="290.0" y="386.0" text-anchor="middle" font-size="21" font-weight="700" fill="#f0f4ff">G0.5 Base：视觉 + VLM</text>
+<text x="290.0" y="416.0" text-anchor="middle" font-size="17" fill="#c5d3e7">内部 PatchMerger、Transformer、动作词表</text>
+<text x="290.0" y="442.0" text-anchor="middle" font-size="17" fill="#c5d3e7">原参数参与全参数策略微调</text>
+<text x="290.0" y="468.0" text-anchor="middle" font-size="17" fill="#c5d3e7">继承官方机器人预训练，当前计划更新</text>
+<rect x="600" y="345" width="480" height="150" rx="9" fill="#15283f" stroke="#799bcb" stroke-width="1.6"/>
+<text x="840.0" y="386.0" text-anchor="middle" font-size="21" font-weight="700" fill="#f0f4ff">固定官方 ActionCodec encoder + RVQ</text>
+<text x="840.0" y="416.0" text-anchor="middle" font-size="17" fill="#c5d3e7">torch.no_grad() 编码专家动作</text>
+<text x="840.0" y="442.0" text-anchor="middle" font-size="17" fill="#c5d3e7">码表不因标签生成而 EMA 更新</text>
+<text x="840.0" y="468.0" text-anchor="middle" font-size="17" fill="#c5d3e7">匹配官方布局、词表与归一化</text>
+<rect x="40" y="565" width="500" height="90" rx="9" fill="#14362f" stroke="#8ad2b7" stroke-width="1.6"/>
+<text x="290.0" y="602.0" text-anchor="middle" font-size="21" font-weight="700" fill="#f0f4ff">自回归动作码概率 / ID</text>
+<text x="290.0" y="632.0" text-anchor="middle" font-size="17" fill="#c5d3e7">训练计算 CE；部署生成编号</text>
+<rect x="600" y="565" width="480" height="90" rx="9" fill="#15283f" stroke="#799bcb" stroke-width="1.6"/>
+<text x="840.0" y="602.0" text-anchor="middle" font-size="21" font-weight="700" fill="#f0f4ff">固定离散动作标签</text>
+<text x="840.0" y="632.0" text-anchor="middle" font-size="17" fill="#c5d3e7">与策略的动作码概率计算 CE</text>
+<rect x="390" y="725" width="340" height="100" rx="9" fill="#14362f" stroke="#8ad2b7" stroke-width="1.6"/>
+<text x="560.0" y="767.0" text-anchor="middle" font-size="21" font-weight="700" fill="#f0f4ff">动作码 CE 损失</text>
+<text x="560.0" y="797.0" text-anchor="middle" font-size="17" fill="#c5d3e7">梯度只回到策略参数</text>
+<rect x="600" y="890" width="480" height="100" rx="9" fill="#15283f" stroke="#799bcb" stroke-width="1.6"/>
+<text x="840.0" y="932.0" text-anchor="middle" font-size="21" font-weight="700" fill="#f0f4ff">部署：固定 codec decoder → 动作</text>
+<text x="840.0" y="962.0" text-anchor="middle" font-size="17" fill="#c5d3e7">32 步中先执行 8 步，再观察和生成</text>
+<text x="40" y="1040" font-size="17" fill="#b4c8e1">训练：专家动作 → 固定编码标签 → CE。部署：当前观察 → VLM 预测 ID → 固定解码器 → 连续动作。</text>
+</g></svg>

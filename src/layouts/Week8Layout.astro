@@ -14,6 +14,7 @@ const pages=[["overview","本周问题",""],["diagnostics","01 · 诊断实验",
     <h1>{title}</h1><p class="intro">{description}</p>
     <div class="w8-status"><span>已实现 · 结构化动作码本与配套接口</span><span>固定码本阶段 · 在线 memory 未启用</span></div>
     <p class="w6-meta">页面更新：2026-10-21 · 实验 00–09 为报告中的已完成结果 · 实验 10 保存于 <time datetime="2026-10-20T17:38:41+08:00">10-20 17:38:41（北京时间）</time>，不自动刷新</p>
+    <aside class="w6-note"><strong>后续完整结果与路线调整已见 Week9。</strong><p>本页保留 Week8 的结构和历史快照。实验 10 的完整 500 场结果，以及后续 Prior / VLM 诊断与官方 G0.5 Base 适配计划，见 <a href={root+"problems/week9/"}>Week9</a>。</p></aside>
     <nav class="w6-subnav" aria-label="Week 8 内容">{pages.map(([id,label,path])=><a href={root+"problems/week8/"+path} aria-current={id===active?"page":undefined}>{label}</a>)}</nav>
     <div class:list={{"weekly-reading":chapters.length>0}}>
       {chapters.length>0&&<nav class="weekly-toc" aria-label="本页讲解目录"><strong>讲解顺序</strong>{chapters.map(([id,label])=><a href={"#"+id}>{label}</a>)}</nav>}

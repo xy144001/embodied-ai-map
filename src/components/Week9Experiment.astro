@@ -1,0 +1,15 @@
+---
+import data from "../data/week9-review.json";
+import Table from "./Week9Table.astro";
+interface Props {id:string;foldTable?:boolean}
+const {id,foldTable=false}=Astro.props;
+const exp=data.experiments.find(e=>e.id===id);
+if(!exp)throw new Error("Unknown Week9 experiment: "+id);
+---
+<section class="weekly-question" id={id}>
+  <span class="question-number">实验 {id.slice(1)} / {exp.date} · {exp.protocol}</span><h2>{exp.title}</h2>
+  <p><strong>为什么做：</strong>{exp.purpose}</p><p><strong>怎样比较：</strong>{exp.approach}</p>
+  {exp.extra.map(p=><p class="w9-extra">{p}</p>)}
+  {foldTable?<details><summary>展开两个 seed 的完整对照结果</summary><div>{exp.tables.map(t=><Table id={t as keyof typeof data.tables} />)}</div></details>:exp.tables.map(t=><Table id={t as keyof typeof data.tables} />)}
+  <div class="w8-result"><p><strong>结果说明：</strong>{exp.finding}</p></div><p class="w8-limit">{exp.limit}</p>
+</section>

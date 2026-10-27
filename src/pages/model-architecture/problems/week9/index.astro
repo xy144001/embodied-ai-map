@@ -1,0 +1,33 @@
+---
+import Layout from "../../../../layouts/Week9Layout.astro";
+const root=import.meta.env.BASE_URL.replace(/\/$/,"")+"/model-architecture/problems/week9/";
+---
+<Layout title="Week9 · 从选码失败，走向有机器人预训练的动作基线" description="本周围绕一个问题推进：为什么码本能还原动作、模型能记住训练轨迹，却仍然做不好新场景？12 组实验把问题从编解码推进到策略泛化，也促成了下一阶段的 G0.5 适配。">
+  <section class="weekly-question">
+    <span class="question-number">本周核心问题 / 动作表示、动作选择与经验学习</span><h2>先建立可靠的基础动作策略，再检验跨回合 memory。</h2>
+    <p class="w6-lead">这周最重要的变化，是把“模型到底哪里不会”拆得更清楚：<strong>新码本的重建已基本可靠；预测动作、利用码内容以及偏离示范后的控制仍有问题。</strong>换成通用 VLM 后，即便训练目标可以完全拟合，新场景表现仍然很差。</p>
+    <div class="w6-entries">
+      <a href={root+"diagnostics/"}><small>01 / 从 Week8 的未完成评测继续</small><strong>码本修好后，选码与注入仍然差</strong><p>补全 500 场结果；比较真值码、预测码、错码，再检查上下文、分层预测和前缀修正。</p><b>实验 01–05 →</b></a>
+      <a href={root+"generalization/"}><small>02 / 去掉旧接口，继续定位</small><strong>会记住训练数据，为什么仍不会做新场景？</strong><p>通用 VLM 直出动作、连续头、尾段监督、短历史，以及从 8 条轨迹拟合到 160 场测试。</p><b>实验 06–12 与原因分析 →</b></a>
+      <a href={root+"g05/"}><small>03 / 新阶段的架构与起点</small><strong>转向官方 G0.5 Base</strong><p>继承配套的机器人动作预训练；更新 VLM 策略，固定官方 codec，并分清公开 FM 成品与 AR 路线。</p><b>架构演变、训练边界与路径对照 →</b></a>
+      <a href={root+"progress/"}><small>04 / 明确已经完成与下一步</small><strong>采集准备、训练计划与 memory 验证</strong><p>数据快照为 2,437 / 29,500；正式训练仍为 0 更新。训练耗时按假设说明，后续以实测收紧。</p><b>当前进度与判断标准 →</b></a>
+    </div>
+    <div class="w6-stats">
+      <div><b>461 → 460 / 500</b><strong>新码本整集往返基本保真</strong><p>同一 Parent 生成动作后再编解码；预测码注入两组则为 413、417 / 500。</p></div>
+      <div><b>377 / 377</b><strong>训练动作码可以全部拟合</strong><p>8 条训练轨迹的密集窗口；动作监督分支在这 8 个训练场景成功 6 次。</p></div>
+      <div class="negative"><b>18 / 160</b><strong>同一末轮模型的新场景表现</strong><p>Parent 为 131 / 160。训练集拟合没有转化为可靠泛化。</p></div>
+    </div>
+    <p class="w9-reading-note">以上来自三种协议，不能读成同一条性能曲线。特别是 6/8 属于训练场景；18/160 属于固定独立测试场景；460/500 是 WAM 自己动作的编解码保真。</p>
+  </section>
+  <section class="weekly-question">
+    <span class="question-number">讲解顺序 / 本周逻辑的五个台阶</span><h2>每一步都改变了下一步该问的问题。</h2>
+    <ol class="w6-steps">
+      <li><strong>动作能保住，但预测链没恢复。</strong><p>整集 roundtrip 从旧版 11% 恢复到新版 92%，预测码注入仍只有约 83%。下一步要检查选码和内容利用。</p></li>
+      <li><strong>真值码远好于预测码，改小 Prior 仍不稳定。</strong><p>换特征、按层预测、修复前缀没有形成跨 seed 的稳定解决方案。</p></li>
+      <li><strong>移除旧注入器和离散输出，也没有恢复强策略。</strong><p>连续动作误差更小，完整任务仍差；旧注入器与量化不能解释全部失败。</p></li>
+      <li><strong>训练目标能学会，场景泛化是当前的明显差距。</strong><p>末轮训练轨迹全部码正确，独立 160 场仅 18 次成功。覆盖、真实采样曝光、动作预训练与闭环纠错仍需区分。</p></li>
+      <li><strong>先借用成熟动作起点，把 memory 的作用单独验证。</strong><p>从官方 G0.5 Base 做 RoboTwin AR 适配；无 memory 基线可靠后，再比较空库、随机历史与相关历史。</p></li>
+    </ol>
+    <div class="w6-plan"><strong>本周没有证明“memory 无效”，也还没有得到 G0.5 AR 适配成功的结果。</strong><p>当前是在减少基础策略的不确定性。跨回合检索、反馈更新码表与 TTT 仍是后续研究；这轮官方码表保持固定。</p></div>
+  </section>
+</Layout>

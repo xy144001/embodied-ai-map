@@ -1,0 +1,26 @@
+---
+import WeeklyLayout from "./WeeklyLayout.astro";
+import "../styles/model-week6.css";
+import "../styles/model-week8.css";
+import "../styles/model-week9.css";
+import "katex/dist/katex.min.css";
+interface Props {title:string;description:string;active?:"overview"|"diagnostics"|"generalization"|"g05"|"progress";chapters?:string[][]}
+const {title,description,active="overview",chapters=[]}=Astro.props;
+const root=import.meta.env.BASE_URL.replace(/\/$/,"")+"/model-architecture/";
+const pages=[["overview","本周主线",""],["diagnostics","01 · 选码与注入诊断","diagnostics/"],["generalization","02 · 拟合与泛化","generalization/"],["g05","03 · 转向官方 G0.5","g05/"],["progress","04 · 准备进度与下一步","progress/"]];
+---
+<WeeklyLayout title={title+" · Week 9"} description={description} section="problems" week={9}>
+  <div class="w6-scope w8-scope w9-scope">
+    <p class="eyebrow">WEEK 9 · FROM CODE PREDICTION TO A PRETRAINED ACTION POLICY</p>
+    <h1>{title}</h1><p class="intro">{description}</p>
+    <div class="w8-status"><span>已完成 · Prior / VLM 多轮诊断</span><span>准备中 · 官方 Base 的 RoboTwin AR 适配</span></div>
+    <p class="w6-meta">回顾：2026-10-20—27 · 页面更新：2026-10-27 · 报告快照：<time datetime="2026-10-27T22:02:09+08:00">10-27 22:02:09（北京时间）</time>。采集与训练进度按此时间保存，不自动刷新。</p>
+    <nav class="w6-subnav" aria-label="Week 9 内容">{pages.map(([id,label,path])=><a href={root+"problems/week9/"+path} aria-current={id===active?"page":undefined}>{label}</a>)}</nav>
+    <div class:list={{"weekly-reading":chapters.length>0}}>
+      {chapters.length>0&&<nav class="weekly-toc" aria-label="本页讲解目录"><strong>讲解顺序</strong>{chapters.map(([id,label])=><a href={"#"+id}>{label}</a>)}</nav>}
+      <article class="weekly-article"><slot /></article>
+    </div>
+    <div class="w6-sources"><p class="w6-meta"><strong>依据：</strong>团队《Prior_to_G05_Weekly_Review.html》。实验表按附件原表提取；附件说明主要结果由 results.json 生成并核对完成审计，本次网页整理未访问训练服务器重新验证。实验编号沿用本周报告，与 Week8 的编号分开。</p><p class="w6-meta">完整任务、中间状态首块干预、离线动作块、训练场景闭环各有不同分母；两训练 seed 复用同一批场景。官方 G0.5 的资料与当前本地配置区别见<a href={root+"problems/week9/g05/#sources"}>来源说明</a>。</p></div>
+    <nav class="w6-bottom" aria-label="继续阅读">{pages.filter(([id])=>id!==active).map(([,label,path])=><a href={root+"problems/week9/"+path}>{label} →</a>)}<a href={root+"problems/week8/"}>← Week8 · 码本改造</a><a href={root+"memory-wam/"}>Memory-WAM →</a></nav>
+  </div>
+</WeeklyLayout>

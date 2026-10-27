@@ -1,0 +1,70 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1120 1110" role="img" aria-labelledby="title desc">
+<title id="title">路线演变：从独立选码，到配套预训练的动作策略</title><desc id="desc">三列是不同研究分支；右列为当前准备中的适配，不表示已经取得训练后的闭环结果。</desc>
+<defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" fill="#9abce9"/></marker><marker id="optional" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" fill="#e0bc7e"/></marker></defs>
+<rect width="1120" height="1110" rx="12" fill="#0b1422"/>
+<g font-family="system-ui, Noto Sans SC, Microsoft YaHei, sans-serif">
+<text x="36" y="46" font-size="29" font-weight="700" fill="#f0f4ff">路线演变：从独立选码，到配套预训练的动作策略</text>
+<text x="36" y="82" font-size="17" fill="#b5c7df">三列是不同研究分支；右列为当前准备中的适配，不表示已经取得训练后的闭环结果。</text>
+<path d="M 199,260 L 199,325" fill="none" stroke="#9abce9" stroke-width="2.3" marker-end="url(#arrow)"/>
+<path d="M 199,460 L 199,535" fill="none" stroke="#9abce9" stroke-width="2.3" marker-end="url(#arrow)"/>
+<path d="M 199,650 L 199,725" fill="none" stroke="#9abce9" stroke-width="2.3" marker-end="url(#arrow)"/>
+<path d="M 560,260 L 560,325" fill="none" stroke="#9abce9" stroke-width="2.3" marker-end="url(#arrow)"/>
+<path d="M 560,460 L 560,535" fill="none" stroke="#9abce9" stroke-width="2.3" marker-end="url(#arrow)"/>
+<path d="M 560,650 L 560,725" fill="none" stroke="#9abce9" stroke-width="2.3" marker-end="url(#arrow)"/>
+<path d="M 921,260 L 921,325" fill="none" stroke="#9abce9" stroke-width="2.3" marker-end="url(#arrow)"/>
+<path d="M 921,460 L 921,535" fill="none" stroke="#9abce9" stroke-width="2.3" marker-end="url(#arrow)"/>
+<path d="M 921,650 L 921,725" fill="none" stroke="#9abce9" stroke-width="2.3" marker-end="url(#arrow)"/>
+<path d="M 921,840 L 921,935" fill="none" stroke="#e0bc7e" stroke-width="2.3" stroke-dasharray="7 5" marker-end="url(#optional)"/>
+<rect x="36" y="160" width="326" height="100" rx="9" fill="#15283f" stroke="#799bcb" stroke-width="1.6"/>
+<text x="199.0" y="202.0" text-anchor="middle" font-size="21" font-weight="700" fill="#f0f4ff">当前观察 / 状态 / 指令</text>
+<text x="199.0" y="232.0" text-anchor="middle" font-size="17" fill="#c5d3e7">部署输入均不含专家未来动作</text>
+<rect x="397" y="160" width="326" height="100" rx="9" fill="#15283f" stroke="#799bcb" stroke-width="1.6"/>
+<text x="560.0" y="202.0" text-anchor="middle" font-size="21" font-weight="700" fill="#f0f4ff">当前观察 / 状态 / 指令</text>
+<text x="560.0" y="232.0" text-anchor="middle" font-size="17" fill="#c5d3e7">部署输入均不含专家未来动作</text>
+<rect x="758" y="160" width="326" height="100" rx="9" fill="#15283f" stroke="#799bcb" stroke-width="1.6"/>
+<text x="921.0" y="202.0" text-anchor="middle" font-size="21" font-weight="700" fill="#f0f4ff">当前观察 / 状态 / 指令</text>
+<text x="921.0" y="232.0" text-anchor="middle" font-size="17" fill="#c5d3e7">部署输入均不含专家未来动作</text>
+<rect x="36" y="325" width="326" height="135" rx="9" fill="#2a2444" stroke="#b7a3ff" stroke-width="1.6"/>
+<text x="199.0" y="371.5" text-anchor="middle" font-size="21" font-weight="700" fill="#f0f4ff">独立小 Prior</text>
+<text x="199.0" y="401.5" text-anchor="middle" font-size="17" fill="#c5d3e7">读取 WAM / VAE 当前特征</text>
+<text x="199.0" y="427.5" text-anchor="middle" font-size="17" fill="#c5d3e7">预测本地自训码本 ID</text>
+<rect x="397" y="325" width="326" height="135" rx="9" fill="#2a2444" stroke="#b7a3ff" stroke-width="1.6"/>
+<text x="560.0" y="371.5" text-anchor="middle" font-size="21" font-weight="700" fill="#f0f4ff">通用 Qwen3-VL-4B</text>
+<text x="560.0" y="401.5" text-anchor="middle" font-size="17" fill="#c5d3e7">新增动作接口；LoRA 等训练</text>
+<text x="560.0" y="427.5" text-anchor="middle" font-size="17" fill="#c5d3e7">没有继承 Faster-WAM 动作权重</text>
+<rect x="758" y="325" width="326" height="135" rx="9" fill="#14362f" stroke="#8ad2b7" stroke-width="1.6"/>
+<text x="921.0" y="371.5" text-anchor="middle" font-size="21" font-weight="700" fill="#f0f4ff">官方 G0.5 Base</text>
+<text x="921.0" y="401.5" text-anchor="middle" font-size="17" fill="#c5d3e7">已有机器人动作预训练</text>
+<text x="921.0" y="427.5" text-anchor="middle" font-size="17" fill="#c5d3e7">计划全参数适配视觉与 VLM</text>
+<rect x="36" y="535" width="326" height="115" rx="9" fill="#2a2444" stroke="#b7a3ff" stroke-width="1.6"/>
+<text x="199.0" y="571.5" text-anchor="middle" font-size="21" font-weight="700" fill="#f0f4ff">查表 → Conditioner</text>
+<text x="199.0" y="601.5" text-anchor="middle" font-size="17" fill="#c5d3e7">码向量注入 Action hidden</text>
+<text x="199.0" y="627.5" text-anchor="middle" font-size="17" fill="#c5d3e7">选码与内容利用需分别诊断</text>
+<rect x="397" y="535" width="326" height="115" rx="9" fill="#2a2444" stroke="#b7a3ff" stroke-width="1.6"/>
+<text x="560.0" y="571.5" text-anchor="middle" font-size="21" font-weight="700" fill="#f0f4ff">更换动作输出形式</text>
+<text x="560.0" y="601.5" text-anchor="middle" font-size="17" fill="#c5d3e7">自回归码 / 并行码 / 连续头</text>
+<text x="560.0" y="627.5" text-anchor="middle" font-size="17" fill="#c5d3e7">绕开旧 WAM Conditioner</text>
+<rect x="758" y="535" width="326" height="115" rx="9" fill="#14362f" stroke="#8ad2b7" stroke-width="1.6"/>
+<text x="921.0" y="571.5" text-anchor="middle" font-size="21" font-weight="700" fill="#f0f4ff">官方词表与序列化</text>
+<text x="921.0" y="601.5" text-anchor="middle" font-size="17" fill="#c5d3e7">在 RoboTwin 监督动作码 CE</text>
+<text x="921.0" y="627.5" text-anchor="middle" font-size="17" fill="#c5d3e7">复用原配接口与码本</text>
+<rect x="36" y="725" width="326" height="115" rx="9" fill="#15283f" stroke="#799bcb" stroke-width="1.6"/>
+<text x="199.0" y="761.5" text-anchor="middle" font-size="21" font-weight="700" fill="#f0f4ff">Faster-WAM 生成动作</text>
+<text x="199.0" y="791.5" text-anchor="middle" font-size="17" fill="#c5d3e7">最终仍由 Action DiT 去噪</text>
+<text x="199.0" y="817.5" text-anchor="middle" font-size="17" fill="#c5d3e7">新码本往返好，预测链仍差</text>
+<rect x="397" y="725" width="326" height="115" rx="9" fill="#15283f" stroke="#799bcb" stroke-width="1.6"/>
+<text x="560.0" y="761.5" text-anchor="middle" font-size="21" font-weight="700" fill="#f0f4ff">直接执行预测动作</text>
+<text x="560.0" y="791.5" text-anchor="middle" font-size="17" fill="#c5d3e7">码经自训 codec；或连续输出</text>
+<text x="560.0" y="817.5" text-anchor="middle" font-size="17" fill="#c5d3e7">能拟合，泛化与闭环仍差</text>
+<rect x="758" y="725" width="326" height="115" rx="9" fill="#15283f" stroke="#799bcb" stroke-width="1.6"/>
+<text x="921.0" y="761.5" text-anchor="middle" font-size="21" font-weight="700" fill="#f0f4ff">固定官方 ActionCodec</text>
+<text x="921.0" y="791.5" text-anchor="middle" font-size="17" fill="#c5d3e7">解码 32 步动作，先执行 8 步</text>
+<text x="921.0" y="817.5" text-anchor="middle" font-size="17" fill="#c5d3e7">无 memory AR 基线待训练</text>
+<rect x="36" y="935" width="1048" height="110" rx="9" fill="#32291c" stroke="#ddbc7c" stroke-width="1.6"/>
+<text x="560.0" y="982.0" text-anchor="middle" font-size="21" font-weight="700" fill="#f0f4ff">下一阶段：先验证官方 Base 的 AR 基线，再比较跨 episode 经验</text>
+<text x="560.0" y="1012.0" text-anchor="middle" font-size="17" fill="#c5d3e7">未来 memory 优先改变动作生成条件 / 选码倾向；当前未启用跨回合记忆，也不在线更新码表。</text>
+<text x="36" y="128" font-size="19" fill="#a8dfc9">旧：独立 Prior + WAM</text>
+<text x="397" y="128" font-size="19" fill="#a8dfc9">中间：通用 VLM 直接预测</text>
+<text x="758" y="128" font-size="19" fill="#a8dfc9">当前：官方 G0.5 Base</text>
+<text x="36" y="1080" font-size="17" fill="#b4c8e1">依据：10-27 周报。G0.5 与中间分支都使用现成 VLM；更重要的区别是机器人预训练与成套接口。</text>
+</g></svg>

@@ -1,0 +1,56 @@
+---
+import Layout from "../../../../../layouts/Week9Layout.astro";
+import Table from "../../../../../components/Week9Table.astro";
+import Figure from "../../../../../components/Week9Figure.astro";
+const base=import.meta.env.BASE_URL.replace(/\/$/,"")+"/model-architecture/";
+const official="https://github.com/OpenGalaxea/GalaxeaVLA/blob/89f2322b4ad016e192437adc1a2c253b05bab246/";
+const chapters=[["evolution","三条路线怎样演变"],["native","真正改变的是训练起点"],["paths","公开 FM 成品与 AR"],["training","本轮训练哪些部分"],["protocol","数据与执行配置"],["memory","后续 memory 接在哪里"],["sources","依据与官方来源"]];
+---
+<Layout title="转向官方 G0.5 · 先继承动作经验，再适配 RoboTwin" description="本周决定使用官方机器人预训练 Base、原配词表和 ActionCodec，先建立无 memory 的自回归基线。把路线演变、公开成品限制和本轮实际训练范围放在一起理解。" active="g05" chapters={chapters}>
+  <section class="weekly-question" id="evolution">
+    <span class="question-number">路线演变 / 每次转向都对应前一轮证据</span><h2>从小 Prior，到通用 VLM，再到配套预训练的动作策略。</h2>
+    <Figure id="evolution" caption="三条研究路线的对应关系。中间的通用 VLM 分支已绕开旧 Conditioner；最右侧是当前准备中的官方 Base 适配，尚无微调后的执行结果。" />
+    <p>最初我们要同时学会选码、把码注入 WAM；后续改为 VLM 直接输出，仍没恢复强策略。现在继承官方成套动作主干与 codec，目的是先降低基础动作学习的不确定性，让跨回合 memory 的效果更容易解释。</p>
+  </section>
+  <section class="weekly-question" id="native">
+    <span class="question-number">初始化 / “原生”究竟说明什么</span><h2>关键是共同学过视觉、语言和动作码。</h2>
+    <p>G0.5 自身也从现成的 Qwen3.5-2B 初始化。在同一主干内直接生成动作，并不要求从零设计 VLM；我们此前的 Qwen3-VL 分支也已直接输出动作码。两者更重要的差别，是是否继承了配套的机器人动作预训练，以及词表、码本、归一化和身体布局是否一致。</p>
+    <Table id="initialization" />
+    <p>“机器人预训练不足”目前是优先假设。转向同时改变初始化、接口和下游数据，未来即使恢复效果，也不能唯一归功于某一个结构选择。</p>
+  </section>
+  <section class="weekly-question" id="paths">
+    <span class="question-number">已完成的成品对照 / 45 类共同 450 场</span><h2>公开成品强制切换输出路径，不能代替 AR 适配。</h2>
+    <p>报告核对了已下载 RoboTwin / LIBERO 成品的保存配置：它们是 FM-only，AR 的交叉熵权重为 0；官方 Base 则包含 AR 训练。因此本轮决定从 Base 继续适配，而不是只把 FM 成品的 AR 开关打开。</p>
+    <Table id="official_paths" />
+    <p>这项旧成品对照共完成 900 / 1,000 次执行。另 5 类的固定场景准备被专家重放门槛阻断，尚未执行的 100 次不能计作模型失败；共同 450 场覆盖的是 45 类，不能称完整 50 类成绩。</p>
+    <div class="w6-plan"><strong>论文路线与已下载权重配置需要同时保留。</strong><p>论文将 AR 作为主实验默认策略，另有 FM 头；团队核对的公开成品 sidecar 则为 FM-only。这既不能证明官方训练好的 AR 差，也不能反推出论文只跑了 FM。当前 Base 微调尚未开始，结果仍待实验。</p></div>
+  </section>
+  <section class="weekly-question" id="training">
+    <span class="question-number">训练边界 / 更新策略，固定官方动作编解码</span><h2>视觉与 VLM 将参与全参数微调，ActionCodec 保持固定。</h2>
+    <Figure id="training" caption="实线为部署路径：当前观察到动作码，再经固定 codec 还原动作。下方是训练监督支路；专家未来动作只用于生成标签。图中绿色是计划更新的参数，蓝色是固定模块。" />
+    <Table id="training_scope" />
+    <p>这里有两个“decoder”：VLM 的 Transformer decoder 负责生成码，属于本轮更新范围；ActionCodec decoder 将码还原为连续动作，保持固定。现在没有复用本地自训 codec，也没有旧 WAM Conditioner。</p>
+    <details><summary>展开报告核对的代码边界与 RVQ 版本区别</summary><div>
+      <p>配置为 <code>discrete_action=true</code>、<code>continuous_action=false</code>、AR CE 权重 1、FM 权重 0。视觉塔与内部 PatchMerger、VLM 原参数进入策略微调；不是只训练新增词表或文本 LoRA。</p>
+      <p>固定 VQActionTokenizer 在 <code>torch.no_grad()</code> 下把专家动作编码为标签；EMA 更新需要训练且梯度开启，当前路径不会因标签编码自动改码表。官方 wrapper 也提供 eval 模式锁。报告中的静态核对还需要真实反向与断点门禁继续验证。</p>
+      <p>本轮沿用官方 Base 的五组 27 维布局、匹配词表与训练集归一化，RoboTwin 原生 14 维通过数据适配映射进入。不能套用另一成品的 20 维设置。</p>
+      <p><strong>当前 Base 的运行配置为 2 层 RVQ。</strong><a href={base+"problems/week8/g05/#rvq"}>Week8 的低维 RVQ 数学过程</a>仍可帮助理解，但其中四级来自当时查阅的公开 codec 配置；本地 G0.5-inspired 新 codec 也使用四级。不同配置的层数和 token 序列不能混用。</p>
+    </div></details>
+  </section>
+  <section class="weekly-question" id="protocol">
+    <span class="question-number">下游适配 / 数据、超参数与闭环节奏</span><h2>接近论文的训练规模，评测范围仍按我们的协议。</h2>
+    <p>目标为 50 类各 500 条 Randomized + 50 条 Clean，共 <strong>27,500 条训练示范</strong>；另有每类 40 条 dev，共 2,000 条。计划训练 4 epochs，global batch 1,024，学习率 4×10⁻⁵。它们与论文 RoboTwin 适配的关键数量和超参数对应。</p>
+    <p>本轮实际图像为 240×320，经官方处理为 256×256；使用头部、左腕、右腕三相机，以及当前状态和原始指令。<code>obs_size=1</code>、<code>predict_cot=false</code>，没有另加多秒视觉历史或 CoT；预测 32 步动作块，每次先执行 8 步再观察。激活检查点与 ZeRO-1 用于适配显存。</p>
+    <p>计划评测仍是 50 类各 10 场、仅 Randomized；论文每类 100 场并分别报告 Clean / Randomized。示范身份、图像实现与计算条件也不同，不能称完整复现。论文 Randomized 92.8% 只作背景参照，不能提前保证本轮达到。</p>
+    <p class="w8-limit">此前本地连续头执行 8 步时下降，不等于所有策略都不适合 8 步重规划；当前是另一套预训练策略。公开 FM 成品与新 Base AR 微调也不是同数据同预算的纯 AR / FM 单因素消融。</p>
+  </section>
+  <section class="weekly-question" id="memory">
+    <span class="question-number">后续方向 / 跨 episode 的经验怎样影响下一次生成</span><h2>先考虑改变动作生成条件或选码倾向。</h2>
+    <p>当前准备阶段不训练跨回合 memory。无 memory 的 AR 基线可靠后，再比较过去任务经验能否改善当前动作码生成；优先保留固定码表和 decoder，先验证经验输入与检索的作用。</p>
+    <p>这与长期“真实反馈修改码内容 / TTT”的目标不同，也与 G0.5 视觉编码器内的短时历史不同。先把固定策略、固定表示与跨回合经验的净作用测清楚，再讨论更新码表。</p>
+    <p><a href={base+"problems/week9/progress/"}>继续：数据准备到哪一步，后续如何判断？ →</a></p>
+  </section>
+  <section class="weekly-question" id="sources"><span class="question-number">来源 / 官方事实与本地实验分别归属</span><h2>本轮配置来自报告，官方设计以固定资料为准。</h2>
+    <ul class="w8-source-list"><li>本地结果、成品 sidecar 核对、训练范围和 2 层 RVQ 配置：团队本周报告，快照 2026-10-27 22:02:09。附件绑定本地结果 / 审计与配置证据；网页不发布服务器路径或失效的相对工程链接。</li><li><a href="https://arxiv.org/html/2608.11739v1#S3" target="_blank" rel="noopener">G0.5 论文 §3</a>：主干与默认动作路径；<a href="https://arxiv.org/html/2608.11739v1#S5.SS2.SSS2" target="_blank" rel="noopener">§5.2.2</a>：RoboTwin 训练 / 评测设置。</li><li><a href="https://github.com/OpenGalaxea/GalaxeaVLA/tree/89f2322b4ad016e192437adc1a2c253b05bab246" target="_blank" rel="noopener">官方仓库固定 commit 89f2322</a> · <a href={official+"src/g05/models/g05/g05_model_qwen35.py"} target="_blank" rel="noopener">Qwen3.5 模型实现</a> · <a href={official+"src/g05/tokenizer/interface/vq_base.py"} target="_blank" rel="noopener">Tokenizer 接口</a> · <a href={official+"src/g05/tokenizer/models/base_wrapper.py"} target="_blank" rel="noopener">Codec 模式锁</a>。</li><li><a href="https://huggingface.co/OpenGalaxea/G05/tree/e312be81e90c56a55bcb26b57429bd39a335b449" target="_blank" rel="noopener">报告引用的公开权重版本</a>。权重列表不替代具体 checkpoint 保存配置；不同模型分支的动作头不可由名称推断。</li></ul>
+  </section>
+</Layout>
