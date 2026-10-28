@@ -42,3 +42,7 @@ AlphaBrain 将 LIBERO-Spatial/Object/Goal/Long 作为核心评测与 continual-l
 ## 5. 局限
 
 LIBERO 主要是固定桌面、单机械臂操作，不能单独证明双足行走、全身平衡或真实部署鲁棒性。将其成绩外推到 humanoid loco-manipulation 前，应在 HumanoidBench/SIMPLE 等目标本体 benchmark 上重新评估。
+
+## 6. 正式规模复现
+
+UnifoLM-VLA-Libero 官方 checkpoint 按官方协议完成 4 suite × 10 task × 50 trials = **2000 集**：总成功率 **98.10%**（作者参考 98.65%，差值 −0.55 pt）；LIBERO-Object 与参考值完全一致（500/500）。协议冻结表、失败分布、复现环境与偏差说明见 [UnifoLM-VLA × LIBERO 复现记录](../../reproductions/unifolm-vla-libero/)。
